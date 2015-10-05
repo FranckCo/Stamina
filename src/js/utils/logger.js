@@ -1,4 +1,4 @@
-import config from '../config/config';
+import StaminaConfig from '../config/config';
 
 const DEFAULT_LEVEL = 'DEBUG';
 
@@ -9,7 +9,7 @@ const LEVELS = {
   'ERROR' : 3
 };
 
-export default class Logger {
+class Logger {
   constructor(moduleName, namespace='default') {
     this.moduleName = moduleName;
     this.namespace = namespace;
@@ -20,13 +20,13 @@ export default class Logger {
   }
 
   getCurrentLevel() {
-    return Config.log.level;
+    return StaminaConfig.log.level;
   }
 
   logWrapper(testLevel, messageArray) {
     messageArray.unshift(this.getPrefix());
     if(LEVELS[testLevel] >= LEVELS[this.getCurrentLevel()]
-      && Config.log.activeNamespaces.indexOf(this.namespace) >= 0) {
+      && StaminaConfig.log.activeNamespaces.indexOf(this.namespace) >= 0) {
       switch(testLevel) {
         case 'DEBUG':
           console.log.apply(console, messageArray);
@@ -66,4 +66,6 @@ export default class Logger {
     var messageArray = Array.prototype.slice.call(arguments);
     this.logWrapper('ERROR', messageArray);
   }
-}
+};
+
+export default Logger;

@@ -6,7 +6,7 @@ var logger = new Logger('StaminaActions', 'Actions');
 
 // TODO maybe make several variables for different types of actions
 
-export default StaminaActions = {
+var StaminaActions = {
   setLanguage: function (language) {
     logger.info('Set language to: ', language);
     StaminaDispatcher.handleViewAction({
@@ -15,3 +15,5 @@ export default StaminaActions = {
     });
   }
 };
+
+export default StaminaActions;

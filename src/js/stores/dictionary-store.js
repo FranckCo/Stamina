@@ -28,7 +28,7 @@ function setLanguage(language) {
   setDictionary(language);
 }
 
-export default DictionaryStore = Object.assign({}, EventEmitter.prototype, {
+var DictionaryStore = Object.assign({}, EventEmitter.prototype, {
 
   emitChange: function() {
     logger.debug('Store emitting change event');
@@ -37,6 +37,10 @@ export default DictionaryStore = Object.assign({}, EventEmitter.prototype, {
 
   getDictionary: function () {
     return _localDictionary;
+  },
+
+  getEntry: function (key) {
+    return _localDictionary[key];
   },
 
   setLanguage: setLanguage,
@@ -55,3 +59,5 @@ export default DictionaryStore = Object.assign({}, EventEmitter.prototype, {
     return true;
   })
 });
+
+export default DictionaryStore;

@@ -18,7 +18,7 @@ class GSBPMView extends React.Component {
     logger.debug('Rendering GSBPMView');
     return (
       <div>
-        <h1 text="This is the GSPBM home page"/>
+        <h1>This is the GSBPM home page</h1>
       </div>
     )
   }
@@ -29,7 +29,7 @@ class GSIMView extends React.Component {
     logger.debug('Rendering GSIMView');
     return (
       <div>
-        <h1 text="This is the GSIM home page"/>
+        <h1>This is the GSIM home page</h1>
       </div>
     )
   }
@@ -37,13 +37,13 @@ class GSIMView extends React.Component {
 
 class StaminaHome extends React.Component {
   render() {
+    logger.debug('Rendering StaminaHome', locale);
     return (
       <div>
-        <h1 text={locale.welcome}/>
-        <p text="Select one option below"/>
+        <h1>{locale.getEntry('welcome')}</h1>
         <ul>
-          <Link to='gsbpm' text='GSBPM'/>
-          <Link to='gsim' text='GSIM'/>
+          <li><Link to='gsbpm'>GSBPM</Link></li>
+          <li><Link to='gsim'>GSIM</Link></li>
         </ul>
       </div>
     )
@@ -58,7 +58,7 @@ class StaminaApp extends React.Component {
 }
 
 // Handler variables should be defined before
-// transitioTo uses the route names, so this attribute must be present
+// transitionTo uses the route names, so this attribute must be present
 var routes = (
   <Route handler={StaminaApp}>
     <DefaultRoute handler={StaminaHome}/>

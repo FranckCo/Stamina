@@ -1,7 +1,8 @@
 import { PayloadSources } from '../constants/stamina-constants';
 import { Dispatcher } from 'flux';
+import Logger from '../utils/logger';
 
-// TODO Add logging
+var logger = new Logger('StaminaDispatcher', 'Dispatcher');
 
 class StaminaDispatcher extends Dispatcher {
 
