@@ -1,0 +1,1067 @@
+﻿
+
+
+Common Statistical Production Architecture
+
+
+
+
+
+
+
+
+
+
+(Version 1.5, December 2015)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Contents
+
+I.	The Problem Statement	4
+A.	Background to existing threats	4
+B.	Background to emerging threats	4
+C.	Describing the current state	5
+II.	Common Statistical Production Architecture	7
+A.	Scope of Architecture	9
+B.	Service Oriented Architecture	10
+C.	Using CSPA	11
+D.	Impact on organizations	12
+III.	Business Architecture	13
+A.	Describing Statistical Production	14
+B.	Business Architecture Principles	15
+IV.	Information Architecture	18
+A.	Reference frameworks and their use	19
+B.	CSPA implementation specifications	19
+C.	Information Architecture Principles	22
+V.	CSPA Application Architecture	23
+A.	Patterns	26
+B.	Service Invocation and Identity	27
+C.	Application Design Principles	28
+D.	Non-Functional Requirements	29
+E.	CSPA Service Definitions, Specifications and Implementation Descriptions	31
+VI.	Technology Architecture	34
+A.	Communication Platform	34
+VII.	Roles involved in the production of IT enabled CSPA Services	36
+VIII.	Enablers	40
+A.	Catalogues	40
+B.	Governance	42
+C.	Legal, Licensing and Financial Considerations	44
+Annex 1: Templates	45
+
+
+
+
+List of Abbreviations
+
+BPMS: Business Process Management System
+CORE: COmmon Reference Environment
+CSPA: Common Statistical Production Architecture
+DDI: Data Documentation Initiative
+GSBPM: Generic Statistical Business Process Model
+GSIM: Generic Statistical Information Model
+HLG: High Level Group for the Modernisation of Statistical Production and Services
+JMS: Java Messaging Service
+MSMQ: Microsoft Message Queue
+OS: Operating System
+SDMX: Standard Data and Metadata eXchange
+SOA: Service Orient Architecture
+TOGAF: The Open Group Architectural Framework 
+VLAN: Virtual Local Area Network
+
+
+I. The Problem Statement
+
+1. 	Many statistical organizations are facing common challenges. There are major threats to the continued efficient and effective supply of core statistics that come from within statistical organizations.
+2.	Existing threats to statistical organisations are: 
+Rigid processes and methods and
+Inflexible ageing technology environments 
+3.	Emerging Threats include:
+The need to be able to quickly respond to emerging information needs
+Challenges (and opportunities) of increasing use of administrative data and the move to harness alternative sources of data (sensor, satellite etc)
+The ability to attract and retain critically skilled staff in a competitive market.
+
+a. Background to existing threats
+4.	Over the years, through many iterations and technology changes, statistical organizations have built up their organizational structure, production process, enabling statistical infrastructure, and technology. The cost of maintaining this business model and the associated asset bases (process, statistical, technology) is becoming insurmountable and the model of delivery is not sustainable. Many statistical organizations are introducing service-oriented architecture approaches to improve the flexibility, robustness and sustainability of their technology environments. 
+
+b. Background to emerging threats
+5.	Statistical organizations are being increasingly challenged to respond quickly to emerging information needs. Criticisms levelled at statistical organizations include;
+The inability of underlying statistical models such as classifications and frameworks to remain relevant to modern information needs
+Difficulties in producing statistics that are coherent across information domains
+Difficulty in producing richer insights into key priority areas where traditional statistical outputs are not sufficient
+6.	For most statistical organizations the underlying model for statistical production is sample survey based. Increasingly there is a need for organizations to make use of administrative or alternative source data to deliver efficiencies, reduce provider burden and make richer use of existing information sources. This requires significant new capabilities that do not exist within the majority of statistical organizations.
+7. 	The skill-sets that underpin statistical organizations are becoming increasingly valuable in the wider market. It is becoming difficult for statistical organizations to compete to attract and retain these skills in this environment.
+
+c. Describing the current state
+
+8.	Historically, statistical organizations have developed their own business processes and IT-systems for producing statistical products. Although the products and the processes conceptually are very similar, the individual solutions are not (as represented by the different shapes in Figure 1). Every technical solution was built for a very specific purpose with little regard for ability to share information with other adjacent applications in the statistical cycle and with limited ability to handle similar but slightly different processes and tasks. This can be referred to as 'accidental architecture' as the process and solutions were not designed from a holistic view.    
+
+
+
+
+Figure 1: Accidental Architectures 
+
+9. 	Often it is difficult to replace even one of the components supporting statistical production.  Use of these processes, methods and an inflexible and aging technology environment mean that statistical organizations find it difficult to produce and share between systems data and information aligned to modern standards (for example, Data Documentation Initiative (DDI) and Statistical Data and Metadata eXchange (SDMX)). Process and methodology changes are time consuming and expensive resulting in an inflexible, unresponsive statistical organization.
+
+10.	Many statistical organizations are modernizing and transforming their organizations using enterprise architecture to underpin their vision and change strategy. An enterprise architecture aims to create an environment which can change and support business goals. It shows what the business needs are, where the organization wants to be, and ensures that the IT strategy aligns with this. Enterprise architecture helps to remove silos, improves collaboration across an organization and ensures that the technology is aligned to the business needs. This work will enable them to standardize their organizations. This is shown in Figure 2 where, as opposed to Figure 1, the countries have standardized their components and interfaces. 
+
+
+
+Figure 2: The result of standardization within an organization
+
+11.	Statistical organizations have attempted many times over the years to share their processes, methodologies and solutions, as it has long been believed that there is value in this. The mechanism for sharing has historically meant an organization taking a copy of a component and integrating it into their environment. Examples include CANCEIS (CANadian Census Edit and Imputation System) and Banff (an editing and imputation system for business surveys). However, most cases of sharing have involved significant work to integrate the component into a different processing and technology environment.   
+
+12.	Figure 3 attempts to explain why the difficulty in sharing or reuse occurs. The figure assumes that the two statistical organizations in the figure develop all their business capability and supporting components and interfaces in a standard way (i.e. they have an Enterprise Architecture as shown in Figure 2). Each organization has standardized within their own organization but not in the same way as the other organization. As shown in Figures 2 and 3 where each country has a different shape of component - Canadian components have a zig zag shape and Sweden have components with slanted edges. If Sweden needs a new component, ideally they need a component with a slanted edge. It can be seen in the third row of Figure 3 that while a component from Canada might support the same process and incorporate robust statistical methodologies, it will not be simple to integrate it into the Swedish environment.   
+
+
+
+Figure 3: Why sharing /reuse is hard now
+
+II. Common Statistical Production Architecture 
+
+13.	As part of the modernization effort, the High Level Group for the Modernization of Statistical Production and Services (HLG) want to take action in order to address the problems and issues described in the previous section. For this reason, HLG has put priority on the development of the Common Statistical Production Architecture (CSPA) and its implementation.
+
+14.	If the official statistical industry had greater alignment at the business, information and application levels, then sharing would be easier. CSPA assists statistical organizations to address these problems by providing a framework, including principles, processes and guidelines, to help reduce the cost of developing and maintaining processes and systems and improving the responsiveness of the development cycle. Sharing and reuse of process components will become easier - not only within organizations, but across the industry as a whole.
+
+15.	The value proposition of CSPA, in providing statistical organizations with a standard framework, is to: 
+Facilitate the process of modernization and support the modernization efforts within statistical organizations
+Provide guidance for transformation within statistical organizations 
+Apply a consistent enterprise architecture approach within and across statistical organizations to respond to the challenges of emerging information sources such as big data
+Facilitate the reuse / sharing of solutions and services and the standardization of processes, and thus a reduction in costs of production
+Encourage interoperability of systems and processes
+Provide a basis for flexible information systems to accomplish their mission and to respond to new challenges and opportunities
+Leverage the wider statistical community to more rapidly develop capabilities in areas of emerging need such as the ability to harness alternative data sources
+Enable international collaboration initiatives for building common infrastructures and services
+Provide the ability to supplement internal capability by drawing on skilled resources from across the statistical community
+Foster alignment with existing industry standards such as the Generic Statistical Business Process Model (GSBPM) and the Generic Statistical Information Model (GSIM)
+16.	CSPA is the industry architecture for the official statistics industry. An industry architecture is a set of agreed common principles and standards designed to promote greater interoperability within and between the different stakeholders that make up an "industry", where an industry is defined as a set of organizations with similar inputs, processes, outputs and goals (in this case official statistics).
+
+17.	CSPA provides a reference architecture for official statistics. It describes: 
+
+What the official statistical industry wants to achieve – The goals and vision (or future state).
+How the industry can achieve this – The principles that guide decisions on strategic development and how statistics are produced.
+What the industry will have to do - Adopt an architecture that will require members to comply with CSPA.
+
+18.	A number of frameworks focusing on specific areas have already been developed. CSPA builds on and uses these existing frameworks, notably the GSBPM and GSIM, as the necessary shared industry vocabulary. Adoption of these frameworks by organizations in the industry will improve the common understanding and alignment necessary for joint development, sharing and reuse of components. 
+
+19.	CSPA complements and uses these pre-existing frameworks by describing the mechanisms to design, build and share components with well-defined functionality that can be integrated in multiple processes easily. CSPA focuses on relating the strategic directions of the HLG to shared principles, practices and guidelines for defining, developing and deploying Statistical Services in order to produce statistics more efficiently. 
+
+20.	CSPA brings together these existing frameworks and introduces the new frameworks related to Statistical Services (described in Section V. Application Architecture) to create an agreed top-level description of the 'system' of producing statistics, which is in alignment with the modernization initiative.
+
+21.	CSPA gives users an understanding of the different statistical production elements (i.e. processes, information, applications, services) that make up a statistical organization and how those elements relate to each other. It also provides a common vocabulary with which to discuss implementations, with the aim to stress commonality. It is an approach to enabling the vision and strategy of the statistical industry, by providing a clear, cohesive, and achievable picture of what is required to get there. 
+
+A. Scope of Architecture
+
+22. 	CSPA is a reference architecture for the statistical industry.  The scope of CSPA is statistical production across the processes defined by the GSBPM (i.e. it does not characterize a full enterprise architecture for a statistical organization). It is understood that statistical organizations may also have a more general Enterprise Architecture (for example an Enterprise Architecture used by all government agencies in a particular country).
+
+23.	CSPA is descriptive, rather than prescriptive, its focus is to support the facilitation, sharing and reuse of Statistical Services both across and within statistical organizations.  CSPA is not a static reference architecture; it is designed to evolve further over time.   
+
+24.	CSPA is designed for use by investment decision makers in developed statistical organizations.  While developing organizations are not excluded, a reasonable level of Enterprise Architecture maturity and a modern technical environment is required for implementation.  There are options for making Statistical Services created using CSPA available to developing statistical organizations, these will be outlined in future versions of the architecture. 
+
+25.	An important concept in architecture is the "separation of concerns". For that reason, the architecture is separated into a number of "perspectives". These "perspectives" are: 
+
+Business Architecture which defines what the industry does and how it is done (statistics in our case),
+Information Architecture which describes the information, its flows and uses across the industry, and how that information is managed,
+Application Architecture which describes the set of practices used to select, define or design software components and their relationships, and
+Technology Architecture which describes the infrastructure technology underlying (supporting) the other architecture perspectives.
+
+26.	CSPA includes: 
+
+Motivations for constructing and using CSPA through the description of requirements
+Sufficient business and information architecture descriptions and principles as are necessary for CSPA's scope
+Application architecture and associated principles for the delivery of Statistical Services
+Technology architecture and principles - limited to the delivery of Statistical Services
+
+27.  	It should be noted that CSPA does not include enterprise, business, application and technology architecture descriptions which are not directly aligned to CSPA scope, nor does it prescribe technology environments of statistical organizations.
+
+b. Service Oriented Architecture
+
+28.	The value of the architecture is that it enables collaboration in developing and using Statistical Services, which will allow statistical organizations to create flexible business processes and systems for statistical production more easily. 
+
+29.	The architecture is based on an architectural style called Service Oriented Architecture (SOA)1.  This style focuses on Services (Statistical Services in this case). A service is a representation of a real world business activity with a specified outcome. It is self-contained and can be reused by a number of business processes (either within or across statistical organizations).  
+
+30.	A Statistical Service will perform one or more tasks in the statistical process. Statistical Services will be at different levels of granularity. An atomic or fine grained Statistical Service encapsulates a small piece of functionality. An atomic service may, for example, support the application of a particular methodological option or a methodological step within a GSBPM sub process. Coarse grained or aggregate Statistical Services will encapsulate a larger piece of functionality, for example, a whole GSBPM sub process. These may be composed of a number of atomic services.  
+
+31.	The granularity of Statistical Services should be based on a balanced consideration between the efficiency of the Statistical Service and the flexibility required for sharing purposes - larger Statistical Services will usually enable greater efficiency, whereas a finer granularity will allow greater flexibility for supporting sharing and reuse. Services, regardless of their granularity, must meet the architectural requirements and be aligned with CSPA principles.
+
+32.	By adopting this common reference architecture, it will be easier for each organization to standardize and combine the components of statistical production, regardless of where the Statistical Services are built. As shown in Figure 4, Sweden could reuse a Statistical Service from Canada because they both use the same component. 
+
+33.	CSPA will facilitate the sharing and reuse of Statistical Services both across and within statistical organizations. The Statistical Services that are shared or reused across statistical organizations might be new Statistical Services that are built to comply with CSPA or legacy/existing tools wrapped to be Statistical Services, which comply with the architecture. This is shown in Figure 4 by the shapes inside the building blocks.
+ 
+
+Figure 4: Making sharing and reuse easier
+
+c. Using CSPA
+
+34.	CSPA also provides a starting point for concerted developments of statistical infrastructure and shared investment across statistical organizations.  CSPA is sometimes referred to as a "plug and play" architecture. The idea is that replacing Statistical Services should be as easy as pulling out a component and plugging another one in.  There are a number of ways in which CSPA may be used by statistical organizations. These are outlined in the sections below. 
+
+Strategic Planning
+
+35.	If statistical organizations are creating and using an industry strategy ("Industry Architecture") and this leads to projects/work programs, they could also integrate/streamline their investment strategies. Where a statistical organization plans to contribute to and or use CSPA in the future, they should modify and integrate their road maps to align with the CSPA framework. Each statistical organization needs to define a strategy to move from its current state to the common future state defined in their roadmap. 
+
+Development within statistical organizations
+
+36.	When a statistical organization identifies the need for a new Statistical Service, there are a number of options they can pursue. In order to fill the gap, the statistical organization can look for Statistical Services that are available in the collaborative space (that is, in the Global Artefact Catalogue). 
+
+37.	If an appropriate Statistical Service is not found in the CSPA Global Artefact Catalogue, the statistical organization can either: 
+start designing and developing a new Statistical Service, or
+modify an existing Statistical Service to meet new functional and/or non-functional requirements.
+
+38.	This could be done independently or in collaboration with other statistical organizations. This development work should be done in alignment with CSPA to ensure that the new Statistical Services can be added to the CSPA Global Artefact Catalogue for sharing and reuse by other statistical organizations. 
+
+39.	Sharing means exchanging concepts, designs or software, where each user of a service creates and operates its own implementation of that service. There are levels of sharing. A limited form of sharing would be to provide another participant with the means to replicate (make a copy of) the asset (for example give the source code) (i.e. they share an aspect of the asset only). A more involved form of sharing would entail that the asset is made entirely common (in this case the asset is also reused).  
+
+40.	Reuse means common use of a single implementation of a service, with only one organization acting as the service provider (the one who runs the service).
+
+41.	It is thought that in the current environment, it is more likely that statistical services will be shared across organizations rather than reused. Sharing between statistical organizations still leaves the option of reusing the various implementations internally within the environment of the individual statistical organization.
+
+Vendors
+
+42.	A statistical organization may choose to have a vendor develop a Statistical Service. A vendor in this case means either a third party commercial vendor or a statistical organization that is selling a product. In the case of a new Statistical Service, the statistical organization should request that it is built in accordance with CSPA. When the product already exists, statistical organizations should verify together if the product meets relevant community requirements. If it does not, statistical organizations can try to influence the vendor to meet requirements. If it meets the community requirements, statistical organizations would ask the vendor to register the Statistical Service implementation to the Global Artefact Catalogue.
+
+d. Impact on organizations
+
+43.	There will be a number of required changes for an organization implementing CSPA. Adoption of CSPA will require investment with a view to generating the long term benefits identified in the value proposition (see paragraph 10)2. 
+
+44.	The main changes required at the organization level can be grouped as:
+
+A. People Changes 
+Openness to international cooperation
+Building trust in international partners (especially as they may be building services for your organization)
+Sense of compromise (acceptance that nothing will be optimized for local use, rather it will be optimized for international or corporate use)
+Development of new functional roles to support use of the architecture (e.g. Assembler, Service Builder)
+
+B. Process Changes 
+Adoption of an industry wide perspective
+Different approach to business process management and design
+Commitment to service (contract between different functional units)
+
+C. Technology Changes 
+Setting up an adequate middleware infrastructure (messaging, repositories)
+Uplift of physical network capabilities (bandwidth, etc.)
+Management of security features
+
+45.  	In addition to the costs and the targeted benefits, an organization adopting CSPA will benefit from:
+
+A sustainable and efficient strategy to cope with legacy and phasing out of existing applications
+A cycle that enables cost saving from reduction in production costs to be reinvested in further infrastructure transformation 
+A positive image both on national and international/industry scene
+ 
+III. Business Architecture
+
+46.	The definition of Business Architecture being used by CSPA is given below.  
+
+"Business Architecture covers all the activities undertaken by a statistical organization, including those undertaken to conceptualize, design, build and maintain information and application assets used in the production of statistical outputs.  Business Architecture drives the Information, Application and Technology architectures for a statistical organization." 
+
+47.	CSPA focuses on architectural considerations associated with statistical production as bounded by GSBPM. Business concerns such as:
+
+Ensuring that the corporate work program for a statistical organization best addresses the needs of its external stakeholders, or
+Recruiting, retaining and developing staff with relevant skills
+
+are not central to CSPA. Such concerns are, however, very important considerations in an organization-specific business architecture. 
+
+48.	Organizations that have formally defined business architecture can reference CSPA when describing aspects of their business architecture which are fundamentally in common with other producers of official statistics.
+
+A. Describing Statistical Production
+
+49.	To enable efficient and consistent documentation and understanding of CSPA three related concepts have been adopted which are relevant for all readers in relation to "Statistical Production". These are Business Function, Business Process and Business Service.
+
+50.	The terms and definitions used in CSPA for these concepts are drawn from GSIM. The terminology and modelling of GSIM aligns with The Open Group Architectural Framework (TOGAF). TOGAF is widely known for defining architectural frameworks.
+
+51.	Following is a brief overview of these three concepts3, a more detailed discussion of these concepts and statistical production is contained in the CSPA “Describing Statistical Production” document.
+
+Business Function
+
+52.	GSIM defines Business Function as something an enterprise does, or needs to do, in order to achieve its objectives. This represents a simpler expression of the definition used in TOGAF.
+
+53.	When identifying Business Functions, the emphasis is on an enterprise level (“whole of business”) perspective, recognizing that different parts of the business may have different detailed requirements in regard to a particular function. At the level of the Business Function, there is no implementation detail.
+
+Business Process
+
+54.	A Business Process is a set of process steps to perform on or more Business Functions to deliver a Statistical Program. Key aspects include:
+
+A process consists of a series of steps (activities/tasks)
+There is sequencing (or "flow") between steps
+A business process is undertaken for a particular purpose
+What is represented (for the sake of simplicity and clarity) as a single step in a high level depiction of a process might – when viewed in more detail - comprise a lower level (sub) process consisting of multiple steps
+
+Business Service
+
+55.	A Business Service is the means of accessing a Business Function. It will perform one or more Business Processes. It is the who - or what - will undertake the work associated with each function. Business services should be scoped to support flexible sequencing and configuration of Business Functions within different Business Processes. A Business Service has an explicitly defined interface that requires the knowledge of what the service will deliver (including in what time frame) given a particular set of inputs. A Statistical Service is a kind of Business Service.
+
+56.	A central aim for CSPA is to enable more efficient and flexible support for statistical production as described by the GSBPM. Future versions of CSPA will provide more guidance on how CSPA can be applied when designing, managing and performing statistical business processes. However, the initial focus in the development of CSPA has been to clearly and consistently define (both conceptually and in practice) the Statistical Services which support statistical production. The aim is that equivalent business functions (such as imputation) within many different statistical business processes4 will be able to reuse (or share) the same Statistical Service in the implementation of the business service.
+
+57.	Key reasons for the initial focus on Statistical Services include:
+
+Common Statistical Services provide the greatest opportunity for realizing savings through collaborative development, sharing and reuse
+While common statistical standards (or reference frameworks) have been agreed for business processes (GSBPM) and for statistical information (GSIM), there is not yet a common framework for Statistical Services, CSPA is filling this gap.
+Once a common approach to the definition and implementation of Statistical Services is agreed, this will support defining business processes which make use of the common Statistical Services in a manner that supports the delivery of a specific business need, within a given context and purpose (business process) aligned to the business function (GSBPM).
+ 
+b. Business Architecture Principles
+
+58.	Principles are high-level decisions or guidelines that influence the way processes and systems are to be designed, built and governed. Principles are derived from the mission and values of the organization, taking into account the opportunities and threats that the organization faces. In CSPA, principles are used to express the high-level design decisions that will shape the future statistical processes and systems.
+
+Decision Principles
+
+59.	Decision principles are guidelines to help decide on strategic development. They provide a basis for decision making and informing how the mission is fulfilled. They help enable sound investment decisions. The following decision principles support the outcomes sought by the High Level Group and key elements of the United Nations Fundamental Principles for Official Statistics. These principles provide a basis for decision making and inform how a statistical organization sets about fulfilling its mission through strategic development. 
+
+60.	A number of principles which are common to most organization's business architecture (whether formally defined or not) are being identified through other initiatives such as work within the Statistical Network. The following business architecture decision principles were jointly developed via the Statistical Network business architecture project and the CSPA project: 
+
+61.	Principle: Capitalize on and influence national and international developments 
+
+Statement: Collaborate nationally and internationally to leverage and influence statistical and technological developments, which support the development of shared statistical services. 
+
+62.	Principle: Deliver enterprise-wide benefits 
+
+Statement: Design and implement new or improved statistical business processes in a way that maximizes their value at an enterprise level.  
+
+63. 	Principle: Increase the value of our statistical assets 
+
+Statement: Add value to the statistical organization's statistical assets (either directly or indirectly) through improved accessibility and clarity, relevance, coherence and comparability, timeliness and punctuality, accuracy and reliability and interpretability.   
+
+64.	Principle: Maintain community trust and information security 
+
+Statement: Conduct all levels of business in a manner which build the community's trust. This includes the community's trust and confidence in the statistical organization's decision making and practices and their ability to preserve the integrity, quality, security and confidentiality of the information provided. 
+
+65.	Principle: Maximize the use of existing data/Minimize respondent load 
+
+Statement: Leverage existing data from all sources (e.g. statistical surveys or administrative records) before collecting it again. Statistical organizations are to choose the source considering quality, timeliness, cost and burden on respondents. Statistical authorities monitor the respondent burden and aim to reduce it over time 
+
+66.	Principle: Sustain and grow the business 
+
+Statement: Focus investment and planning on long term sustainability and growth, both in terms of the organization's role and position within its own community as well as internationally. 
+
+67.	Principle: Take a holistic and integrated view 
+
+Statement: Ensure data, skills, knowledge, methods, processes, standards, frameworks, systems and other resources are consistent, reusable and interoperable across multiple business lines within a statistical organisation.
+
+Design Principles
+
+68.  	CSPA aims to support organizations in realizing these decision principles in practice. The Business Architecture design principles have been identified for CSPA in conjunction with the Statistical Network Business Architecture project. 
+
+69.	Principle: Consider all capability elements 
+
+Statement: Consider all capability elements (e.g. methods, standards, processes, skills, and IT) to ensure the end result is well integrated, measurable, and operationally effective. 
+
+70.	Principle: Re-use existing before designing new 
+
+Statement: Re-use and leverage existing data, metadata, products and capability elements wherever possible before designing new.
+
+71.	Principle: Design new for re-use and easy assembly
+
+Statement: Design and standardize all new data, metadata, products and capability elements for re-use, so they can be easily assembled and modified to accommodate changing user demands.
+
+72.	Principle: Processes are metadata driven
+
+Statement: Ensure the design, composition, operation and management of business processes, including all input and output interactions, are metadata driven and automated wherever possible.
+
+73.	Principle: Adopt available standards
+
+Statement: Aim to adopt open, industry recognized, and international standards where available. Statistical industry standards such as the Generic Statistics Business Process Model (GSBPM) and the Generic Statistical Information Model (GSIM) are examples of the standards to be used.
+
+74.	Principle: Designs are output driven
+
+Statement: Ensure the whole statistical process is output-driven. Output is the reference starting point; the statistical production process starts from the output desired, that is from required products, and goes backwards, defining the various aspects of the process. 
+
+75.	Principle: Enable discoverability and accessibility 
+
+Statement: Ensure data, metadata, products and capability elements are discoverable and accessible to achieve the benefits from sharing and reuse.
+
+76.	Principle: Statistical Services are defined at an appropriate level of granularity
+
+Statement: Statistical Services are defined with relevance to the GSBPM sub-process they support.
+
+77.	Principle: Statistical Services are relevant to the business
+
+Statement: Statistical Services are large enough for the business to understand, and are not low-level services used by IT. 
+
+78.	Principle: Statistical Services deliver net business value
+
+Statement: Statistical Services deliver sufficient business value to consumers exceeding the cost of integrating them into local environments.
+
+79.	Principle: Statistical Services have service-level agreements
+
+Statement: Statistical Services have an accompanying service-level agreement that defines the performance of the service.
+
+80.	The Information and Application architecture design aspects of CSPA are directed by the CSPA Business Architecture design principles.
+
+IV. Information Architecture
+
+81.	The definition of Information Architecture5 being used by CSPA is given below. 
+
+Information Architecture (IA) classifies the information and knowledge assets gathered, produced and used within the Business Architecture. It also describes the information standards and frameworks that underpin the statistical information. IA facilitates discoverability and accessibility, leading to greater reuse and sharing.
+
+82.	In other words, Information Architecture connects information assets to the business processes that need them and the IT systems that use and manage them. It includes relating the coherent and consistent definition of information assets at an enterprise level to the information needs of specific business processes and IT systems in practice.
+
+83.	As an industry architecture, the Information Architecture set out by CSPA must provide an agreed and actionable (rather than purely conceptual) connection between:
+
+The common information frameworks and implementation standards agreed within the industry (e.g. GSIM, SDMX, DDI)6, and
+The practical business goals and needs to be supported under CSPA, such as the ability to share and reuse CSPA Services
+
+84.	It must support the needs of:
+
+Business leaders, planners and process designers who are seeking to apply the Business Architecture from CSPA and who need to understand the connection between processes and information at a business level
+Application architects and developers who are seeking to apply the Application Architecture from CSPA and who need to understand how CSPA Services interact with information
+ 
+A. Reference frameworks and their use
+
+85.	The Information Architecture will identify common reference frameworks to be used for aligning communication and high level (conceptual) designs.
+
+GSBPM will be used as a common reference when recording information in regard to business processes.
+GSIM will be used as a common reference when defining the information input to, and output from, business processes.
+A common reference framework for recording information with regards to the definition of CSPA Services is being developed as part of CSPA (this is the Logical Information Model).
+A common reference framework to use when describing statistical methods is a gap at this stage.7
+
+86.	The completed Information Architecture will not only identify the reference frameworks which apply but also provide guidance on how they are applied, in combination, within CSPA.
+
+b. CSPA implementation specifications
+
+Conceptual Specifications
+
+87.	A major barrier to effective collaboration within and between statistical organizations has been the lack of common terminology. Using GSIM as a common language will increase the ability to compare information within and between statistical organizations. GSIM describes, at the conceptual level, the information that the statistical production process consumes and produces.
+
+88.	Although GSIM can be used independently, it has been designed to work in conjunction with the GSBPM. It supports GSBPM and covers the whole statistical process. It is assumed in this document that an organization either uses the GSBPM or uses another business process model, which can be mapped to the GSBPM.
+
+89.	In order for interoperability and reuse to be supported in practice when applying CSPA, the industry needs to do more than align conceptual designs using common frameworks. While GSIM describes the information objects relevant to statistical production it does not provide enough detail for implementation. When it comes to describing information objects in the real world we need to describe them in terms of standards for representing the precise logical relationships between them in a manner, which is consistent with GSIM. 
+
+Logical Specifications
+
+90.	Standards such as SDMX and DDI offer examples of such detailed logical models. They identify and use many more attributes than are defined within the GSIM model. 
+
+91.	As these standards and practices have evolved independently, the objects and attributes they use are similar, but not consistent and can be implemented in many different ways. There is some overlap between the standards where a GSIM information object could be described using multiple standards and in some cases, there are information objects where neither DDI nor SDMX is appropriate. 
+92.	Establishing a consistent set of objects and attributes independent of the terminology used in existing standards such as SDMX and DDI requires the development of a CSPA Logical Information Model (LIM). Logical information models describe the information objects of a business without referring to specific industry standards. The logical model is not expected to be an exhaustive representation of all information objects a statistical organisation uses, but rather focus on the information objects that have the greatest use cases. The LIM will:
+Complement, and be founded upon, the existing GSIM conceptual model and using the relevant parts of SDMX, DDI and other relevant information models;
+Describe the relationship, attributes, data types and cardinality of GSIM information objects;
+Support consistent use of SDMX, DDI and other implementation standards in reusable CPSA services;
+Make it easier for organisations that do not yet use SDMX or DDI to implement reusable CSPA Services, and
+Be a useful way for users to precisely document the inputs and outputs of their business processes.
+93.	While the CSPA LIM will act as a bridge at the logical level between different standards, physical representations of information objects in CSPA will rely on representations provided by the existing implementation standards.
+Conceptual
+
+Logical
+
+Physical
+
+
+Figure 5: CSPA Logical Information Model
+
+Physical Specifications
+94.	Depending on what information is being represented in practice, DDI and SDMX are expected to provide the primary basis for the physical representation of statistical information (e.g. data and metadata) in CSPA.
+95.	A strong recommendation about specific standards for the logical and physical representation of business process information has not been stated yet8.  However, CSPA recognises that there are use cases in which process metadata would have value to the business, specifically for the use of orchestration and or workflow to execute statistical function services and the tracking of paradata for performance management. The business process information objects currently in GSIM will be expanded upon in more detail in the LIM.
+96.	For implementation, data and metadata may be communicated together or separately (recommended) provided that the data and metadata can be reunited when required. If the two are separated the data must contain a reconciling or correlating identifier for the metadata to enable it to be retrieved.
+
+Future work and implications for statistical organisations
+97.	CSPA will over the long-term provide implementation specifications on:
+Whether SDMX, DDI or a custom schema should be used for representing a particular object of the LIM
+Exactly how the chosen schema will be applied for the particular purpose. In many instances there are multiple technically compliant means of achieving the same business purpose, the implementation specification will specify which should be used.
+98.	Implementation specifications mean CSPA is prescriptive in regard to some practical details. While it would be simpler to align with CSPA if it was less prescriptive, the practical value from alignment would be much less. It is often the case that two developments which have a "common conceptual basis", but were implemented using completely unrelated approaches, are difficult and expensive to make interoperable and/or sharable (if it is possible at all).
+99.	In addition, an organization which has already implemented a different standard, or a local specification, can "map" their existing approach to the relevant implementation specification – they are not required to "rebuild" from first principles.
+100.	CSPA implementation specifications specify approaches which will support maximum interoperability/sharability on a cost effective basis. In particular cases it may be difficult for an organization to fully comply with a CSPA implementation specification (due to operational constraints). In these cases, compliance to the extent practical will still realize benefits. In other words, while CSPA implementation specifications provide a set of expectations, it is recognized that not all implementations may be able to achieve them fully in practice.
+
+c. Information Architecture Principles
+
+101.	A number of principles which are common to most organization's information architecture (whether formally defined or not) have been agreed. These are outlined below. 
+
+102.	Principle: Manage information as an asset 
+
+Statement: Information is an asset that has value to the organization and must be managed accordingly.
+
+103.  	Principle: Manage the information lifecycle
+
+Statement: All information has a lifecycle and should be managed to provide reliable identification, versioning and all information should be managed independently and beyond the scope of a single service. 
+
+104.  	Principle: Protect information appropriately 
+
+Statement: All personal, confidential and classified data should be protected and the data should be treated accordingly. 
+
+105.  	Principle: Use agreed models and standards 
+
+Statement: All information used as inputs and outputs to Statistical Services should be described using a common, business-oriented, reference model. 
+
+106.  	Principle: Capture information as early as possible 
+
+Statement: Information should be captured in a standard and structured manner at the earliest possible point in the statistical business process to ensure it can be used by all subsequent services. 
+
+107.	Principle: Describe to ensure reuse
+
+Statement: All information should be described in a manner that ensures information is reusable between services. Reuse is intended to reduce duplication, additional human intervention and reduce errors. 
+
+108.	Principle: Ensure there is an authoritative source 
+
+Statement: Information consumed and produced by services should be sourced and updated from a single authoritative source. Information should be consistent across all relevant services. 
+
+109.	Principle: Preserve information input into Statistical Services 
+
+Statement: Information that is input into services must be preserved to ensure no information loss. 
+
+110.	Principle: Describe information by metadata 
+
+Statement: All information consumed and produced by services must be described by sufficient metadata. 
+
+V. CSPA Application Architecture
+
+111.	TOGAF provides the following useful definitions:
+Application - A deployed and operational IT system that supports business functions and services; for example, a payroll. Applications use data and are supported by multiple technology components but are distinct from the technology components that support the application.
+Architecture - 1. A formal description of a system, or a detailed plan of the system at component level, to guide its implementation (source: ISO/IEC 42010:2007). 2. The structure of components, their inter-relationships, and the principles and guidelines governing their design and evolution over time.
+Application Architecture - A description of the major logical grouping of capabilities that manage the data objects necessary to process the data and support the business.
+Technology Architecture - The logical software and hardware capabilities that are required to support deployment of business, data, and application services. This includes IT infrastructure, middleware, networks, communications, processing, and standards.
+
+112. 	CSPA uses the following definition that blends several important elements from these definitions:
+
+“Application architecture is a description of the major logical grouping of capabilities that manage the data objects necessary to process the data and support the business - it details the structure of components, their inter-relationships, and the principles and guidelines governing their design and evolution over time.” 
+
+113.	As described in Section II, The CSPA Application Architecture is based on an architectural style called Service Oriented Architecture (SOA). This style focuses on Services (or CSPA Services in this case). A service is a representation of a real world business activity with a specified outcome. It is self-contained and can be reused by a number of business processes (either within or across statistical organizations). 
+
+114.	CSPA Services have invocable interfaces that are called to perform business processes. SOA emphasizes the importance of loose coupling. CSPA Services are independent, that is, they do not talk directly to each other. Organizations will need a technology solution to support communication between CSPA Services. This solution (for example a communication platform) will not affect the interfaces. It should be noted that SOA is not the same as Web Services, although they are often used in SOA.
+
+115. 	In the discussion that follows, it is important to note that the Application Architecture is a descriptive (not prescriptive) framework that must support flexible approaches within individual statistical organizations while providing a basis for collaboration and sharing of standardized service components.
+
+116. 	The CSPA Application Architecture must provide a means of expressing statistical production as an assembly of statistical services, aligned with design principles and guidelines and taking advantage of design patterns. 
+
+117.	CSPA Services can be one of two types – a statistical function service or a statistical entity service. 
+
+118.	Statistical function services must be defined at an appropriate level of granularity. In Section III B (Business Architecture) we describe the following guidance in the section on design principles:
+CSPA Services are defined at an appropriate level of granularity [...] defined at the level of a GSBPM sub-process they support, and
+CSPA Services are relevant to the business [...] large enough for the business to understand, and are not low-level services used by IT.
+
+119.	An alternative approach to determining the size and complexity of services is microservices. Microservices are small, specialized and autonomous services, which collaborate to complete a process. Given their characteristics, microservices are well suited to enable a more fine grained development of the application landscape to achieve business value.
+
+120.	One of the advantages of this approach is the granularity that can be obtained when scaling only services that have a high demand.  From the example, if an organization has a huge demand to collect information from multiple sources it only needs to create new instances of the collect service, and not the others so demand of resources is more efficient. Using this approach will add further requirements to the production platform.
+
+121. 	Statistical entity services are an important and related set of services. These services provide reliable access to statistical information entities (objects) in order to support statistical production processes. Sometimes statistical entity management is included in a statistical function service. However, sometimes the entities are managed outside the service. Statistical entity services might include:
+Classification services - for the management and use of statistical classifications 
+Register services - for the management and use of business, address, and household register information
+Geography services - for the management and use of geographic information
+Statistical metadata services - for the management and use of relevant statistical metadata throughout GSBPM statistical production
+
+122. 	The IT departments of Statistical organizations will also be concerned with IT-specific services, which we term Utility Services, that provide important reusable service components of a non-statistical nature to create solutions. These are out of scope of CSPA, but informal sharing of common utility services where useful is encouraged amongst the statistical community.
+
+123. 	The Figure 6 below shows the relationship between these "layers". The CSPA Application Architecture supports the identification of services, their definition, specification, and implementation, and their assembly into statistical production solutions. It is focused on expressing the statistical task (function) and entity services and how they are combined, under the direction of the business process layer which represents an instance of a GSBPM context (or alternatively, through an event-driven approach to be discussed below). Note that the bottom two layers are part of IT Community Sharing (libraries, tools, experiences) and are not part of the CSPA Application Architecture - they do in part touch on elements that may be part of the CSPA Technology Architecture.
+
+
+Figure 6: Service layers (both within and external to CSPA)
+
+A. Patterns 
+
+Architectural Patterns
+
+124.	In general terms, an architectural pattern is a description of a widely recognized, re-usable, proven solution to a specific class of recurring design problems. It is often expressed as a problem context, system of forces, and a resolution of those forces into an effective solution.
+
+125.	The benefits of using architectural patterns can be described by using the analogy of an expert chess player. To play chess, you must learn the rules and the principles (for example the value of different pieces). However, to improve and become a really good player, you need to learn the patterns used by more experienced players and apply them to your game. In the same way, you could use the principles and non-functional requirements of CSPA, but to get the maximum benefit, it is worthwhile to learn the architectural patterns applicable to your field of work. There are many architectural patterns described in literature. Service Designers, Service Builders and Assemblers in particular can benefit from studying these patterns. The Service Designer or local Solution Architect is encouraged to investigate SOA Patterns such as those found on the website SOAPatterns9.
+
+126.  	Solution and Application Architects tasked with designing statistical production solutions will be most effective if they are able to select the most appropriate patterns for the different parts of GSBPM. Over time we expect that the community will identify and share patterns that are particularly effective, and we see this as an on-going process arising from community collaboration.
+
+127. 	Current statistical organization experience has identified two patterns that have important implications in different parts of GSBPM. These have to do with the means by which information and process control flows throughout the solution and how service invocation is triggered. 
+
+In an event-driven approach, services subscribe to event streams (publish-subscribe pattern) and are triggered in an asynchronous fashion as events occur. 
+In a process-driven approach, explicit process control functions (workflows) sequence the execution of a collection of services and the flow of data amongst them. 
+
+128.	The selection of approach depends on a number of factors, often driven by the specific context of the statistical organization. Ultimately the Solution and Application Architects (as well as Information Architects and Technology Architects) within a Statistical organization will arrive at a set of design decisions based on these and other patterns, and will look to design and assemble solutions based on them. There may be important architectural considerations on the part of service designers to ensure compatibility of services with either of these two patterns. Architects should consult the specific guidance on this topic when making their decision. For further information see CSPA implementation guidance.
+
+b. Service Invocation and Identity
+
+129.	In order for CSPA to have a robust capability dealing with entities, we define the concept of a global identifier which uniquely identifies entities in the statistical production space. Service messages (request / response) or event-driven messages may include these identifiers in their messages, and the supplying service is able to use them in carrying out its functions - e.g. to relate a piece of metadata and data for a processing step. The message may also supply the location. The identifiers exist independent of the local environment.
+
+130.	The best approach to obtaining the required information is to require that the invoking service (or orchestration) provides the necessary data and metadata objects (with their GUID's) at invocation or at a previous occasion in the case of the event driven pattern. The invoked service may respond with additional entity references to the invoker, who is then able to address any additional information needs (through its business logic). 
+
+Protocols for passing data by reference
+
+
+131.	In certain circumstances, services require large data sets as inputs. Examples of this could include administrative data files or large survey response files. The problem is similar to a "pass by value" situation in that the input data is passed to the service via in-message approaches.
+
+132. 	This issue is solved by the Claim check pattern. A short explanation can be found here: http://www.enterpriseintegrationpatterns.com/patterns/messaging/StoreInLibrary.html
+
+133.	The implementation of a data store is local to each organization and may be implemented as part of the communications platform. Organizations may choose to implement a utility service, a repository, a file cache, or some other mechanism. URI management is also a part of local operation.
+
+c. Application Design Principles
+
+134.	The design principles have been selected to maximize the flexibility of the Statistical Services wrapped or developed in the context of CSPA. The flexibility of the Statistical Service directly impacts the level of reuse, the flexibility required of the industry vision and the ease with which a statistical organization can implement a Statistical Service.
+
+135.	Principle: Maintain independence between design and implementation 
+
+Statement: The descriptions of CSPA Services are layered in conceptual (CSPA Service Definition), logical (CSPA Service Specification) and implementation (CSPA Service Implementation Description).
+
+136.	Principle: Use available standards 
+
+Statement: The design of CSPA Services should align with, and harness, relevant existing standards and frameworks wherever possible.
+
+137.	Principle: Use architecture patterns
+
+Statement: Follow architecture patterns depending on best fit to requirements.
+
+138.	Principle: Implement using GSIM
+
+Statement: Manage standardized service contracts based on CSPA Logical Information Model (LIM)
+139.	Principle: Minimize coupling 
+
+Statement: Enable services to be loosely coupled externally and be aware of internal coupling.
+
+140.	Principle: Maximize Service Autonomy
+
+Statement: Maximize service autonomy (completeness) to enable share-ability and reusability (External & Internal)
+
+141.	Principle: Include non functional requirements
+
+Statement: Non-functional requirements form a key input in design decisions.
+
+d. Non-Functional Requirements
+
+142.	In the context of CSPA, a non-functional requirement is a requirement that relates to the operation of a system. While functional requirements define what the services does (for example, error localization), the non-functional requirements describe a performance characteristic of a system (for example, authorization of who can access the resources and functions of the service). That is, non-functional requirements determine how a service behaves rather than what it should do.
+
+143.	Non-functional requirements are important to be captured in the design of the services. They have a significant influence on the software architecture of a service. The Designer [1] of a CSPA Service should identify the non-functional requirements that are relevant to that service when they are designing it. The implementation of a CSPA Service provides some functional value when assembled into a value chain within an organization. The non-functional requirements of a CSPA Service address other concerns or behaviours of the service such as performance, security, process metrics and error handling. This section provides some guidance on these concerns.
+
+Multilingual Support
+
+144.	The CSPA Services must be able to support input and output in multiple languages where applicable. If the service includes manual operations, it also must be possible to change the language of the GUI. Preferably, even the presentation style should be adaptable. Additionally, services must be documented at least in English in addition to the local language(s) of the organization developing the CSPA Service. It is highly recommended that organizations that have made translations of the documentation of a CSPA Services in additional languages make them available to the community.
+
+Security
+
+145.	CSPA Service Security needs to address the following key concerns:
+
+A service implementation must not contain any internal vulnerabilities that might pose risks to a local Statistical organisation environment
+The statistical information (data, metadata) must be able to be protected at a level consistent with the needs of the local Statistical organisation
+The service must not be vulnerable to attack where it may be used for wrong purposes
+
+146.	In order to address information access, it is necessary to validate the user (invoker) through authentication, and to address access privileges through authorization controls. 
+
+147.	The challenge in implementing security features in a service lies in the fact that in general different Statistical Organisations will have different (but similar) approaches. 
+
+148.	Invoker Authentication may involve validating the identity of a user (person) or an invoking service. These can be mediated with certificates (tokens) or directory services (for users). 
+
+149.	Access authorization involves resolving the rights of the invoker (person or service) and granting access to the relevant information and service resources based on these rights. The rights may be managed centrally (e.g. in Active Directory) or local to the service (in internal rights resources). 
+
+150.	For the purpose of this document, the security concern relates to controls that are put in place to mitigate the risk that a CSPA Service or the data it controls is misused. This section provides some basic guidance on some of these controls. However, in general it is strongly advised that each CSPA Service implementation complete a Risk Assessment and document a Risk Mitigation Plan for high and extreme risks identified in the assessment.
+
+Data at rest
+151.	Data at rest is of particular interest when a Statistical Service needs to defer state (see discussion in "Service Statelessness" in section V D). Under this circumstance, the security (e.g. encryption requirements or access control) of the data are entirely the responsibility of the Statistical Service. Where a CSPA Service already has a functional dependency on underlying technologies or platforms, it would be reasonable to make use of security functions available in those technologies.
+
+Data in transit
+152.	Security of data in transit (e.g. contained within a message flow as part of a service invocation) will be considered in future iterations of CSPA.
+
+Data Sensitivity
+153.	Sensitivity of statistical data varies amongst organizations and at this stage the architecture does not attempt to converge on a standard definition or treatment.
+
+Machine to machine certification
+154.	Guidance for this will come in a future iteration of CSPA. Organization specific implementations based on assembly time infrastructure can assure security for service communication (for example, use of a VLAN).
+
+
+
+
+
+Performance
+
+155.	No specific guidance is provided on the performance characteristics. However, they should be declared in the CSPA Service Implementation Description and it is recommended that examples of performance level are included.
+
+Process Metrics
+
+156.	A CSPA Service will generally capture metrics related to the function that it performs. To all intents and purposes, these process metrics are treated by the CSPA Service as just one of its outputs and should be reflected as such in the CSPA Service Specification.
+
+Error Handling
+
+157.	Error handling, in this case, relates to situations where the service fails. The service must report this to the communication infrastructure if applicable. Error handling is left to the communication platform to handle as required. Generally there will be protocol specific requirements for flagging errors. The error codes and their meanings need to be documented in the CSPA Service Implementation Description.
+
+158.	In the case of publish/subscribe pattern, it is suggested that a standard error event that all CSPA compliant services should be listening for in order to be able to handle relevant errors.
+
+e. CSPA Service Definitions, Specifications and Implementation Descriptions
+
+159.	The level of reusability promised by the adoption of a SOA is dependent on standard definitions of the services. CSPA has three layers to the description of any service. These layers are described in the following paragraphs and in Figure 7.
+
+CSPA Service Definition
+
+160.	The CSPA Service Definition is at a conceptual level. In this document, the capabilities of a Statistical Service are described in terms of the GSBPM sub process that it relates to, the business function that it performs and GSIM information objects which are the inputs and outputs.
+
+161.	A template of a CSPA Service Definition can be found in Annex 1.
+
+CSPA Service Specification
+
+162.	The CSPA Service Specification is at a logical level. In this layer, the capabilities of a CSPA Service are fleshed out into business functions that have GSIM implementation level objects as inputs and outputs. This document also includes metrics and methodologies.
+
+163.	A template of a CSPA Service Specification can be found in Annex 1.
+
+CSPA Service Implementation Description
+
+164.	The CSPA Service Implementation Description is at an implementation (or physical) level. In this layer, the functions of the CSPA Service are refined into detailed operations whose inputs and outputs are GSIM implementation level objects.
+
+165.	This layer fully defines the service contract, including communications protocols, by means of the Service Implementation Description. It includes a precise description of all dependencies to the underlying infrastructure, non-functional characteristics and any relevant information about the configuration of the application being wrapped, when applicable.
+
+166.	A template of a CSPA Service Implementation Description can be found in Annex 1.
+
+
+Figure 7: Service interfaces at different levels of abstraction
+
+167.	In general, there will be one Service Specification corresponding to a Service Definition, to ensure that standard data exchange can occur. However, it is recognised that there may be occasions where an additional Service Specification is required, it is likely that this will be associated with variations in the methodology encapsulated within the statistical service. At the implementation level, services may have different implementations (software dependencies, protocols, supported methodologies) reflecting the environment of the supplying organization. Each implementation must rigidly adhere to the data format specified in the Service Specification. The CSPA Architecture Working Group is the final approver for CSPA service documentation (Service Definition, Service Specification and Service Implementation Description), and is responsible for publishing through the Global Artefact Catalogue. The role of the CSPA Architecture Working Group is detailed in the Governance section of this document.
+
+168.	There are a number of roles identified in CSPA (see Section VII) which are involved in the definition, specification, and implementation of CSPA Services. These roles can be considered as operating at different levels of abstraction. Figure 8 illustrates the relationship between these levels and roles for instances where there is one Service Specification for one Service Definition. Figure 9 illustrates the case where more than one Service Specification is required for one Service Definition.
+
+
+Figure 8: Minimal Linkages between CSPA Service Definition, Specification, and Implementation
+
+
+Figure 9: Possible Linkages between CSPA Service Definition, Specification, and Implementation
+
+VI. Technology Architecture
+
+169.	The CSPA provides the following definition of Technology Architecture: 
+
+"Technology Architecture (TA) describes the IT infrastructure required to support the deployment of business services, data services and applications services, including hardware, middleware, networks, platforms, etc."
+
+170.	Within each statistical organization, there needs to be an infrastructural environment in which the generic services can be combined and configured to run as element of organization specific processes. This environment is not part of CSPA. CSPA assumes that each statistical organization has such an environment and makes statements about the characteristics and capabilities that such a platform must have in order to be able to accept and run Statistical Services that comply with CSPA.
+
+171.	Platform for Service Communication: A communication platform provides the capability for communication between Statistical Services. It enables inter-service communication while allowing Statistical Services to remain autonomous and adds additional capabilities for monitoring and orchestrating the information flow. To assemble a built Statistical Service, the communication platform is updated to integrate with new services. There are multiple ways of establishing a communication platform. Examples of architectural components could be; BPMS, ESB, Workflow Engines, Orchestration Engines, Message Queuing and Routing. 
+
+172.	Platform for Configuring and Controlling Services and Processes: The Platform for Controlling Service and Process execution encompasses the functionalities and tools to support the management and maintenance of services metadata, artefacts and policies. Examples of how this mechanism could be achieved include Business Process Modelling System, Lifecycle Management, Service Monitoring and Management.  
+
+173.	Platform for Reporting on Services and Processes: The Platform for reporting is responsible for enabling real-time monitoring and near-real-time presentation of user defined business key performance indicators (KPIs). Examples of how this mechanism could be achieved are; Static Dashboard or Business Activity Monitoring (also generates alerts and notifications to user when these KPIs cross specified thresholds).
+
+A. Communication Platform
+
+174.	CSPA provides guidance on the way that organizations should go about building new or wrapping existing Statistical Services.  When the time comes for an organization to use a Statistical Service that conforms to CSPA there are some organization specific technology approaches that also need consideration.  
+
+175.	CSPA does not specify how organizations will coordinate the use of Statistical Services to implement a wider business process.  Organizations will need a technology solution to support communication between Statistical Services since the Statistical Services are not to talk directly to each other.
+
+176.	Where the Statistical Service being used is largely independent, interfaces between that Statistical Service and others may be manually managed by a person. There may also be other relatively trivial uses of Statistical Service where a bespoke solution to integrate them is developed.  These are sub-optimal yet pragmatic ways of achieving reuse of Statistical Services.
+
+177.	Where the integration of Statistical Services is non-trivial, a communications platform of some sort will usually be required.  The key functions of the communication platform are:
+
+Orchestration - managing the sequence of flow of invocations of the Statistical Services
+Error handling - where Statistical Services fail or where the output of services contain erroneous cases that require a different treatment
+Message payload translation - in particular where a Statistical Service does not support standard GSIM implementation objects - It is possible to offload this function to specialized Statistical Service
+Auditing, Logging, Activity Monitoring
+Performance Management
+Security
+
+178.	Figure 10 illustrates the relationship between the elements that are specified in CSPA and the underlying Communications Platform that is local to an Organization. 
+
+
+
+Figure 10: Statistical Service Components and Communication Platforms
+
+179.	In this diagram, two Statistical Services (Edit, Coding 1) have been defined and specified in compliance with CSPA, and their implementations are communicating with each other within the environment of a statistical organization. The Statistical Service instances communicate with each other through the organization's communication platform – this may be a full SOA implementation (bus or broker), a CORE implementation, or some other more rudimentary platform (or no platform at all).
+
+180.	It is important to state that CSPA does not prescribe the capabilities and architecture of the underlying Communications Platform – it instead assumes that an organization's Assemblers and Configurers will be responsible for addressing how the platform supports the use of CSPA-compliant Statistical Services. This allows CSPA and its Statistical Services to be used by the widest possible community amongst statistical organizations, all of who may be in different stages of development and modernization.
+
+181.	In the diagram one can see that there is a second Coding Statistical Service (Coding 2) that doesn't (yet) implement the complete CSPA Statistical Service Specification due to a transitional state. An organization may optionally make use of some form of translation service to address differences between their interfaces (typically at the information encoding level). This is seen as a transitional state – the goal is to ensure that all services adhere to the Statistical Service Specification, while allowing for differences at the Statistical Service implementation level at the protocol level (and underlying platforms).
+
+VII. Roles involved in the production of IT enabled CSPA Services
+
+182.	Using CSPA will create new functional roles within a statistical organization. These roles may already exist in some statistical organizations and may have particular people (for example, Chief Information Officer, Enterprise Architect) assigned to them. CSPA makes no recommendation about who in an organization should play these roles or the composition (for example the ‘investor role’ could be an executive team, an investment board, or an individual business owner) – this is left to each statistical organization to decide how the role is undertaken – this is left to each statistical organization to decide who performs that role. This section and Figure 11 explain the functional roles in the form of one possible user story.  
+
+
+
+Figure 11: Roles in CSPA
+
+A. Investor
+
+183.	The investor role is focused on directing and financing the investments in new statistical processes that are needed to produce new statistical products. Investors commission designing, building and running statistical processes. The challenge most executives of statistical organisations are facing is to manage the ever increasing demands for faster change with tight and often diminishing budgets.
+
+184.	This leads to a need for investments to be fit for purpose with the lowest possible Total Cost of Ownership (TCO) and a reasonably short time-to-market. Reusing already available solutions is a way to lower both costs and development time. But developing reusable components (services) incurs up-front development costs. The Investor needs to weigh up and decide on the alternatives. The Investor needs the Designer to design and present such alternatives.
+
+185.	International collaboration helps spread the costs and lower the overall TCO for the community and for the individual organisations. Investors therefore should pool their requirements and resources.
+
+b. Designer
+
+186.	The Designer has been given a set of high level business requirements from the Investor, describing what data is needed, and some parameters of the process. The Designer identifies the data already available as input for the process, determines what data still needs to be collected and determines the steps needed to produce the required output from that collective input. The Designer then assesses what solutions (services) are available to actually realize this design. 
+In order to determine what functionality is available, the Designer will consider internal and external capabilities. This will involve a search of the CSPA Catalogue(s), to determine whether there are internal or external candidates. The catalogue shows several levels of reuse: services already provided as a running service by a Service Provider (internal or external), services available as software from an internal or external source, solutions available only as a tool, not (yet) service ready, and services available as a conceptual specification only.
+When a possible internal candidate is found that is not yet a CSPA service, a decision is needed as to whether the existing functionality should be wrapped and exposed as a Statistical Service, or whether a new Statistical Service should be built. 
+
+187.	Once it has been established that no suitable existing solution can be found, or in the case where existing functionality must be heavily modified, the Designer will specify the functionality for each Statistical Service needed to meet requirements. Together, the Investor and the Designer make the trade-off: generic vs. specific, development cost vs. long-term benefit. The Designer needs to help the Investor to make the right decisions.
+
+188.	Another parameter in this decision-making is the availability of other parties willing and able to participate in the investment of designing and building a new service. Potential collaborators should be identified and negotiated with the Investor. 
+
+189.	Whatever the outcome of the trade-offs, the Designer will define any new Statistical Services on a conceptual and logical level. The conceptual level consists of a Service Definition using GSIM information objects, the logical level is a Service Specification using LIM objects as presented in Figure 5.
+
+190.	Service design across these levels includes information design, work-flow, (service) interface design, and other relevant aspects. The Designer will address Service dependencies, Service interface contracts, extensibility, and all data, metadata and performance metrics. Capabilities for configuration by users will also be determined, as well as the degree of configuration to be implemented by the Service Builder.
+
+191.	Eventually, after all services needed for the process are either found to be pre-existing or specified and built, the process as such can be specified in terms of those services, connecting inputs, outputs and triggers. The task of building this process is given to the Assembler.
+
+c. Service Builder
+
+192.	The Service Builder receives a Statistical Service Definition and a Statistical Service Specification from the Designer. The Service Builder then implements the Service, i.e. realizes functionality as specified in Definition and Specifications in software. The Service Builder will also implement features of the Service so that the Assembler and Configurer can customize the behaviour to fit the process or statistical domain. In addition, the Service Builder may provide features for the Service Provider to integrate it into the technology environment. 
+
+193.	On an implementation level, decisions must be made about how to realize the functionality specified using various available technology approaches. The Service Builder will document the design decisions made, together with installation and operational instructions in a Service Implementation Description. The Service Builder tests the service to ensure that it supports the specified functionality. Test results may also be provided in the documentation. Finally, the Service Builder makes both software and documentation available through the Service Catalogue, locally and globally. The result is a software package that can be deployed onto some infrastructure and operated by a Service provider. 
+
+d. Service Provider
+
+194.	The Service Provider actually delivers the service so that it can be used in the execution of statistical processes. This means implementing the software as created by the Service Builder in a technical environment, drawing up Service Level Agreements and providing the service to Assemblers, Configurers and Users.
+
+195.	The Service Provider may limit the service to an IT-service only, providing the Software as a Service (SaaS). For a fully automatic service, this is the only scenario. But for a service that is automated only partially, the Service provider may decide to provide also the staffing, turning the SaaS into a full business service. However, if the Service Provider only provides the SaaS in this case, the Assembler (or ultimately the process owner) will need to find solutions for the staffing of the manual part of the service process.
+
+196. 	There are two cases for the Service provider: one where the Statistical Service can be deployed within the local environment without any modifications, which provides a high degree of confidence in their compatibility. The second scenario involves the use of an external Statistical Service, which might require extension or modification to fit the local technical environment. In this latter case, issues would be communicated to the Service Builder and possibly Designer for adaptation or further development.
+
+197. 	Note that Services and Service Providers can be both local and external to the organisation owning and operating the process that is using that service.
+
+e. Environment Provider
+
+198.	The Environment Provider role is tasked with creating the communication infrastructure that drives the services during execution of the statistical process. The scope of this task is restricted to the local organization. Depending on the local requirements, the Environment should support one or even both patterns described in the chapter on Application Architecture. Also, the environment must support the Assembler and Configurer.
+
+f. Assembler
+
+199.	The Assembler integrates the Statistical Services according to the requirements of the business process, as expressed in the (process) design documentation delivered by the Designer. The Assembler uses all levels of the interface specifications as provided by the Service Definition, the Service Specification and the Service Implementation Description. Depending on the pattern selected for the integration, the Assembler may build or configure a process orchestration, or set up mechanisms for an event-driven type of process. This might take place within a process management environment, as part of the (local) Communication Infrastructure, but could also be accomplished through a bespoke software layer.
+
+g. Configurer
+
+200.	The Configurer takes the assembled process, and makes it suitable for use in the intended statistical domain. Parameters are specified according to the domain knowledge of the Configurer. Any issues with the assembled Service are communicated to the Designer, Service Builder, or Assembler.
+
+h. User
+
+201.	There is no single user involved with a particular Statistical Process. There are users both inside (executing manual parts of services, such as manual editing) and outside of (managing, controlling) the process. The user chain covers everyone from the designers of surveys, through the conduct of data collection operations, through to those who process the collected data. The User does not need to know where the data and metadata are stored - in particular the user does not need to actively manage how data flows between parts of the processing environment. The User should be able to perform his/her operations without experiencing a high degree of frustration or complexity.
+
+i. Example
+
+202.	One example would be a case where the government legislates the requirement that some data collections must support people completing their reporting obligations on-line using eForms. Tasked by the Investor, the Designer reviews the impact of this change. To assess the impact the Designer needs to review what Statistical Services are required to implement the new Statistical collection, review the Statistical Service catalogue(s) for available solutions and identify any gaps.
+
+203.	The Designer may identify that there is a gap in the Services required to support rendering the design of an eForm for respondents to use: an eForm capability is missing from the current catalogue(s). 
+
+204.	The Designer designs and presents alternative solutions, each with associated costs. The Investor makes the decision and once this decision as to how the data collection is to be run is made, the Designer will work out the details for the new process, including the specifications for any new services to be built.
+
+205.	The Service Builder will build the service solution, a Service provider will implement and provide the service and the Assembler will create the new process by integrating the new service into the (local) solution. Finally, the Configurer “tweaks” the process for a particular statistical survey.
+
+206.	With this, the machinery is in place and is “ready to roll”. Depending on the business environment for the process, the process owner (one of the types of users), or some preceding process triggers the process into action by providing the necessary input conditions. Users (“workers”) inside the process will be alerted as input arrives at the various process steps (services). For instance, once the survey has been designed and administered, the next User is alerted of the arrival of survey responses, including some data, which will be auto-coded, and other data, which needs manual coding. Once coded, the data would go through a series of edits, including data cleaning and validation, imputation, confidentialization, etc. 
+
+VIII. Enablers
+
+A. Catalogues
+
+207.	A primary aim of CSPA is to support efficient sharing and reuse of process patterns, information and services at an organization and international level.
+
+208.	One key requisite in achieving this goal is an ability to reliably and efficiently discover what is available for reuse to support a particular business need. This includes an ability to efficiently assess whether a potentially reusable artefact is, in fact, "fit for purpose" in practice when it comes to supporting that particular business need.
+
+209.	Catalogues of reusable resources have a key role within CSPA. They provide lists and descriptions of standardized artefacts, and, where relevant, information on how to obtain and use them. The catalogues can be at many levels, from global to local. For example, it is envisaged that each statistical organization will have catalogues of processes, information objects and Statistical Services. 
+
+210.	However, for the purposes of the CSPA Reference Architecture, it is the global level that is the primary interest. The global catalogue is called the Global CSPA Catalogue. The Global CSPA Catalogue provides information about resources and potential collaboration partners, helping to ensure that Statistical Services conform to the requirements of CSPA. 
+
+211.	The Global CSPA Catalogue will not necessarily hold copies of executable code. It will, however, provide all necessary information about how to access the artefacts, including contact details for further information.
+
+212.	The Global CSPA Catalogue contains information about developments that are planned or in progress by statistical organizations. This information will facilitate the creation of a global roadmap of statistical organizations developments that can be consulted to see which organizations are developing what and when. 
+
+213.	The Global CSPA Catalogue is a composite conceptual catalogue representing 5 layers of information.  Figure 12 below outlines the defined layers and their current implementation.
+
+
+
+Figure 12:  CSPA Global Artefact Catalogue Layers
+
+214.	Links to the current implementation of the layers of the Global Artefact Catalogue are provided below:
+
+Layer 1: Knowledge Base (Virtual Help Desk10) provides access to standards such as GSIM, GSBPM and GAMSO, as well as information about DDI and SDMX.  
+Layer 2: Investment Catalogue11 provides information about the developments that have been planned or are in progress by statistical organizations.
+Layer 3: Business Capabilities Catalogue12 provides information about the developments that have been completed (ie. Capabilities that already exist) in statistical organizations. 
+Layer 4: CSPA Services Catalogue13 provides access to a list of Statistical Services that have been developed. This catalogue is hosted by Eurostat.
+Layer 5: Technical/Supporting Services - currently accessed via the Service Implementation Specification for the CSPA Service, the current repository is Github.com14. 
+
+b. Governance
+
+215. 	From 2016, a new governance model for CSPA development and support will be put in place. This includes a dedicated committee of experts to oversee the maintenance and enhancement of CSPA and related materials, and to provide technical support to implementers. In the following paragraphs, the groups involved and the role they play is outlined.
+
+UNECE High-Level Group for the Modernisation of Official Statistics (HLG-MOS)
+
+216. 	CSPA was developed as a series of projects overseen by the HLG. This group will be the custodians of the outputs. Whilst the architecture itself will be "owned" by the international official statistics community, it will be administered by the HLG, as top-level representatives of that community.
+
+HLG Executive Board
+
+217.	The Executive Board has a coordinating role with respect to the CSPA Implementation Group. The CSPA Implementation Group reports to the Executive Board on a monthly basis and the Chair of Group has observer status at the Executive Board meetings.
+
+CSPA Implementation Group
+
+218.	The UNECE, on behalf of the international statistical community provides leadership for maintaining and extending CSPA to retain its relevance and value as an 'industry asset' through the CSPA Implementation Group.
+
+219.	The HLG, Executive Board and the CSPA Implementation Group will carefully balance the advantages of change, in terms of increasing relevance and usefulness, against the costs of having to implement those changes within statistical organizations. A reasonable degree of stability over time is therefore a key requirement for the CSPA Reference Architecture and associated enablers.
+
+220.	The members of the CSPA Implementation Group are drawn from a range of backgrounds including IT, enterprise architecture, methodology and standards.
+
+221.	The CSPA Implementation Group provides advice to statistical organizations who are planning, designing and developing CSPA compliant Statistical Services. They guide the CSPA compliance of Statistical Services, therefore Service Definitions and Service Specifications are assessed taking into account:
+
+The granularity of the service
+The naming of the service
+The information in the templates is understandable/readable
+Whether the service is "clean" that is, it stands alone
+The methods
+The input
+The outputs
+The Non Functional Requirements
+
+222.	The bolded items are specifically checked in the Service Definition. All items are checked for the Service Specification. They approve Service Definitions, Service Specifications and confirm that Service Implementation Descriptions reflect the agreed Service Definitions and Specifications.  The CSPA Implementation Group then approves the addition of these into the Global CSPA Catalogue (CSPA Services layer).
+
+223.	Additionally, the CSPA Implementation Group provides practical technical assistance to CSPA implementation projects in statistical organisations when requested – either through their own efforts or through a network of developers in the community. They also update the information into the Investment and Business Capabilities layers of the Global CSPA Catalogue on an annual basis.
+
+224.	Figure 13 summarizes these groups and roles.
+ 
+
+
+Figure 13:  HLG-MOS Governance
+
+
+c.  Legal, Licensing and Financial Considerations
+ 
+225.	CSPA provides an industry reference architecture enabling the development of statistical services for sharing and reuse, however, it does not provide a framework covering the legal, licensing and financial considerations.  Statistical organizations involved in HLG activities are now interested in collaborating more effectively to share, develop and enhance joint products.  The legal, licensing and financial considerations are critical enablers of effective sharing and reuse of statistical services that have been developed by statistical organizations (either alone or in collaboration with others).  It is noted that any CSPA compliant statistical services developed and owned by a 3rd party vendor or community will probably have specific legal, licensing and financial considerations.
+
+226.	The Statistical Modernisation Community Statement of Intent provides a framework for enhanced collaboration between official statistics organisations, providing a basis for the development, sharing and maintenance of the joint products of the community. The aim is to ensure an open inclusive approach to modernisation activities, while at the same time giving potential partners a sense of the level of engagement expected.
+
+227.	 All HLG-MOS members are listed as endorsing the Statement of Intent, taking effect from 1 January 2016.
+
+ 
+Annex 1: Templates
+
+Statistical Service Definition
+
+Template
+
+Name
+
+GSBPM
+
+Business Function
+
+Outcomes
+
+Restrictions
+
+GSIM Inputs
+
+GSIM Outputs
+
+Service dependencies
+ 
+
+Statistical Service Specification
+
+Template
+
+Statistical Service Specification: Name of Statistical Service
+
+Protocol for Invoking the Service 
+
+This service can be invoked in different ways, depending on the chosen architectural pattern.
+Describe the architectural pattern(s) that this service is expected to operate in (see Chapter V - Architectural pattern).
+The protocol used to invoke this function should be in compliance with the guidance provided for developing Statistical Services by CSPA.
+
+Input Messages 
+
+The inputs of the service are related to the following CSPA logical model objects:....
+Describe specific inputs in terms of CSPA logical Information Model  
+
+Output Message 
+
+The outputs of the service are related to the following CSPA logical model objects:....
+Describe specific outputs in terms of CSPA logical Information Model  
+
+Applicable Methodologies
+
+Describe the statistical methods that may be implemented in this Statistical Service
+
+
+Statistical Service Implementation Description
+
+Template
+
+Name : A name that identifies the Statistical Service implementation. It must be unique in the Service catalogue. 
+Version: Version number 
+Builder Organization:  The owner of the Statistical Service, i.e. the Service Builder's organization. 
+Statistical Service Definition: The link to the Statistical Service Definition document. 
+Statistical Service Specification: The link to the Statistical Service Specification document. 
+Invocation protocols: Depending on the chosen architectural pattern, specify how the service has to be invoked in the deployed infrastructure.
+If the service is capable to work in many architectural patterns with different implementations, then it would require different Service Implementation documents, one per supporter pattern.
+Service Interface
+Protocol-dependent specification of the information required to invoke the service.
+Definition of Service Interface (if service is Web service) or
+Environment settings (if service is local)
+Examples:
+WSDL interface for SOAP Web Service protocol
+List of HTTP request parameters for REST Web Service protocol
+Command line specification for Command Line protocol
+Add other examples for other supported protocols
+Data-by-Reference protocols: For each input passed as reference, specify supported protocol(s). Accepted protocols are listed in this document. 
+Technical dependencies: Which methodologies listed in the Statistical Service Specification are supported by this Service Implementation 
+Technical dependencies: List of technical requirements of the service in terms of:
+Operating system(s) (specify version)
+Runtime platforms – any additional software that has to be installed on the machine the service is installed on (e.g. SAS, R, Java virtual machine, .net runtime, J2EE container, etc. – Specify version)
+Database(s)
+Other dependencies (libraries, packages etc.)
+
+Installation documentation
+Installation guide for the Assembler 
+Additional information
+Any additional information for a Assembler which is deemed relevant by the Service Builder
+
+Annex 2: Glossary
+
+Term
+Definition
+Application Architecture
+Application Architecture (AA) classifies and hosts the individual applications describing their deployment, interactions, and relationships with the business processes of the organization (e.g. estimation, editing and seasonal adjustment tools, etc.).  AA facilitates discoverability and accessibility, leading to greater reuse and sharing. Source: Statistical Network BA definition
+Architectural Pattern
+The description of a recurring particular design problem which comes from different design contexts. The solution schema is specified by describing its components, its responsibilities its relations and the ways they collaborate. Source: CSPA
+Business Architecture
+Business Architecture (BA) covers all the activities undertaken by a statistical organization, including those undertaken to conceptualize, design, build and maintain information and application assets used in the production of statistical outputs. BA drives the Information, Application and Technology architectures for a statistical organization. Source: Statistical Network BA definition
+Business Line
+A business line within a statistical organization usually delivers a particular business outcome. Business lines allow the Business Architecture to be split into homogeneous areas of related activities. Business lines are defined in order to guarantee independence from reorganization of the current organizational structure. Source: Statistical Network BA definition
+Business Function
+Something an enterprise does, or needs to do, in order to achieve its objectives. Source: GSIM
+Business Process
+A set of process steps to perform one or more Business Functions to deliver a Statistical Program. Source: GSIM
+Business Service
+A defined interface for accessing business capabilities (an ability that an organization possesses, typically expressed in general and high level terms and requiring a combination of organization, people, processes and technology to achieve). 
+Source: GSIM
+Capability
+Capabilities provide the Statistical Organisation with the ability to undertake a specific activity. A capability is only achieved through the integration of all relevant capability elements (e.g. methods, processes, standards and frameworks, IT systems and people skills). Source: Statistical Network BA definition
+Common Statistical Production Architecture
+A set of principles for increased interoperability within and between statistical organizations through the sharing of processes and components, to facilitate real collaboration opportunities, international decisions and investments and sharing of designs, knowledge and practices. Source: CSPA
+Enterprise Architecture
+Enterprise Architecture is about understanding all of the different elements that go to make up the enterprise and how those elements interrelate. It is an approach to enabling the vision and strategy of an organization, by providing a clear, cohesive, and achievable picture of what's required to get there.  Source: Statistical Network BA definition
+Global Artefact Catalogue
+A list and descriptions of standardized artefacts, and, where relevant, information on how to obtain and use them. Source: CSPA
+Industry Architecture
+A set of agreed common principles and standards designed to promote greater interoperability within and between the different players that make up an "industry", where an industry is defined as a set of organizations with similar inputs, processes, outputs and goals. Source: CSPA
+Information Architecture
+Information Architecture (IA) classifies the information and knowledge assets gathered, produced and used within the Business Architecture. It also describes the information standards and frameworks that underpin the statistical information. IA facilitates discoverability and accessibility, leading to greater reuse and sharing. Source: Statistical Network BA definition
+Interface
+A type of contract by which subsystems or component communicate. Source: CSPA
+Non Functional Requirements
+Non Functional Requirements are the overall factors that affect runtime behaviour, system design, and user experience. They represent areas of concern that have the potential for application wide impact. Source: CSPA
+Principles
+Principles are general rules and guidelines, intended to be enduring and seldom amended, that inform and support the way in which an organization sets about fulfilling its mission and business objectives. Source: Statistical Network BA definition
+Protocol
+Formats and rules for exchanging messages in or between computing systems. Source: CSPA
+Reuse
+Reuse is the concept of using a common asset (implemented component, a component definition, a pattern...) repetitively in different (or similar) contexts (for example in different business processes), and/or by different participants, and/or overtime. Source: CSPA
+Service
+A service is a logical representation of a repeatable business activity that has a specified outcome and is self-contained, fulfils a business need for a customer (internal or external to the organization) and may be composed of other services. 
+Source: Statistical Network BA definition (adapted from TOGAF G113)
+Service Contract
+A service contract is comprised of one or more published documents (called service description documents) that express meta information about a service. The fundamental part of a service contract consists of the service description documents that express its technical interface. These form the technical service contract which essentially establishes an API into the functionality offered by the service. A service contract can be further comprised of human-readable documents, such as a Service Level Agreement (SLA) that describes additional quality-of-service features, behaviours, and limitations. Source: http://serviceorientation.com/soaglossary/service_contract
+Service Interface
+A service interface is the abstract boundary that a service exposes. It defines the types of messages and the message exchange patterns that are involved in interacting with the service, together with any conditions implied by those messages. Source: http://www.w3.org/TR/ws-arch/#service_interface
+Service Oriented Architecture
+Service-Oriented Architecture (SOA) is an architectural style that supports a way of thinking (Service Orientation) in terms of services and service-based development and the outcomes of services.  
+The SOA architectural style has the following distinctive features: 
+It is based on the design of the services – which mirror real-world business activities – comprising the enterprise (or inter-enterprise) business processes. 
+Service representation utilizes business descriptions to provide context (i.e., business process, goal, rule, policy, service interface, and service component) and implements services using service orchestration. 
+It places unique requirements on the infrastructure – it is recommended that implementations use open standards to realize interoperability and location transparency. 
+Implementations are environment-specific – they are constrained or enabled by context and must be described within that context. 
+It requires strong governance of service representation and implementation. 
+It requires a "Litmus Test", which determines a "good service".  Source: The Open Group http://www.opengroup.org/soa/source-book/soa/soa.htm
+Share
+Share is an ownership concept where an asset is made available to other participants for use. There are levels of sharing. A limited form of sharing would be to provide another participant with the means to replicate (make a copy) the asset (for example give the source code) (i.e. they share an aspect of the asset only). A more involved form of sharing would entail that asset is actually been made entirely common (in this case the asset is also reused).  Source: CSPA
+Statistical Service
+A Statistical Service is a specialization of Service for the statistical industry. A Statistical Service represents a defined interface for accessing business capabilities (an ability that an organization possesses, typically expressed in general and high level terms and requiring a combination of organization, people, processes and technology to achieve). 
+It is logical representation of a repeatable business activity that has a specified outcome and is self-contained, fulfils a business need for a customer (internal or external to the organization) and may be composed of other services Source: GSIM and Statistical Network BA definition (Service)
+Technology Architecture
+Technology Architecture (TA) describes the IT infrastructure required to support the deployment of applications and IT services, including hardware, middleware, networks, platforms, etc. Source: Statistical Network BA definition
