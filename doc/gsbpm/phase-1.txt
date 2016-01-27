@@ -1,0 +1,10 @@
+Specify Needs
+This phase is triggered when a need for new statistics is identified, or feedback about current statistics initiates a review. It includes all activities associated with engaging customers to identify their detailed statistical needs, proposing high level solution options and preparing business cases to meet these needs.
+In this phase the organisation:
+- identifies the need for the statistics;
+- confirms, in more detail, the statistical needs of the stakeholders;
+- establishes the high level objectives of the statistical outputs;
+- identifies the relevant concepts and variables for which data are required;
+- checks the extent to which current data sources can meet these needs;
+- prepares the business case to get approval to produce the statistics.
+This phase is broken down into six sub-processes. These are generally sequential, from left to right, but can also occur in parallel, and can be iterative. The sub-processes are:

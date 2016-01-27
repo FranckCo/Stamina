@@ -1,0 +1,2 @@
+Finalise data files
+This sub-process brings together the results of the other sub-processes in this phase and results in a data file (usually of macro-data), which is used as the input to the "Analyse" phase. Sometimes this may be an intermediate rather than a final file, particularly for business processes where there are strong time pressures, and a requirement to produce both preliminary and final estimates.

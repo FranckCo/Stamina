@@ -1,0 +1,5 @@
+Produce dissemination products
+This sub-process produces the products, as previously designed (in sub-process 2.1), to meet user needs. They could include printed publications, press releases and web sites. The products can take many forms including interactive graphics, tables, public-use micro-data sets and downloadable files. Typical steps include:
+- preparing the product components (explanatory text, tables, charts, quality statements etc.);
+- assembling the components into products;
+- editing the products and checking that they meet publication standards.

@@ -1,0 +1,2 @@
+Build or enhance process components
+This sub-process describes the activities to build new and enhance existing components and services needed for the "Process" and "Analyse" phases, as designed in the "Design" phase. Services may include dashboard functions and features, information services, transformation functions, workflow frameworks, provider and metadata management services.

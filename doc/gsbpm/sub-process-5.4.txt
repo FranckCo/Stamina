@@ -1,0 +1,7 @@
+Edit and impute
+Where data are considered incorrect, missing or unreliable, new values may be inserted in this sub-process. The terms editing and imputation cover a variety of methods to do this, often using a rule-based approach. Specific steps typically include:
+- the determination of whether to add or change data;
+- the selection of the method to be used;
+- adding / changing data values;
+- writing the new data values back to the data set, and flagging them as changed;
+- the production of metadata on the editing and imputation process.

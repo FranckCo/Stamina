@@ -1,0 +1,2 @@
+Prepare draft outputs
+This sub-process is where the data are transformed into statistical outputs. It includes the production of additional measurements such as indices, trends or seasonally adjusted series, as well as the recording of quality characteristics.

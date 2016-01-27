@@ -1,0 +1,6 @@
+Integrate data
+This sub-process integrates data from one or more sources. It is where the results of sub-processes in the "Collect" phase are combined. The input data can be from a mixture of external or internal data sources, and a variety of collection modes, including extracts of administrative data. The result is a set of linked data. Data integration can include:
+- combining data from multiple sources, as part of the creation of integrated statistics such as national accounts
+- matching / record linkage routines, with the aim of linking micro or macro data from different sources
+- prioritising, when two or more sources contain data for the same variable, with potentially different values
+Data integration may take place at any point in this phase, before or after any of the other sub-processes. There may also be several instances of data integration in any statistical business process. Following integration, depending on data protection requirements, data may be anonymised, that is stripped of identifiers such as name and address, to help to protect confidentiality.

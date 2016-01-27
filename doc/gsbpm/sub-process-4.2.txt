@@ -1,0 +1,10 @@
+Set up collection
+This sub-process ensures that the people, processes and technology are ready to collect data and metadata, in all modes as designed. It takes place over a period of time, as it includes the strategy, planning and training activities in preparation for the specific instance of the statistical business process. Where the process is repeated regularly, some (or all) of these activities may not be explicitly required for each iteration. For one-off and new processes, these activities can be lengthy. This sub-process includes:
+- preparing a collection strategy;
+- training collection staff;
+- ensuring collection resources are available e.g. laptops;
+- agreeing terms with any intermediate collection bodies, e.g. sub-contractors for computer assisted telephone interviewing
+- configuring collection systems to request and receive the data;
+- ensuring the security of data to be collected;
+- preparing collection instruments (e.g. printing questionnaires, pre-filling them with existing data, loading questionnaires and data onto interviewers' computers etc.).
+For non-survey sources, this sub-process will include ensuring that the necessary processes, systems and confidentiality procedures are in place, to receive or extract the necessary information from the source.

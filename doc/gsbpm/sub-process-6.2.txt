@@ -1,0 +1,9 @@
+Validate outputs
+This sub-process is where statisticians validate the quality of the outputs produced, in accordance with a general quality framework and with expectations. This sub-process also includes activities involved with the gathering of intelligence, with the cumulative effect of building up a body of knowledge about a specific statistical domain. This knowledge is then applied to the current collection, in the current environment, to identify any divergence from expectations and to allow informed analyses. Validation activities can include:
+- checking that the population coverage and response rates are as required;
+- comparing the statistics with previous cycles (if applicable);
+- checking that the associated metadata and paradata (process metadata) are present and in line with expectations
+- confronting the statistics against other relevant data (both internal and external);
+- investigating inconsistencies in the statistics;
+- performing macro editing;
+- validating the statistics against expectations and domain intelligence.

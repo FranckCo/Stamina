@@ -1,0 +1,8 @@
+Finalise outputs
+This sub-process ensures the statistics and associated information are fit for purpose and reach the required quality level, and are thus ready for use. It includes:
+- completing consistency checks;
+- determining the level of release, and applying caveats;
+- collating supporting information, including interpretation, commentary, technical notes, briefings, measures of uncertainty and any other necessary metadata;
+- producing the supporting internal documents;
+- pre-release discussion with appropriate internal subject matter experts;
+- approving the statistical content for release.

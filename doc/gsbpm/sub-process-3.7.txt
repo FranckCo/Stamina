@@ -1,0 +1,5 @@
+Finalise production systems
+This sub-process includes the activities to put the assembled and configured processes and services, including modified and newly-created services into production ready for use by business areas. The activities include:
+- producing documentation about the process components, including technical documentation and user manuals
+- training the business users on how to operate the process
+- moving the process components into the production environment, and ensuring they work as expected in that environment (this activity may also be part of sub-process 3.5 (Test production system)).

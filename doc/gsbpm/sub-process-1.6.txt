@@ -1,0 +1,5 @@
+Prepare business case
+This sub-process documents the findings of the other sub-processes in this phase in the form of a business case to get approval to implement the new or modified statistical business process. Such a business case would need to conform to the requirements of the approval body, but would typically include elements such as:
+- A description of the "As-Is" business process (if it already exists), with information on how the current statistics are produced, highlighting any inefficiencies and issues to be addressed;
+- The proposed "To-Be" solution, detailing how the statistical business process will be developed to produce the new or revised statistics;
+- An assessment of costs and benefits, as well as any external constraints.

@@ -1,0 +1,2 @@
+Calculate weights
+This sub process creates weights for unit data records according to the methodology created in sub-process 2.5 (Design processing and analysis). In the case of sample surveys, weights can be used to "gross-up" results to make them representative of the target population, or to adjust for non-response in total enumerations. In other situations, variables may need weighting for normalisation purposes.
