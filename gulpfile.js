@@ -1,38 +1,66 @@
-var gulp = require('gulp');
+const gulp = require('gulp');
 var del = require('del');
+const babel = require('gulp-babel');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var babelify = require('babelify');
+var uglify = require('gulp-uglify');
+var watchify = require('watchify');
+var streamify = require('gulp-streamify');
 var rename = require('gulp-rename');
 
+var path = {
+  HTML: 'src/index.html',
+  ALL: ['src/js/*.js', 'src/js/**/*.js', 'src/index.html'],
+  JS: ['src/js/*.js', 'src/js/**/*.js'],
+  OUT: 'build.js',
+  MINIFIED_OUT: 'build.min.js',
+  DEST: 'dist',
+  DEST_SRC: 'dist/src',
+  DEST_BUILD: 'dist/build',
+  ENTRY_POINT: './src/js/components/stamina-app.js'
+};
 
-// DEL
-gulp.task('del:dist', function (callback) {
-  del([
-    './dist/index.html',
-    './dist/css/**',
-    './dist/js/**',
-    './dist/img/**',
-    './dist/fonts/**'
-    ],
-     callback);
+// Transforms JSX/ES2015 into ES5
+gulp.task('transform', function() {
+  return gulp.src(path.JS)
+      .pipe(babel({
+        presets: ['es2015', 'react']
+      }))
+      .pipe(gulp.dest(path.DEST_SRC));
 });
 
-// BUILD
-gulp.task('build:copy:index', ['del:dist'], function() {
-	gulp.src('./src/index.html')
-		.pipe(gulp.dest('./dist'));
+gulp.task('build', function(){
+  browserify({
+    entries: [path.ENTRY_POINT],
+    transform: [['babelify', {'presets': ['es2015', 'react']}]],
+  })
+    .bundle()
+    .pipe(source(path.MINIFIED_OUT))
+    .pipe(streamify(uglify()))
+    .pipe(gulp.dest(path.DEST_BUILD));
 });
 
-// FIXME excludes less and scss directories
-gulp.task('build:copy:css', ['del:dist'], function() {
-	gulp.src('./src/css/**/*.*')
-		.pipe(gulp.dest('./dist/css'));
-});
+gulp.task('watch', function() {
 
-gulp.task('build:copy:img', ['del:dist'], function() {
-	gulp.src('./src/img/*.*')
-		.pipe(gulp.dest('./dist/img'));
+  gulp.watch(path.HTML, ['copy']);
+
+  var watcher  = watchify(browserify({
+    entries: [path.ENTRY_POINT],
+    transform: [['babelify', {'presets': ['es2015', 'react']}]],
+    debug: true,
+    cache: {}, packageCache: {}, fullPaths: true
+  }));
+
+  return watcher.on('update', function () {
+    watcher.bundle()
+      .pipe(source(path.OUT))
+      .pipe(gulp.dest(path.DEST_SRC))
+      console.log('Updated');
+  })
+    .bundle()
+    .pipe(source(path.OUT))
+    .pipe(gulp.dest(path.DEST_SRC));
 });
 
 gulp.task('build:copy:fonts', ['del:dist'], function() {
@@ -51,8 +79,8 @@ gulp.task('build:browserify', ['del:dist'], function() {
 
 // SIMPLE
 gulp.task('copy:index', function() {
-	gulp.src('./src/index.html')
-		.pipe(gulp.dest('./dist'));
+  gulp.src(path.HTML)
+    .pipe(gulp.dest(path.DEST));
 });
 
 gulp.task('browserify', function() {
@@ -62,20 +90,4 @@ gulp.task('browserify', function() {
 	return bundler.bundle()
 		.pipe(source('stamina.js'))
 		.pipe(gulp.dest('./dist/js'));
-});
-
-gulp.task('build',
-  ['del:dist',
-   'build:browserify',
-   'build:copy:index',
-   'build:copy:css',
-   'build:copy:img',
-   'build:copy:fonts']);
-
-gulp.task('default',
-  ['browserify',
-  'copy:index']);
-
-gulp.task('watch', function() {
-	gulp.watch('src/**/*.*', ['default']);
 });
