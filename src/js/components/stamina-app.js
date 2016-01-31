@@ -1,5 +1,6 @@
-import React from 'react';
-import Router, { Route, RouteHandler, DefaultRoute, Link } from 'react-router';
+import React from 'react'
+import { render } from 'react-dom'
+import { Router, Route, Link } from 'react-router'
 import StaminaActions from '../actions/stamina-actions';
 import Logger from '../utils/logger';
 
@@ -13,65 +14,53 @@ StaminaActions.setLanguage(language);
 
 var logger = new Logger('StaminaApp', 'Components');
 
-class GSBPMView extends React.Component {
+const StaminaApp = React.createClass({
+  render() {
+    logger.debug('Rendering StaminaApp');
+    return (
+      <div>
+        <h1>Stamina</h1>
+        <h2>{locale.getEntry('welcome')}</h2>
+        <ul>
+          <li><Link to="/gsbpm">GSBPM</Link></li>
+          <li><Link to="/gsim">GSIM</Link></li>
+        </ul>
+        {this.props.children}
+      </div>
+    )
+  }
+})
+
+const GSBPMView = React.createClass({
   render() {
     logger.debug('Rendering GSBPMView');
     return (
       <div>
         <h1>This is the GSBPM home page</h1>
+        {this.props.children}
       </div>
     )
   }
-}
+})
 
-class GSIMView extends React.Component {
+const GSIMView = React.createClass({
   render() {
     logger.debug('Rendering GSIMView');
     return (
       <div>
         <h1>This is the GSIM home page</h1>
+        {this.props.children}
       </div>
     )
   }
-}
+})
 
-class StaminaHome extends React.Component {
-  render() {
-    logger.debug('Rendering StaminaHome', locale);
-    return (
-      <div>
-        <h1>{locale.getEntry('welcome')}</h1>
-        <ul>
-          <li><Link to='gsbpm'>GSBPM</Link></li>
-          <li><Link to='gsim'>GSIM</Link></li>
-        </ul>
-      </div>
-    )
-  }
-}
+render((
+  <Router>
+    <Route path="/" component={StaminaApp}>
+      <Route path="gsbpm" component={GSBPMView}/>
+      <Route path="gsim" component={GSIMView}/>
+    </Route>
+  </Router>
+), document.getElementById('base'))
 
-class StaminaApp extends React.Component {
-  render() {
-    logger.debug('Rendering StaminaApp');
-    return (<RouteHandler/>)
-  }
-}
-
-// Handler variables should be defined before
-// transitionTo uses the route names, so this attribute must be present
-var routes = (
-  <Route handler={StaminaApp}>
-    <DefaultRoute handler={StaminaHome}/>
-    <Route name='gsbpm' path='gsbpm' handler={GSBPMView}/>
-    <Route name='gsim' path='gsim' handler={GSIMView}/>
-  </Route>
-);
-
-var router = Router.create({
-  routes: routes,
-  location: Router.HashLocation
-});
-
-router.run( (Handler) => {
-  React.render(<Handler/>, document.getElementById('base'));
-});
