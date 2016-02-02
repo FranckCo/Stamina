@@ -3,6 +3,7 @@ import { render } from 'react-dom'
 import { Router, Route, Link } from 'react-router'
 import StaminaActions from '../actions/stamina-actions';
 import Logger from '../utils/logger';
+import GlobalMenu from './global-menu';
 
 import locale from '../stores/dictionary-store';
 
@@ -19,7 +20,7 @@ const StaminaApp = React.createClass({
     logger.debug('Rendering StaminaApp');
     return (
       <div>
-        <h1>Stamina</h1>
+        <GlobalMenu/>
         <h2>{locale.getEntry('welcome')}</h2>
         <ul>
           <li><Link to="/gsbpm">GSBPM</Link></li>
