@@ -9,7 +9,11 @@ var _language = 'en';
 var _localDictionary;
 
 var _dictionary = {
-  welcome: {'en': 'Welcome to Stamina', 'fr': 'Bienvenue dans Stamina'}
+  welcome: {'en': 'Welcome to Stamina', 'fr': 'Bienvenue dans Stamina'},
+  models: {'en': 'Models', 'fr': 'Modèles'},
+  services: {'en': 'Services', 'fr': 'Services'},
+  classifications: {'en': 'Classifications', 'fr': 'Nomenclatures'},
+  glossaries: {'en': 'Glossaries', 'fr': 'Glossaires'}
 };
 
 //initialization

@@ -8,12 +8,13 @@
   },
   "main": "js/stamina.js",
   "dependencies": {
+    "bootstrap": "^3.3.6",
     "events": "^1.1.0",
     "flux": "^2.1.1",
     "jquery": "^2.2.0",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
-    "react-router": "^1.0.2",
+    "react-router": "2.0.0-rc6",
     "superagent": "^1.7.2"
   },
   "devDependencies": {

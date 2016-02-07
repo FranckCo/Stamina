@@ -1,10 +1,10 @@
-import React from 'react'
-import { render } from 'react-dom'
-import { Router, Route, Link } from 'react-router'
+import React from 'react';
+import { render } from 'react-dom';
+import { Router, Route, Link, browserHistory } from 'react-router';
+
 import StaminaActions from '../actions/stamina-actions';
 import Logger from '../utils/logger';
 import GlobalMenu from './global-menu';
-
 import locale from '../stores/dictionary-store';
 
 // Set language has to be called before requiring components
@@ -57,11 +57,10 @@ const GSIMView = React.createClass({
 })
 
 render((
-  <Router>
+  <Router history={browserHistory}>
     <Route path="/" component={StaminaApp}>
       <Route path="gsbpm" component={GSBPMView}/>
       <Route path="gsim" component={GSIMView}/>
     </Route>
   </Router>
 ), document.getElementById('base'))
-
