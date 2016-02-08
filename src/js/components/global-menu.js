@@ -16,7 +16,13 @@ class GlobalMenu extends React.Component {
       <div role="navigation">
         <ul className="nav nav-pills">
           <li role="presentation" className="active"><Link to="/">Stamina</Link></li>
-          <li role="presentation"><Link to="/models">{locale.getEntry('models')}</Link></li>
+          <li role="presentation" className="dropdown">
+            <Link id="modelLabel" to="/models" className="dropdown-toggle" data-toggle="dropdown" data-target="#" role="button" aria-haspopup="true" aria-expanded="false">{locale.getEntry('models')} <span className="caret"></span></Link>
+            <ul className="dropdown-menu" aria-labelledby="modelLabel">
+              <li role="presentation"><Link to="/model/gsbpm">GSBPM</Link></li>
+              <li role="presentation"><Link to="/model/gsim">GSIM</Link></li>
+            </ul>
+          </li>
           <li role="presentation"><Link to="/services">{locale.getEntry('services')}</Link></li>
           <li role="presentation"><Link to="/classifications">{locale.getEntry('classifications')}</Link></li>
           <li role="presentation"><Link to="/glossaries">{locale.getEntry('glossaries')}</Link></li>
