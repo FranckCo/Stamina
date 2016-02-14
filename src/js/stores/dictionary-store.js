@@ -1,4 +1,4 @@
-import StaminaDispatcher from '../dispatchers/stamina-dispatcher';
+﻿import StaminaDispatcher from '../dispatchers/stamina-dispatcher';
 import { ActionTypes, StoreEvents } from '../constants/stamina-constants';
 import EventEmitter from 'events';
 import Logger from '../utils/logger';
@@ -10,6 +10,7 @@ var _localDictionary;
 
 var _dictionary = {
   welcome: {'en': 'Welcome to Stamina', 'fr': 'Bienvenue dans Stamina'},
+  welcome_gsbpm: {'en': 'Generic Statistical Business Process Model', 'fr': 'Modèle Statistique Générique de Processus Métier'},
   models: {'en': 'Models', 'fr': 'Modèles'},
   services: {'en': 'Services', 'fr': 'Services'},
   classifications: {'en': 'Classifications', 'fr': 'Nomenclatures'},

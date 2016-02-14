@@ -5,6 +5,7 @@ import { Router, Route, Link, browserHistory } from 'react-router';
 import StaminaActions from '../actions/stamina-actions';
 import Logger from '../utils/logger';
 import GlobalMenu from './global-menu';
+import GSBPMView from './gsbpm-view';
 import locale from '../stores/dictionary-store';
 
 // Set language has to be called before requiring components
@@ -15,7 +16,7 @@ StaminaActions.setLanguage(language);
 
 var logger = new Logger('StaminaApp', 'Components');
 
-const StaminaApp = React.createClass({
+class StaminaApp extends React.Component {
   render() {
     logger.debug('Rendering StaminaApp');
     return (
@@ -30,21 +31,9 @@ const StaminaApp = React.createClass({
       </div>
     )
   }
-})
+}
 
-const GSBPMView = React.createClass({
-  render() {
-    logger.debug('Rendering GSBPMView');
-    return (
-      <div>
-        <h1>This is the GSBPM home page</h1>
-        {this.props.children}
-      </div>
-    )
-  }
-})
-
-const GSIMView = React.createClass({
+class GSIMView extends React.Component {
   render() {
     logger.debug('Rendering GSIMView');
     return (
@@ -54,13 +43,13 @@ const GSIMView = React.createClass({
       </div>
     )
   }
-})
+}
 
-render((
-  <Router history={browserHistory}>
-    <Route path="/" component={StaminaApp}>
-      <Route path="gsbpm" component={GSBPMView}/>
-      <Route path="gsim" component={GSIMView}/>
-    </Route>
-  </Router>
-), document.getElementById('base'))
+var routes = (
+  <Route path='/' component={StaminaApp}>
+    <Route name='gsbpm' path='gsbpm' component={GSBPMView}/>
+    <Route name='gsim' path='gsim' component={GSIMView}/>
+  </Route>
+);
+
+render(<Router routes={routes} history={browserHistory}/>, document.getElementById('base'))
