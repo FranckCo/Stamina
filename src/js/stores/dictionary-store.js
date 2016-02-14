@@ -11,6 +11,7 @@ var _localDictionary;
 var _dictionary = {
   welcome: {'en': 'Welcome to Stamina', 'fr': 'Bienvenue dans Stamina'},
   welcome_gsbpm: {'en': 'Generic Statistical Business Process Model', 'fr': 'Modèle Statistique Générique de Processus Métier'},
+  welcome_gsim: {'en': 'Generic Statistical Information Model', 'fr': "Modèle Statistique Générique d'Information"},
   models: {'en': 'Models', 'fr': 'Modèles'},
   services: {'en': 'Services', 'fr': 'Services'},
   classifications: {'en': 'Classifications', 'fr': 'Nomenclatures'},

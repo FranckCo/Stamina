@@ -3,17 +3,17 @@ import React from 'react';
 import Logger from '../utils/logger';
 import locale from '../stores/dictionary-store';
 
-var logger = new Logger('GSBPMView', 'Components');
+var logger = new Logger('GSIMView', 'Components');
 
-export default class GSBPMView extends React.Component {
+export default class GSIMView extends React.Component {
   constructor(props) {
     super(props);
   }
   render() {
-  logger.debug('Rendering GSBPMView');
+  logger.debug('Rendering GSIMView');
     return (
       <div>
-        <h1>{locale.getEntry('welcome_gsbpm')}</h1>
+        <h1>{locale.getEntry('welcome_gsim')}</h1>
         {this.props.children}
       </div>
     )
