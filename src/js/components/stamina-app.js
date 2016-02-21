@@ -7,6 +7,8 @@ import Logger from '../utils/logger';
 import GlobalMenu from './global-menu';
 import GSBPMView from './gsbpm-view';
 import GSIMView from './gsim-view';
+import ModelView from './model-view';
+import ModelsView from './models-view';
 import locale from '../stores/dictionary-store';
 
 // Set language has to be called before requiring components
@@ -25,8 +27,7 @@ class StaminaApp extends React.Component {
         <GlobalMenu/>
         <h2>{locale.getEntry('welcome')}</h2>
         <ul>
-          <li><Link to="/gsbpm">GSBPM</Link></li>
-          <li><Link to="/gsim">GSIM</Link></li>
+          <li><Link to="/models">{locale.getEntry('models')}</Link></li>
         </ul>
         {this.props.children}
       </div>
@@ -36,8 +37,11 @@ class StaminaApp extends React.Component {
 
 var routes = (
   <Route path='/' component={StaminaApp}>
-    <Route name='gsbpm' path='gsbpm' component={GSBPMView}/>
-    <Route name='gsim' path='gsim' component={GSIMView}/>
+    <Route path='model' component={ModelView}>
+      <Route path='gsbpm' component={GSBPMView}/>
+      <Route path='gsim' component={GSIMView}/>
+    </Route>
+    <Route path='models' component={ModelsView}/>
   </Route>
 );
 
