@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 
 public class MCVReader {
@@ -38,7 +38,7 @@ public class MCVReader {
 
 	public static void main(String[] args) {
 		try {
-			//extractFormPDF();
+			//extractFromPDF();
 			readEntryList();
 			readMCVContent();
 			Model model = ModelFactory.createDefaultModel();
@@ -50,12 +50,9 @@ public class MCVReader {
 	/**
 	 * Reads the PDF file and extracts the content and table of contents to text files.
 	 */
-	public static void extractFormPDF() throws IOException {
+	public static void extractFromPDF() throws IOException {
 
-		PDFParser parser = new PDFParser(new FileInputStream(MCV_PDF));
-		parser.parse();
-		
-		PDDocument document = parser.getPDDocument();
+		PDDocument document = PDDocument.load(new File(MCV_PDF));
 		PDFTextStripper stripper = new PDFTextStripper();
 
 		// Extract the main contents
