@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class GSBPMShredder {
 
@@ -13,7 +14,7 @@ public class GSBPMShredder {
 	static String GSBPM_TXT = "src/main/resources/data/GSBPM 5.0 - phases.txt";
 	static String SHRED_PATH = "src/main/resources/data/shreds/";
 
-	private static Logger logger = Logger.getLogger(GSBPMShredder.class);
+	private static Logger logger = LogManager.getLogger(GSBPMShredder.class);
 
 	public static void main(String[] args) throws IOException {
 

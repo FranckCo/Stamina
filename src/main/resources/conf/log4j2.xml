@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration>
+    <Properties>
+        <Property name="logs">logs</Property>
+        <Property name="rollover.max.size">10MB</Property>
+        <Property name="rollover.max">14</Property>
+        <Property name="rollover.file.pattern">%d{yyyyMMddHHmmss}</Property>
+        <Property name="record.pattern">%d [%t] %-5p (%F [%M]:%L) - %m %n</Property>
+    </Properties>
+
+	<Appenders>
+		<Console name="STDOUT">
+			<PatternLayout pattern="${record.pattern}"/>
+		</Console>
+		<RollingRandomAccessFile name="stamina" filePattern="${logs}/stamina.${rollover.file.pattern}.log.gz" fileName="${logs}/stamina.log">
+			<Policies>
+				<SizeBasedTriggeringPolicy size="${rollover.max.size}"/>
+			</Policies>
+			<DefaultRolloverStrategy max="${rollover.max}"/>
+			<PatternLayout pattern="${record.pattern}"/>
+		</RollingRandomAccessFile>
+	</Appenders>
+	<Loggers>
+		<Logger name="fr.insee.stamina" additivity="false" level="debug">
+			<AppenderRef ref="stamina"/>
+		</Logger>
+		<Root level="info">
+			<AppenderRef ref="stamina"/>
+		</Root>
+	</Loggers>
+</Configuration>

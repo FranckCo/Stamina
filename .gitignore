@@ -4,5 +4,6 @@ target/
 .classpath
 .project
 dist/
+logs/
 node_modules/
 npm-debug.log

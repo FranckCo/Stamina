@@ -8,11 +8,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class GSBPMReader {
 
-	private static Logger logger = Logger.getLogger(GSBPMReader.class);
+	private static Logger logger = LogManager.getLogger(GSBPMReader.class);
 
 	public GSBPMReader() {}
 
