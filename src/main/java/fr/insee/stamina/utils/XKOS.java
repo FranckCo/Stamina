@@ -31,10 +31,10 @@ public class XKOS {
 	/* ##########################################################
 	 * Defines XKOS Classes
 	   ########################################################## */
-	public static final Resource ClassificationLevel = model.createResource( uri + "ClassificationLevel");
-	public static final Resource ConceptAssociation = model.createResource( uri + "ConceptAssociation");
+	public static final Resource ClassificationLevel = model.createResource(uri + "ClassificationLevel");
+	public static final Resource ConceptAssociation = model.createResource(uri + "ConceptAssociation");
 	public static final Resource Correspondence = model.createResource(uri + "Correspondence");
-	public static final Resource ExplanatoryNote = model.createResource( uri + "ExplanatoryNote"); // Not yet in the official draft
+	public static final Resource ExplanatoryNote = model.createResource(uri + "ExplanatoryNote");
 	/* ##########################################################
 	 * Defines XKOS Properties
 	   ########################################################## */
@@ -43,7 +43,7 @@ public class XKOS {
 	public static final Property coreContentNote = model.createProperty(uri + "coreContentNote");
 	public static final Property additionalContentNote = model.createProperty(uri + "additionalContentNote");
 	public static final Property exclusionNote = model.createProperty(uri + "exclusionNote");
-	public static final Property caseLaw = model.createProperty(uri + "caseLaw"); // Not yet in the official draft
+	public static final Property caseLaw = model.createProperty(uri + "caseLaw");
 	// XKOS data properties
 	public static final Property numberOfLevels = model.createProperty(uri + "numberOfLevels");
 	public static final Property depth = model.createProperty(uri + "depth");
