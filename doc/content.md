@@ -25,7 +25,7 @@ We deduce form the previous sections the different types of resources that we ha
 
 ### Principles
 
-The data sources for the project come from different producers: Eurostat, the UNECE, the UNSC, national offices, the SDMX sponsors group, etc. Ideally, each resource should be identified by a URI based on a domain controlled by its publisher: for example the GSIM should use URIs in the http://www.unece.org domain, the CPC should use URIs in the http://www.unsd.org and the NACE should use **TBD**. However, it is clearly impossible within the timeframe of the project to design a naming policy for each of these actors, specific to their data, and have it validated by them.
+The data sources for the project come from different producers: Eurostat, the UNECE, the UNSC, national offices, the SDMX sponsors group, etc. Ideally, each resource should be identified by a URI based on a domain controlled by its publisher: for example the GSIM should use URIs in the `http://www.unece.org` domain, the CPC should use URIs in the `http://www.unsd.org` and the NACE should use `http://ec.europa.eu/eurostat`. However, it is clearly impossible within the timeframe of the project to design a naming policy for each of these actors, specific to their data, and have it validated by them.
 
 This is why it is suggested to define a naming policy based on a "neutral" domain name, for example `stamina-project.org`. We suggest to divide the root domain name according to the main type of data: `/models`, `/concepts` (for glossaries and classifications) and `/metadata`.
 
