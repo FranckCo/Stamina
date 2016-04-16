@@ -35,9 +35,9 @@ Similarly, the `/metadata` path root will be further refined according to the vo
 
 Under `/models`, it is useful to distinguish between the identification of the individuals (a given GSBP phase or GSIM object) and a the identification of the vocabulary terms defined to represent the models themselves (the OWL class corresponding to a GSBPM phase or to a GSIM object):
 * for individuals, we subdivide further according to the name of model: `/gsim`, `/gsbmp`, `/gamso`, etc.
-* OWL vocabularies usually use hash-namespaces, so our OWL objects will be in the `http://www.stamina-project.org/models/def#` namespace.
+* OWL vocabularies usually use hash-namespaces, so our OWL objects will be in the `http://stamina-project.org/models/def#` namespace.
 
-Inside the given context, the default pattern for identifying a given resource will be: `/{resource-type}/{resource-identifier}`, except for OWL artifacts whose URI will be `http://www.stamina-project.org/models/def#{name-of-artifacts}`.
+Inside the given context, the default pattern for identifying a given resource will be: `/{resource-type}/{resource-identifier}`, except for OWL artifacts whose URI will be `http://stamina-project.org/models/def#{name-of-artifacts}`.
 
 ### Examples
 
@@ -45,7 +45,7 @@ For identifying section B of the ISIC Rev.3.1 we have the following URI componen
 
 | Element | Value |
 |----|----|
-| Authority   | `http://www.stamina-project.org` |
+| Authority   | `http://stamina-project.org` |
 | Path element for classifications   | `/concepts` |
 | Path for ISIC Rev.3.1   | `/isicr31` |
 | Resource type   | `/section` |
@@ -57,7 +57,7 @@ For sub-process 3.1 of the GSBPM, we have:
 
 | Element | Value |
 |----|----|
-| Authority   | `http://www.stamina-project.org` |
+| Authority   | `http://stamina-project.org` |
 | Path element for models   | `/models` |
 | Path for GSBPM   | `/gsbpm` |
 | Resource type   | `/sub-process` |
