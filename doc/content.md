@@ -37,7 +37,11 @@ Under `/models`, it is useful to distinguish between the identification of the i
 * for individuals, we subdivide further according to the name of model: `/gsim`, `/gsbmp`, `/gamso`, etc.
 * OWL vocabularies usually use hash-namespaces, so our OWL objects will be in the `http://stamina-project.org/models/def#` namespace.
 
-Inside the given context, the default pattern for identifying a given resource will be: `/{resource-type}/{resource-identifier}`, except for OWL artifacts whose URI will be `http://stamina-project.org/models/def#{name-of-artifacts}`.
+Inside the given context, the default pattern for identifying a given resource will be: `/{resource-type}/{resource-identifier}`, except for OWL artifacts whose URI will be `http://stamina-project.org/models/def#{name-of-artifacts}`. The `{resource-identifier}` can be any local identifier for the resource, for example the item code for a classification item, a version number or a publication date for a concept description, etc. When there is only one resource of a given type within the context, the `/{resource-identifier}` path element can be omitted.
+
+When a resource strongly depends on another, this can be represented in the path hierarchy, for example:
+* An explanatory note for a classification item exists only in the context of this item, so (if there is a necessity to represent it as a resource and not simply as a RDF literal) it will have an URI like `http://stamina-project/concepts/nacer2/class/51.22/inclusion-note`.
+* Likewise, an ADMS asset distribution will be identified by extending the asset URI. On the contrary, the asset URI does not extend the catalog URI since an asset may be included in several catalogs.
 
 ### Examples
 
@@ -65,4 +69,10 @@ For sub-process 3.1 of the GSBPM, we have:
 
 The URI is thus `http://stamina-project/models/gsbpm/sub-process/3.1`.
 
-Additional examples to be provided.
+Additional examples:
+
+| Resource | URI |
+|----|----|
+| ADMS asset for CPC Ver.2.1 | `http://stamina-project.org/meta/adms/asset/cpcv21` |
+| VoID dataset of the GSBPM individuals | `http://stamina-project.org/meta/void/dataset/gsbpm` |
+| VoID dataset of the GSBPM ontology | `http://stamina-project.org/meta/void/dataset/gsbpm-def` |
