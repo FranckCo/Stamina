@@ -30,35 +30,48 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 
+import fr.insee.stamina.cpc.CPCModelMaker;
 import fr.insee.stamina.utils.XKOS;
 
 /**
- * The <code>ISICModelMaker</code> creates and saves Jena models corresponding to the CPC and ISIC classifications.
+ * The <code>ISICModelMaker</code> creates and saves Jena models corresponding to the ISIC classification.
  * 
  * Only ISIC revisions 3.1 and 4 are considered here, but the program can easily be extended to other versions.
  * The data is extracted from MS Access files available on the UNSD web site (http://unstats.un.org/unsd/cr/registry/regdnld.asp).
  * 
  * @author Franck Cotton
- * @version 0.8, 14 Apr 2016
+ * @version 0.9, 20 Apr 2016
  */
 public class ISICModelMaker {
 
+	/** Files containing the Access databases */
 	public static Map<String, String> ISIC_ACCESS_FILE = new HashMap<String, String>();
+	/** Name of the Access tables containing the data */
 	public static Map<String, String> ISIC_ACCESS_TABLE = new HashMap<String, String>();
+	/** Name of the Access tables containing the names of the levels */
 	public static Map<String, String> ISIC_STRUCTURE_ACCESS_TABLE = new HashMap<String, String>();
-	/** Files where the ISIC models is saved as Turtle */
+	/** Files where the ISIC models will be saved as Turtle */
 	public static Map<String, String> ISIC_TURTLE_FILE = new HashMap<String, String>();
+	/** Base URIs for the resources */
 	public static Map<String, String> ISIC_BASE_URI = new HashMap<String, String>();
+	/** Labels for the concept schemes representing the classification versions */
 	public static Map<String, String> ISIC_SCHEME_LABEL = new HashMap<String, String>();
+	/** Notations for the concept schemes representing the classification versions */
 	public static Map<String, String> ISIC_SCHEME_NOTATION = new HashMap<String, String>();
-
+	/** CSV files containing the additional French labels */
+	public static Map<String, String> ISIC_FRENCH_LABELS_FILE = new HashMap<String, String>();
+	/** CSV files containing the additional Spanish labels */
+	public static Map<String, String> ISIC_SPANISH_LABELS_FILE = new HashMap<String, String>();
+	/** CSV format of the files containing additional labels */
+	public static Map<String, CSVFormat> ISIC_LABELS_FILE_FORMAT = new HashMap<String, CSVFormat>();
+	// Initialization of the static properties
 	static {
 		ISIC_ACCESS_FILE.put("3.1", "D:\\Temp\\unsd\\ISIC31_english.mdb");
 		ISIC_ACCESS_FILE.put("4", "D:\\Temp\\unsd\\ISIC4_english.mdb");
 		ISIC_ACCESS_TABLE.put("3.1", "tblTitles_English_ISICRev31");
 		ISIC_ACCESS_TABLE.put("4", "tblTitles_English_ISICRev4");
-		ISIC_STRUCTURE_ACCESS_TABLE.put("3.1", "tblStructure_ISICRev4");
-		ISIC_STRUCTURE_ACCESS_TABLE.put("4", "tblStructure_ISICRev31");
+		ISIC_STRUCTURE_ACCESS_TABLE.put("3.1", "tblStructure_ISICRev31");
+		ISIC_STRUCTURE_ACCESS_TABLE.put("4", "tblStructure_ISICRev4");
 		ISIC_TURTLE_FILE.put("3.1", "src/main/resources/data/isic31.ttl");
 		ISIC_TURTLE_FILE.put("4", "src/main/resources/data/isic4.ttl");
 		ISIC_BASE_URI.put("3.1", "http://stamina-project.org/codes/isicr31/");
@@ -67,9 +80,15 @@ public class ISICModelMaker {
 		ISIC_SCHEME_LABEL.put("4", "International Standard Industrial Classification - Rev.4");
 		ISIC_SCHEME_NOTATION.put("3.1", "ISIC Rev.3.1");
 		ISIC_SCHEME_NOTATION.put("4", "ISIC Rev.4");
+		ISIC_FRENCH_LABELS_FILE.put("3.1", null);
+		ISIC_FRENCH_LABELS_FILE.put("4", "D:\\Temp\\unsd\\ISIC_Rev_4_french_structure.txt");
+		ISIC_SPANISH_LABELS_FILE.put("3.1", "D:\\Temp\\unsd\\ISIC_Rev_3_1_spanish_structure.txt");
+		ISIC_SPANISH_LABELS_FILE.put("4", "D:\\Temp\\unsd\\ISIC_Rev_4_spanish_structure.txt");
+		ISIC_LABELS_FILE_FORMAT.put("3.1", CSVFormat.TDF.withQuote(null).withIgnoreEmptyLines());
+		ISIC_LABELS_FILE_FORMAT.put("4", CSVFormat.DEFAULT.withHeader());
 	}
-	public static String ISIC4_FRENCH_LABELS_FILE = "D:\\Temp\\unsd\\ISIC_Rev_4_french_structure.txt";
-	public static String ISIC4_SPANISH_LABELS_FILE = "D:\\Temp\\unsd\\ISIC_Rev_4_spanish_structure.txt";
+
+	/** CSV files containing the correspondences */
 	public static String ISIC31_TO_ISIC4_FILE = "D:\\Temp\\unsd\\ISIC31_ISIC4.txt";
 	public static String ISIC4_TO_CPC21_FILE = "D:\\Temp\\unsd\\isic4-cpc21.txt";
 
@@ -79,6 +98,7 @@ public class ISICModelMaker {
 
 	/** File where the ISIC31 to ISIC4 correspondence information is saved as Turtle */
 	private static String ISIC31_TO_ISIC4_TTL = "src/main/resources/data/isic31-isic4.ttl";
+	private static String ISIC4_TO_CPC21_TTL = "src/main/resources/data/isic4-cpc21.ttl";
 
 	/** Log4J2 logger */
 	private static final Logger logger = LogManager.getLogger(ISICModelMaker.class);
@@ -109,6 +129,7 @@ public class ISICModelMaker {
 		modelMaker.createISICModel("4", false);
 		modelMaker.createISICModel("3.1", false);
 		modelMaker.createCorrespondenceModels();
+		logger.debug("Program terminated");
 	}
 
 	/**
@@ -119,7 +140,7 @@ public class ISICModelMaker {
 	private void createISICModel(String version, boolean withNotes) throws Exception {
 
 		logger.debug("Construction of the Jena model for ISIC version " + version);
-		logger.debug("Preparing to read the divisions to sections mapping from the database in " + ISIC_ACCESS_FILE.get(version));
+		logger.debug("Preparing to read the divisions to sections mapping from table " + ISIC_STRUCTURE_ACCESS_TABLE.get(version) + " in database " + ISIC_ACCESS_FILE.get(version));
 		try {
 			Table table = DatabaseBuilder.open(new File(ISIC_ACCESS_FILE.get(version))).getTable(ISIC_STRUCTURE_ACCESS_TABLE.get(version));
 			Cursor cursor = CursorBuilder.createCursor(table);
@@ -164,13 +185,15 @@ public class ISICModelMaker {
 			Resource level = levels.get(itemCode.length() - 1);
 			level.addProperty(SKOS.member, itemResource);
 		}
-		// Add labels in other languages (only for Rev.4)
-		if ("4".equals(version)) {
-			this.addLabels(ISIC4_FRENCH_LABELS_FILE, "4", "fr");
-			this.addLabels(ISIC4_SPANISH_LABELS_FILE, "4", "es");			
-		}
+		// TODO No table/cursor to close?
+		logger.debug("Finished reading table " + ISIC_ACCESS_TABLE.get(version));
+		// Addition of French and Spanish labels
+		this.addLabels(ISIC_FRENCH_LABELS_FILE.get(version), version, "fr");
+		this.addLabels(ISIC_SPANISH_LABELS_FILE.get(version), version, "es");
+
 		// Write the Turtle file and clear the model
 		isicModel.write(new FileOutputStream(ISIC_TURTLE_FILE.get(version)), "TTL");
+		logger.debug("The Jena model for ISIC Rev." + version + " has been written to " + ISIC_TURTLE_FILE.get(version));
 		isicModel.close();
 	}
 
@@ -188,9 +211,9 @@ public class ISICModelMaker {
 		// Create the classification, classification levels and their properties
 		String baseURI = ISIC_BASE_URI.get(version);
 		String schemeLabel = ISIC_SCHEME_LABEL.get(version);
-		scheme = isicModel.createResource(baseURI + "isic", SKOS.ConceptScheme);
+		scheme = isicModel.createResource(getSchemeURI(version), SKOS.ConceptScheme);
 		scheme.addProperty(SKOS.prefLabel, isicModel.createLiteral(schemeLabel, "en"));
-		scheme.addProperty(SKOS.notation, "ISIC Rev." + version);
+		scheme.addProperty(SKOS.notation, ISIC_SCHEME_NOTATION.get(version));
 		int numberOfLevels = levelNames.length / 2;
 		scheme.addProperty(XKOS.numberOfLevels, isicModel.createTypedLiteral(numberOfLevels));
 
@@ -214,6 +237,10 @@ public class ISICModelMaker {
 	 * @param language The tag representing the language of the labels ("fr", "es", etc.). 
 	 */
 	private void addLabels(String filePath, String version, String language) {
+
+		if (filePath == null) return;
+
+		logger.debug("Preparing to create additional labels, language is " + language + ", source file is " + filePath);
 
 		String baseURI = ISIC_BASE_URI.get(version);
 		try {
@@ -268,7 +295,7 @@ public class ISICModelMaker {
 		try {
 			isicModel.write(new FileOutputStream(ISIC31_TO_ISIC4_TTL), "TTL");
 		} catch (FileNotFoundException e) {
-			logger.error("Error saving the 3.1-4 correspondences to " + ISIC31_TO_ISIC4_TTL, e);
+			logger.error("Error saving the ISIC31-ISIC4 correspondences to " + ISIC31_TO_ISIC4_TTL, e);
 		}
 		isicModel.close();
 
@@ -277,7 +304,6 @@ public class ISICModelMaker {
 		isicModel.setNsPrefix("rdfs", RDFS.getURI());
 		isicModel.setNsPrefix("skos", SKOS.getURI());
 		isicModel.setNsPrefix("xkos", XKOS.getURI());
-		//ISIC4_TO_CPC21_FILE
 
 		// Creation of the correspondence table resource
 		table = isicModel.createResource(ISIC4_TO_CPC21_BASE_URI + "correspondence", XKOS.Correspondence);
@@ -291,7 +317,7 @@ public class ISICModelMaker {
 				String cpc21Code = record.get("CPC21code");
 				Resource association = isicModel.createResource(ISIC4_TO_CPC21_BASE_URI + isic4Code + "-" + cpc21Code, XKOS.ConceptAssociation);
 				association.addProperty(XKOS.sourceConcept, getItemURI(isic4Code, ISIC4_TO_CPC21_BASE_URI));
-				//association.addProperty(XKOS.targetConcept, CPCModelMaker.getItemURI(cpc21Code, CPCModelMaker.CPC21_BASE_URI));
+				association.addProperty(XKOS.targetConcept, CPCModelMaker.getItemURI(cpc21Code, CPCModelMaker.CPC_BASE_URI.get("2.1")));
 				// There are no descriptions for the ISIC4-CPC21 correspondences
 				table.addProperty(XKOS.madeOf, association);
 				// TODO Add 'partial' information
@@ -303,11 +329,22 @@ public class ISICModelMaker {
 		}
 		// Write the Turtle file and clear the model
 		try {
-			isicModel.write(new FileOutputStream(ISIC31_TO_ISIC4_TTL), "TTL");
+			isicModel.write(new FileOutputStream(ISIC4_TO_CPC21_TTL), "TTL");
 		} catch (FileNotFoundException e) {
-			logger.error("Error saving the 3.1-4 correspondences to " + ISIC4_TO_CPC21_FILE, e);
+			logger.error("Error saving the ISIC4-CPC21 correspondences to " + ISIC4_TO_CPC21_TTL, e);
 		}
 		isicModel.close();
+	}
+
+	/**
+	 * Returns the URI of the concept scheme corresponding to a major version of ISIC.
+	 * 
+	 * @param version The version of the ISIC classification.
+	 * @return The URI of the concept scheme.
+	 */
+	public static String getSchemeURI(String version) {
+
+		return ISIC_BASE_URI.get(version) + "isic";
 	}
 
 	/**
