@@ -245,6 +245,8 @@ public class CPCModelMaker {
 		Resource table = cpcModel.createResource(CPC2_TO_CPC21_BASE_URI + "correspondence", XKOS.Correspondence);
 		// TODO Add properties properly
 		table.addProperty(SKOS.definition, "CPC Ver.2 - CPC Ver.2.1 correspondence table");
+		// Comment extracted from the 'readme.txt' file (could be better in a skos:historyNote)
+		table.addProperty(RDFS.comment, cpcModel.createLiteral("The correspondence does not yet include divisions 61 and 62 of the CPC", "en"));
 		try {
 			Reader reader = new FileReader(CPC2_TO_CPC21_FILE);
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());

@@ -309,6 +309,8 @@ public class ISICModelMaker {
 		table = isicModel.createResource(ISIC4_TO_CPC21_BASE_URI + "correspondence", XKOS.Correspondence);
 		// TODO Add properties properly
 		table.addProperty(SKOS.definition, "Correspondence table between ISIC Rev.4 and CPC Ver.2.1");
+		// Comment extracted from the 'readme.txt' file (could be better in a skos:historyNote)
+		table.addProperty(RDFS.comment, isicModel.createLiteral("The correspondence does not yet include divisions 45, 46 and 47 of ISIC", "en"));
 		try {
 			Reader reader = new FileReader(ISIC4_TO_CPC21_FILE);
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
