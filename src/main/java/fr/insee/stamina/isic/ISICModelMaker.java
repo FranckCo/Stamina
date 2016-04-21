@@ -253,7 +253,7 @@ public class ISICModelMaker {
 			}
 			parser.close();
 			reader.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error adding labels from " + filePath, e);
 		}
 	}
@@ -272,7 +272,7 @@ public class ISICModelMaker {
 		// Creation of the correspondence table resource
 		Resource table = isicModel.createResource(ISIC31_TO_ISIC4_BASE_URI + "correspondence", XKOS.Correspondence);
 		// TODO Add properties properly
-		table.addProperty(SKOS.definition, "Table");
+		table.addProperty(SKOS.definition, "Correspondence table between ISIC Rev.3.1 and ISIC Rev.4");
 		try {
 			Reader reader = new FileReader(ISIC31_TO_ISIC4_FILE);
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
@@ -288,7 +288,7 @@ public class ISICModelMaker {
 			}
 			parser.close();
 			reader.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error reading correspondences from " + ISIC31_TO_ISIC4_FILE, e);
 		}
 		// Write the Turtle file and clear the model
@@ -308,7 +308,7 @@ public class ISICModelMaker {
 		// Creation of the correspondence table resource
 		table = isicModel.createResource(ISIC4_TO_CPC21_BASE_URI + "correspondence", XKOS.Correspondence);
 		// TODO Add properties properly
-		table.addProperty(SKOS.definition, "Table");
+		table.addProperty(SKOS.definition, "Correspondence table between ISIC Rev.4 and CPC Ver.2.1");
 		try {
 			Reader reader = new FileReader(ISIC4_TO_CPC21_FILE);
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
@@ -324,7 +324,7 @@ public class ISICModelMaker {
 			}
 			parser.close();
 			reader.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error reading correspondences from " + ISIC4_TO_CPC21_FILE, e);
 		}
 		// Write the Turtle file and clear the model

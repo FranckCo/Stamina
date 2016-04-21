@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public class CPCModelMaker {
 	}
 
 	/** CSV file containing the correspondences between CPC Ver.2 and CPC Ver.2.1 */
-	public static String CPC2_TO_CPC21_FILE = "D:\\Temp\\unsd\\CPCv2_CPCv21.txt";
+	public static String CPC2_TO_CPC21_FILE = "D:\\Temp\\unsd\\cpc2-cpc21.txt";
 
 	/** Base URIs for RDF resources in correspondences. */
 	public final static String CPC2_TO_CPC21_BASE_URI = "http://stamina-project.org/codes/cpc2-cpc21/";
@@ -226,7 +225,7 @@ public class CPCModelMaker {
 			}
 			parser.close();
 			reader.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error adding labels from " + filePath, e);
 		}
 	}
@@ -245,7 +244,7 @@ public class CPCModelMaker {
 		// Creation of the correspondence table resource
 		Resource table = cpcModel.createResource(CPC2_TO_CPC21_BASE_URI + "correspondence", XKOS.Correspondence);
 		// TODO Add properties properly
-		table.addProperty(SKOS.definition, "Table");
+		table.addProperty(SKOS.definition, "CPC Ver.2 - CPC Ver.2.1 correspondence table");
 		try {
 			Reader reader = new FileReader(CPC2_TO_CPC21_FILE);
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
@@ -255,13 +254,13 @@ public class CPCModelMaker {
 				Resource association = cpcModel.createResource(CPC2_TO_CPC21_BASE_URI + cpc2Code + "-" + cpc21Code, XKOS.ConceptAssociation);
 				association.addProperty(XKOS.sourceConcept, getItemURI(cpc2Code, CPC_BASE_URI.get("2")));
 				association.addProperty(XKOS.targetConcept, getItemURI(cpc21Code, CPC_BASE_URI.get("2.1")));
-				if (record.get("Detail").length() > 0) association.addProperty(RDFS.comment, cpcModel.createLiteral(record.get("Detail"), "en"));
+				// There are no descriptions of the correspondences for CPC2-CPC2.1
 				table.addProperty(XKOS.madeOf, association);
 				// TODO Add 'partial' information
 			}
 			parser.close();
 			reader.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error reading correspondences from " + CPC2_TO_CPC21_FILE, e);
 		}
 		// Write the Turtle file and clear the model
