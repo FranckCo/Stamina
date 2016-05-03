@@ -53,4 +53,11 @@ public class ADMS {
 	public static final Property sample = model.createProperty(uri + "sample");
 	public static final Property status = model.createProperty(uri + "status");
 	public static final Property translation = model.createProperty(uri + "translation");
+
+	// Define a selection of terms from the controlled vocabularies (see https://joinup.ec.europa.eu/svn/adms/ADMS_v1.00/ADMS_SKOS_v1.00.html)
+	public static final Resource CompletedStatus = model.createResource("http://purl.org/adms/status/Completed");
+	public static final Resource UnderDevelopmentStatus = model.createResource("http://purl.org/adms/status/UnderDevelopment");
+	public static final Resource TaxonomyAssetType = model.createResource("http://purl.org/adms/assettype/Taxonomy");
+	public static final Resource SKOSRepresentationTechnique = model.createResource("http://purl.org/adms/representationtechnique/SKOS");
+	public static final Resource SPARQLRepresentationTechnique = model.createResource("http://purl.org/adms/representationtechnique/SPARQL");
 }
