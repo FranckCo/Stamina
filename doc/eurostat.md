@@ -14,12 +14,20 @@ Unfortunately, XML files produced by RAMON have a little defect: they start with
 
 ## Details on the sources
 
-RAMON produces the downloadable files on demand and adds a timestamp to the file name (for example `CPA_2_1_20160314_114049.xml`). This is not very handy in a perspective of automation where files names should be deterministic. To circumvent this difficulty, the loading programs will select their inputs based on a file name filter (`CPA_2_1_*.xml` for the previous example). In case several files correspond to an expression, the most recent file will be used.
+RAMON produces the downloadable files on demand and adds a timestamp to the file name (for example `CPA_2_1_20160314_114049.xml`). This is not very handy in a perspective of automation where files names should be deterministic. To circumvent this difficulty, the loading programs must select their inputs based on a file name filter (`CPA_2_1_*.xml` for the previous example). In case several files correspond to an expression, the most recent file will be used.
 
 Using this file naming convention, the following sources were used:
 
-* NACE Rev. 2 in XML can be downloaded from the [NACE Rev. 2 page on RAMON](http://ec.europa.eu/eurostat/ramon/nomenclatures/index.cfm?TargetUrl=LST_CLS_DLD&StrNom=NACE_REV2)
-* CPA Version 2.1 in XML can be downloaded from the [CPA Version 2.1 page on RAMON](http://ec.europa.eu/eurostat/ramon/nomenclatures/index.cfm?TargetUrl=LST_CLS_DLD&StrNom=CPA_2_1)
+* NACE Rev. 2 in XML can be downloaded from the [NACE Rev. 2 page on RAMON](http://ec.europa.eu/eurostat/ramon/nomenclatures/index.cfm?TargetUrl=LST_CLS_DLD&StrNom=NACE_REV2).
+* CPA Version 2.1 in XML can be downloaded from the [CPA Version 2.1 page on RAMON](http://ec.europa.eu/eurostat/ramon/nomenclatures/index.cfm?TargetUrl=LST_CLS_DLD&StrNom=CPA_2_1).
 * The correspondence between NACE Rev 2 et CPA Version 2.1 is not explicitly available from RAMON, but the it can easily be produced since both classifications are completely aligned down to the class level.
-* The correspondence between ISIC Rev.4 and NACE Rev. 2 can be downloaded from [this page on RAMON](http://ec.europa.eu/eurostat/ramon/relations/index.cfm?TargetUrl=LST_REL_DLD&StrNomRelCode=NACE%20REV.%202%20-%20ISIC%20REV.%204), and is also accessible on the UNSD web site as file [ISIC4-NACE2.zip](http://unstats.un.org/unsd/cr/registry/regdntransfer.asp?f=133). The UNSD version gives
+* The correspondence between ISIC Rev.4 and NACE Rev. 2 can be downloaded from [this page on RAMON](http://ec.europa.eu/eurostat/ramon/relations/index.cfm?TargetUrl=LST_REL_DLD&StrNomRelCode=NACE%20REV.%202%20-%20ISIC%20REV.%204), and is also accessible on the UNSD web site as file [ISIC4-NACE2.zip](http://unstats.un.org/unsd/cr/registry/regdntransfer.asp?f=133). The UNSD version gives more information, for example indicators of partial coverage for links.
+* The correspondence between CPA 2008 and CPA Version 2.1 is available on [this page](http://ec.europa.eu/eurostat/ramon/relations/index.cfm?TargetUrl=LST_REL_DLD&StrNomRelCode=CPA 2008 - CPA 2.1).
 * The correspondence between CPA Version 2.1 and CPC Ver.2.1 does not seem to be available from RAMON nor from the UNSD web site. It could be a use case of the project to generate this table.
+
+## Details on the outputs
+
+The following Turtle files are produced by the programs:
+
+* nace11.ttl, nace2.ttl, cpa2008.ttl and cpa21.ttl correspond to the classification schemes for NACE Rev. 1.1, NACE Rev. 2, CPA Version 2008 and CPA Version 2.1
+* nace11-nace2.ttl, cpa2008-cpa21.ttl and nace2-cpa21.ttl contain the correspondence tables between NACE Rev. 1.1 and NACE Rev. 2, CPA Version 2008 and CPA Version 2.1, and NACE Rev. 2 and CPA Version 2.1
