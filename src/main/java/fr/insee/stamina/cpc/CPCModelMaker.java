@@ -29,6 +29,7 @@ import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 
+import fr.insee.stamina.utils.Names;
 import fr.insee.stamina.utils.XKOS;
 
 /**
@@ -46,9 +47,6 @@ public class CPCModelMaker {
 	public static Map<String, String> CPC_ACCESS_FILE = new HashMap<String, String>();
 	/** Name of the Access tables containing the data */
 	public static Map<String, String> CPC_ACCESS_TABLE = new HashMap<String, String>();
-	// There is no table giving the name of the levels for CPC, but the mapping division-section is straightforward
-	/** Files where the CPC models will be saved as Turtle */
-	public static Map<String, String> CPC_TURTLE_FILE = new HashMap<String, String>();
 	/** Base URIs for the resources */
 	public static Map<String, String> CPC_BASE_URI = new HashMap<String, String>();
 	/** Labels for the concept schemes representing the classification versions */
@@ -67,9 +65,6 @@ public class CPCModelMaker {
 		CPC_ACCESS_TABLE.put("1.1", "tblTitles_English_CPCV11");
 		CPC_ACCESS_TABLE.put("2", "CPC2-structure");
 		CPC_ACCESS_TABLE.put("2.1", "CPC21-structure");
-		CPC_TURTLE_FILE.put("1.1", "src/main/resources/data/cpc11.ttl");
-		CPC_TURTLE_FILE.put("2", "src/main/resources/data/cpc2.ttl");
-		CPC_TURTLE_FILE.put("2.1", "src/main/resources/data/cpc21.ttl");
 		CPC_BASE_URI.put("1.1", "http://stamina-project.org/codes/cpc11/");
 		CPC_BASE_URI.put("2", "http://stamina-project.org/codes/cpc2/");
 		CPC_BASE_URI.put("2.1", "http://stamina-project.org/codes/cpc21/");
@@ -175,8 +170,9 @@ public class CPCModelMaker {
 		this.addLabels(CPC_SPANISH_LABELS_FILE.get(version), version, "es");
 
 		// Write the Turtle file and clear the model
-		cpcModel.write(new FileOutputStream(CPC_TURTLE_FILE.get(version)), "TTL");
-		logger.debug("The Jena model for CPC Ver." + version + " has been written to " + CPC_TURTLE_FILE.get(version));
+		String turtleFileName = "src/main/resources/data/" + Names.getCSContext("CPC", version) + ".ttl";
+		cpcModel.write(new FileOutputStream(turtleFileName), "TTL");
+		logger.debug("The Jena model for CPC Ver." + version + " has been written to " + turtleFileName);
 		cpcModel.close();
 	}
 
