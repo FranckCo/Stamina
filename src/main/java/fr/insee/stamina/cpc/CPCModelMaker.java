@@ -81,9 +81,6 @@ public class CPCModelMaker {
 	/** Log4J2 logger */
 	private static final Logger logger = LogManager.getLogger(CPCModelMaker.class);
 
-	/** Names of the items for each level, singular and plural */
-	private static String[] levelNames = new String[]{"section", "division", "group", "class", "subclass", "sections", "divisions", "groups", "classes", "subclasses"};
-
 	/** Current Jena model */
 	private Model cpcModel = null;
 	/** Resource corresponding to the current concept scheme */
@@ -117,8 +114,6 @@ public class CPCModelMaker {
 
 		logger.debug("Construction of the Jena model for CPC version " + version);
 
-		String baseURI = Names.getCSBaseURI("CPC", version);
-
 		// Init the Jena model for the given version of the classification
 		initModel(version);
 
@@ -133,7 +128,7 @@ public class CPCModelMaker {
 		logger.debug("Cursor defined on table " + CPC_ACCESS_TABLE.get(version));
 		for (Row row : cursor.newIterable()) {
 			String itemCode = row.getString(codeColumnName);
-			Resource itemResource = cpcModel.createResource(getItemURI(itemCode, baseURI), SKOS.Concept);
+			Resource itemResource = cpcModel.createResource(Names.getItemURI(itemCode, "CPC", version), SKOS.Concept);
 			itemResource.addProperty(SKOS.notation, cpcModel.createLiteral(itemCode));
 			itemResource.addProperty(SKOS.prefLabel, cpcModel.createLiteral(row.getString(labelColumnName), "en"));
 			// Add explanatory notes if requested
@@ -149,7 +144,7 @@ public class CPCModelMaker {
 				scheme.addProperty(SKOS.hasTopConcept, itemResource);
 				itemResource.addProperty(SKOS.topConceptOf, scheme);
 			} else {
-				Resource parentResource = cpcModel.createResource(getItemURI(parentCode, baseURI), SKOS.Concept);
+				Resource parentResource = cpcModel.createResource(Names.getItemURI(parentCode, "CPC", version), SKOS.Concept);
 				parentResource.addProperty(SKOS.narrower, itemResource);
 				itemResource.addProperty(SKOS.broader, parentResource);
 			}
@@ -179,19 +174,17 @@ public class CPCModelMaker {
 		cpcModel.setNsPrefix("xkos", XKOS.getURI());
 
 		// Create the classification, classification levels and their properties
-		String baseURI = Names.getCSBaseURI("CPC", version);
 		String schemeLabel = CPC_SCHEME_LABEL.get(version);
-		scheme = cpcModel.createResource(getSchemeURI(version), SKOS.ConceptScheme);
+		scheme = cpcModel.createResource(Names.getCSURI("CPC", version), SKOS.ConceptScheme);
 		scheme.addProperty(SKOS.prefLabel, cpcModel.createLiteral(schemeLabel, "en"));
 		scheme.addProperty(SKOS.notation, Names.getCSShortName("CPC", version));
-		int numberOfLevels = levelNames.length / 2;
+		int numberOfLevels = Names.LEVEL_NAMES.get("CPC").size();
 		scheme.addProperty(XKOS.numberOfLevels, cpcModel.createTypedLiteral(numberOfLevels));
 
 		levels = new ArrayList<Resource>();
 		for (int levelIndex = 1; levelIndex <= numberOfLevels; levelIndex++) {
-			String levelName = levelNames[levelIndex + 3];
-			Resource level = cpcModel.createResource(baseURI + levelNames[levelIndex + 3], XKOS.ClassificationLevel);
-			level.addProperty(SKOS.prefLabel, cpcModel.createLiteral(schemeLabel + " - " + levelName.substring(0, 1).toUpperCase() + levelName.substring(1), "en"));
+			Resource level = cpcModel.createResource(Names.getClassificationLevelURI("CPC", version, levelIndex), XKOS.ClassificationLevel);
+			level.addProperty(SKOS.prefLabel, cpcModel.createLiteral(Names.getClassificationLevelLabel("CPC", version, levelIndex), "en"));
 			level.addProperty(XKOS.depth, cpcModel.createTypedLiteral(levelIndex));
 			levels.add(level);
 		}
@@ -210,13 +203,12 @@ public class CPCModelMaker {
 
 		if (filePath == null) return;
 
-		String baseURI = Names.getCSBaseURI("CPC", version);
 		try {
 			Reader reader = new InputStreamReader(new FileInputStream(filePath), "Cp1252");
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
 			for (CSVRecord record : parser) {
 				String itemCode = record.get(0);
-				Resource itemResource = cpcModel.createResource(getItemURI(itemCode, baseURI));
+				Resource itemResource = cpcModel.createResource(Names.getItemURI(itemCode, "CPC", version));
 				itemResource.addProperty(SKOS.prefLabel, cpcModel.createLiteral(record.get(1), language));
 			}
 			parser.close();
@@ -250,8 +242,8 @@ public class CPCModelMaker {
 				String cpc2Code = record.get("CPC2code");
 				String cpc21Code = record.get("CPC21code");
 				Resource association = cpcModel.createResource(CPC2_TO_CPC21_BASE_URI + cpc2Code + "-" + cpc21Code, XKOS.ConceptAssociation);
-				association.addProperty(XKOS.sourceConcept, getItemURI(cpc2Code, Names.getCSBaseURI("CPC", "2")));
-				association.addProperty(XKOS.targetConcept, getItemURI(cpc21Code, Names.getCSBaseURI("CPC", "2.1")));
+				association.addProperty(XKOS.sourceConcept, Names.getItemURI(cpc2Code, "CPC", "2"));
+				association.addProperty(XKOS.targetConcept, Names.getItemURI(cpc21Code, "CPC", "2.1"));
 				// There are no descriptions of the correspondences for CPC2-CPC2.1
 				table.addProperty(XKOS.madeOf, association);
 				// TODO Add 'partial' information
@@ -268,33 +260,6 @@ public class CPCModelMaker {
 			logger.error("Error saving the CPC2-CPC21 correspondences to " + CPC2_TO_CPC21_TTL, e);
 		}
 		cpcModel.close();
-	}
-
-	/**
-	 * Returns the URI of the concept scheme corresponding to a major version of CPC.
-	 * 
-	 * @param version The version of the CPC classification.
-	 * @return The URI of the concept scheme.
-	 */
-	public static String getSchemeURI(String version) {
-
-		return Names.getCSBaseURI("CPC", version) + "cpc";
-	}
-
-	/**
-	 * Computes the URI of an CPC item.
-	 * 
-	 * @param code The item code.
-	 * @param baseURI The base URI corresponding to the CPC version.
-	 * @return The item URI, or a blank string if the code type was not recognized.
-	 */
-	public static String getItemURI(String code, String baseURI) {
-
-		String uri = "";
-		if ((code == null) || (code.length() == 0)) return uri;
-		if (code.length() < 6)  uri = baseURI + levelNames[code.length() - 1] + "/" + code;
-
-		return uri;
 	}
 
 	/**
