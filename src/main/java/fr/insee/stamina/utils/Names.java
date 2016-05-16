@@ -75,6 +75,26 @@ public class Names {
 	}
 
 	/**
+	 * Returns the long name of a classification version.
+	 * 
+	 * @param classification Short name of the classification, e.g. "NACE", "ISIC", etc.
+	 * @param version Version of the classification ("4", "2.1", "2008", etc.).
+	 * @return The long name of the classification version.
+	 */
+	public static String getCSLabel(String classification, String version) {
+
+		String shortName = classification.toUpperCase();
+		if ("ISIC".equals(shortName)) return String.format("International Standard Industrial Classification of All Economic Activities, Rev.%s", version);
+		if ("CPC".equals(shortName)) return String.format("Central Product Classification, Ver.%s", version);
+		if ("NACE".equals(shortName)) return String.format("Statistical Classification of Economic Activities in the European Community, Rev. %s", version);
+		if ("CPA".equals(shortName)) return String.format("Statistical Classification of Products by Activity, Version %s", version);
+		if ("NAF".equals(shortName)) return String.format("Nomenclature d'activités française - NAF rév. %s", version);
+		if ("CPF".equals(shortName)) return String.format("Classification des produits française - CPF rév. %s", version);
+
+		return null;
+	}
+
+	/**
 	 * Returns the short name of a classification version.
 	 * Examples of short names are: ISIC Rev.3.1, CPC Ver.2.1, etc.
 	 * 
@@ -90,10 +110,43 @@ public class Names {
 		if ("CPC".equals(shortName)) return String.format("CPC Ver.%s", version);
 		if ("NACE".equals(shortName)) return String.format("NACE Rev. %s", version);
 		if ("CPA".equals(shortName)) return String.format("CPA %s", version);
-		if ("NAF".equals(shortName)) return String.format("NAF rÃ©v. %s", version);
-		if ("CPF".equals(shortName)) return String.format("CPF rÃ©v. %s", version);
+		if ("NAF".equals(shortName)) return String.format("NAF rév. %s", version);
+		if ("CPF".equals(shortName)) return String.format("CPF rév. %s", version);
 
 		return null;
+	}
+
+	/**
+	 * Return the URI of a level in a classification version.
+	 * 
+	 * @param classification Short name of the classification, e.g. "NACE", "ISIC", etc.
+	 * @param version Version of the classification ("4", "2.1", "2008", etc.).
+	 * @param depth The depth of the level which URI is requested (the most aggregated level has depth 1).
+	 * @return The URI for the resource corresponding to the classification version.
+	 */
+	public static String getClassificationLevelURI(String classification, String version, int depth) {
+
+		String levelName = LEVEL_NAMES.get(classification).get(depth - 1);
+		if (levelName.endsWith("ss")) levelName += "es"; // Case of class and subclass
+		else if (levelName.endsWith("y")) levelName = levelName.substring(0, levelName.length() - 1) + "ies"; // Case of category and subcategory
+		else levelName += "s";
+
+		return getCSBaseURI(classification, version) + levelName;
+	}
+
+	/**
+	 * Return the label of a level in a classification version.
+	 * 
+	 * @param classification Short name of the classification, e.g. "NACE", "ISIC", etc.
+	 * @param version Version of the classification ("4", "2.1", "2008", etc.).
+	 * @param depth The depth of the level which URI is requested (the most aggregated level has depth 1).
+	 * @return The label of a level in a classification version.
+	 */
+	public static String getClassificationLevelLabel(String classification, String version, int depth) {
+
+		String levelName = LEVEL_NAMES.get(classification).get(depth - 1);
+
+		return getCSLabel(classification, version) + " - " + levelName.substring(0, 1).toUpperCase() + levelName.substring(1);
 	}
 
 	/**
