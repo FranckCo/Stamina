@@ -47,14 +47,11 @@ public class CPCModelMaker {
 	public static Map<String, String> CPC_ACCESS_FILE = new HashMap<String, String>();
 	/** Name of the Access tables containing the data */
 	public static Map<String, String> CPC_ACCESS_TABLE = new HashMap<String, String>();
-	/** Base URIs for the resources */
-	public static Map<String, String> CPC_BASE_URI = new HashMap<String, String>();
 	/** Labels for the concept schemes representing the classification versions */
 	public static Map<String, String> CPC_SCHEME_LABEL = new HashMap<String, String>();
 	/** Notations for the concept schemes representing the classification versions */
 	public static Map<String, String> CPC_SCHEME_NOTATION = new HashMap<String, String>();
 	// There are no French labels for the CPC on the UNSD web site
-
 	/** CSV files containing the additional Spanish labels */
 	public static Map<String, String> CPC_SPANISH_LABELS_FILE = new HashMap<String, String>();
 	// Initialization of the static properties
@@ -65,9 +62,6 @@ public class CPCModelMaker {
 		CPC_ACCESS_TABLE.put("1.1", "tblTitles_English_CPCV11");
 		CPC_ACCESS_TABLE.put("2", "CPC2-structure");
 		CPC_ACCESS_TABLE.put("2.1", "CPC21-structure");
-		CPC_BASE_URI.put("1.1", "http://stamina-project.org/codes/cpc11/");
-		CPC_BASE_URI.put("2", "http://stamina-project.org/codes/cpc2/");
-		CPC_BASE_URI.put("2.1", "http://stamina-project.org/codes/cpc21/");
 		CPC_SCHEME_LABEL.put("1.1", "Central Product Classification - Ver.1.1");
 		CPC_SCHEME_LABEL.put("2", "Central Product Classification - Ver.2");
 		CPC_SCHEME_LABEL.put("2.1", "Central Product Classification - Ver.2.1");
@@ -128,6 +122,8 @@ public class CPCModelMaker {
 
 		logger.debug("Construction of the Jena model for CPC version " + version);
 
+		String baseURI = Names.getCSBaseURI("CPC", version);
+
 		// Init the Jena model for the given version of the classification
 		initModel(version);
 
@@ -142,7 +138,7 @@ public class CPCModelMaker {
 		logger.debug("Cursor defined on table " + CPC_ACCESS_TABLE.get(version));
 		for (Row row : cursor.newIterable()) {
 			String itemCode = row.getString(codeColumnName);
-			Resource itemResource = cpcModel.createResource(getItemURI(itemCode, CPC_BASE_URI.get(version)), SKOS.Concept);
+			Resource itemResource = cpcModel.createResource(getItemURI(itemCode, baseURI), SKOS.Concept);
 			itemResource.addProperty(SKOS.notation, cpcModel.createLiteral(itemCode));
 			itemResource.addProperty(SKOS.prefLabel, cpcModel.createLiteral(row.getString(labelColumnName), "en"));
 			// Add explanatory notes if requested
@@ -158,7 +154,7 @@ public class CPCModelMaker {
 				scheme.addProperty(SKOS.hasTopConcept, itemResource);
 				itemResource.addProperty(SKOS.topConceptOf, scheme);
 			} else {
-				Resource parentResource = cpcModel.createResource(getItemURI(parentCode, CPC_BASE_URI.get(version)), SKOS.Concept);
+				Resource parentResource = cpcModel.createResource(getItemURI(parentCode, baseURI), SKOS.Concept);
 				parentResource.addProperty(SKOS.narrower, itemResource);
 				itemResource.addProperty(SKOS.broader, parentResource);
 			}
@@ -188,7 +184,7 @@ public class CPCModelMaker {
 		cpcModel.setNsPrefix("xkos", XKOS.getURI());
 
 		// Create the classification, classification levels and their properties
-		String baseURI = CPC_BASE_URI.get(version);
+		String baseURI = Names.getCSBaseURI("CPC", version);
 		String schemeLabel = CPC_SCHEME_LABEL.get(version);
 		scheme = cpcModel.createResource(getSchemeURI(version), SKOS.ConceptScheme);
 		scheme.addProperty(SKOS.prefLabel, cpcModel.createLiteral(schemeLabel, "en"));
@@ -219,7 +215,7 @@ public class CPCModelMaker {
 
 		if (filePath == null) return;
 
-		String baseURI = CPC_BASE_URI.get(version);
+		String baseURI = Names.getCSBaseURI("CPC", version);
 		try {
 			Reader reader = new InputStreamReader(new FileInputStream(filePath), "Cp1252");
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
@@ -259,8 +255,8 @@ public class CPCModelMaker {
 				String cpc2Code = record.get("CPC2code");
 				String cpc21Code = record.get("CPC21code");
 				Resource association = cpcModel.createResource(CPC2_TO_CPC21_BASE_URI + cpc2Code + "-" + cpc21Code, XKOS.ConceptAssociation);
-				association.addProperty(XKOS.sourceConcept, getItemURI(cpc2Code, CPC_BASE_URI.get("2")));
-				association.addProperty(XKOS.targetConcept, getItemURI(cpc21Code, CPC_BASE_URI.get("2.1")));
+				association.addProperty(XKOS.sourceConcept, getItemURI(cpc2Code, Names.getCSBaseURI("CPC", "2")));
+				association.addProperty(XKOS.targetConcept, getItemURI(cpc21Code, Names.getCSBaseURI("CPC", "2.1")));
 				// There are no descriptions of the correspondences for CPC2-CPC2.1
 				table.addProperty(XKOS.madeOf, association);
 				// TODO Add 'partial' information
@@ -287,7 +283,7 @@ public class CPCModelMaker {
 	 */
 	public static String getSchemeURI(String version) {
 
-		return CPC_BASE_URI.get(version) + "cpc";
+		return Names.getCSBaseURI("CPC", version) + "cpc";
 	}
 
 	/**
