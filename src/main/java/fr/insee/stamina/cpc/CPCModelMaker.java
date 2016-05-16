@@ -49,8 +49,6 @@ public class CPCModelMaker {
 	public static Map<String, String> CPC_ACCESS_TABLE = new HashMap<String, String>();
 	/** Labels for the concept schemes representing the classification versions */
 	public static Map<String, String> CPC_SCHEME_LABEL = new HashMap<String, String>();
-	/** Notations for the concept schemes representing the classification versions */
-	public static Map<String, String> CPC_SCHEME_NOTATION = new HashMap<String, String>();
 	// There are no French labels for the CPC on the UNSD web site
 	/** CSV files containing the additional Spanish labels */
 	public static Map<String, String> CPC_SPANISH_LABELS_FILE = new HashMap<String, String>();
@@ -65,9 +63,6 @@ public class CPCModelMaker {
 		CPC_SCHEME_LABEL.put("1.1", "Central Product Classification - Ver.1.1");
 		CPC_SCHEME_LABEL.put("2", "Central Product Classification - Ver.2");
 		CPC_SCHEME_LABEL.put("2.1", "Central Product Classification - Ver.2.1");
-		CPC_SCHEME_NOTATION.put("1.1", "CPC Ver.1.1");
-		CPC_SCHEME_NOTATION.put("2", "CPC Ver.2");
-		CPC_SCHEME_NOTATION.put("2.1", "CPC Ver 2.1");
 		CPC_SPANISH_LABELS_FILE.put("1.1", null); // No Spanish labels for CPC Ver.1.1
 		CPC_SPANISH_LABELS_FILE.put("2", "CPCv2_Spanish_structure.txt");
 		CPC_SPANISH_LABELS_FILE.put("2.1", null); // No Spanish labels for CPC Ver.2.1
@@ -188,7 +183,7 @@ public class CPCModelMaker {
 		String schemeLabel = CPC_SCHEME_LABEL.get(version);
 		scheme = cpcModel.createResource(getSchemeURI(version), SKOS.ConceptScheme);
 		scheme.addProperty(SKOS.prefLabel, cpcModel.createLiteral(schemeLabel, "en"));
-		scheme.addProperty(SKOS.notation, CPC_SCHEME_NOTATION.get(version));
+		scheme.addProperty(SKOS.notation, Names.getCSShortName("CPC", version));
 		int numberOfLevels = levelNames.length / 2;
 		scheme.addProperty(XKOS.numberOfLevels, cpcModel.createTypedLiteral(numberOfLevels));
 
