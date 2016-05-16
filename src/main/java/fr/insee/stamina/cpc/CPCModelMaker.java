@@ -34,11 +34,11 @@ import fr.insee.stamina.utils.XKOS;
 /**
  * The <code>CPCModelMaker</code> creates and saves Jena models corresponding to the CPC classification.
  * 
- * Only CPC revisions 2 and 2.1 are considered here, but the program can easily be extended to other versions.
+ * Only CPC revisions 1.1, 2 and 2.1 are considered here, but the program can easily be extended to other versions.
  * The data is extracted from MS Access files available on the UNSD web site (http://unstats.un.org/unsd/cr/registry/regdnld.asp).
  * 
  * @author Franck Cotton
- * @version 0.9, 20 Apr 2016
+ * @version 0.10, 12 May 2016
  */
 public class CPCModelMaker {
 
@@ -61,22 +61,30 @@ public class CPCModelMaker {
 	public static Map<String, String> CPC_SPANISH_LABELS_FILE = new HashMap<String, String>();
 	// Initialization of the static properties
 	static {
+		CPC_ACCESS_FILE.put("1.1", "D:\\Temp\\unsd\\cpc_v11_english.mdb");
 		CPC_ACCESS_FILE.put("2", "D:\\Temp\\unsd\\CPCv2_english.mdb");
 		CPC_ACCESS_FILE.put("2.1", "D:\\Temp\\unsd\\CPC21_english.mdb");
+		CPC_ACCESS_TABLE.put("1.1", "tblTitles_English_CPCV11");
 		CPC_ACCESS_TABLE.put("2", "CPC2-structure");
 		CPC_ACCESS_TABLE.put("2.1", "CPC21-structure");
+		CPC_TURTLE_FILE.put("1.1", "src/main/resources/data/cpc11.ttl");
 		CPC_TURTLE_FILE.put("2", "src/main/resources/data/cpc2.ttl");
 		CPC_TURTLE_FILE.put("2.1", "src/main/resources/data/cpc21.ttl");
+		CPC_BASE_URI.put("1.1", "http://stamina-project.org/codes/cpc11/");
 		CPC_BASE_URI.put("2", "http://stamina-project.org/codes/cpc2/");
 		CPC_BASE_URI.put("2.1", "http://stamina-project.org/codes/cpc21/");
+		CPC_SCHEME_LABEL.put("1.1", "Central Product Classification - Ver.1.1");
 		CPC_SCHEME_LABEL.put("2", "Central Product Classification - Ver.2");
 		CPC_SCHEME_LABEL.put("2.1", "Central Product Classification - Ver.2.1");
+		CPC_SCHEME_NOTATION.put("1.1", "CPC Ver.1.1");
 		CPC_SCHEME_NOTATION.put("2", "CPC Ver.2");
 		CPC_SCHEME_NOTATION.put("2.1", "CPC Ver 2.1");
+		CPC_SPANISH_LABELS_FILE.put("1.1", null); // No Spanish labels for CPC Ver.1.1
 		CPC_SPANISH_LABELS_FILE.put("2", "CPCv2_Spanish_structure.txt");
 		CPC_SPANISH_LABELS_FILE.put("2.1", null); // No Spanish labels for CPC Ver.2.1
 	}
 
+	// TODO Add correspondence between CPC Ver.1.1 and CPC Ver.2
 	/** CSV file containing the correspondences between CPC Ver.2 and CPC Ver.2.1 */
 	public static String CPC2_TO_CPC21_FILE = "D:\\Temp\\unsd\\cpc2-cpc21.txt";
 
@@ -109,8 +117,9 @@ public class CPCModelMaker {
 
 		CPCModelMaker modelMaker = new CPCModelMaker();
 		logger.debug("New CPCModelMaker instance created");
-		modelMaker.createCPCModel("2.1", false);
+		modelMaker.createCPCModel("1.1", true);
 		modelMaker.createCPCModel("2", false);
+		modelMaker.createCPCModel("2.1", false);
 		modelMaker.createCorrespondenceModels();
 		logger.debug("Program terminated");
 	}
