@@ -47,8 +47,6 @@ public class CPCModelMaker {
 	public static Map<String, String> CPC_ACCESS_FILE = new HashMap<String, String>();
 	/** Name of the Access tables containing the data */
 	public static Map<String, String> CPC_ACCESS_TABLE = new HashMap<String, String>();
-	/** Labels for the concept schemes representing the classification versions */
-	public static Map<String, String> CPC_SCHEME_LABEL = new HashMap<String, String>();
 	// There are no French labels for the CPC on the UNSD web site
 	/** CSV files containing the additional Spanish labels */
 	public static Map<String, String> CPC_SPANISH_LABELS_FILE = new HashMap<String, String>();
@@ -60,9 +58,6 @@ public class CPCModelMaker {
 		CPC_ACCESS_TABLE.put("1.1", "tblTitles_English_CPCV11");
 		CPC_ACCESS_TABLE.put("2", "CPC2-structure");
 		CPC_ACCESS_TABLE.put("2.1", "CPC21-structure");
-		CPC_SCHEME_LABEL.put("1.1", "Central Product Classification - Ver.1.1");
-		CPC_SCHEME_LABEL.put("2", "Central Product Classification - Ver.2");
-		CPC_SCHEME_LABEL.put("2.1", "Central Product Classification - Ver.2.1");
 		CPC_SPANISH_LABELS_FILE.put("1.1", null); // No Spanish labels for CPC Ver.1.1
 		CPC_SPANISH_LABELS_FILE.put("2", "CPCv2_Spanish_structure.txt");
 		CPC_SPANISH_LABELS_FILE.put("2.1", null); // No Spanish labels for CPC Ver.2.1
@@ -174,9 +169,8 @@ public class CPCModelMaker {
 		cpcModel.setNsPrefix("xkos", XKOS.getURI());
 
 		// Create the classification, classification levels and their properties
-		String schemeLabel = CPC_SCHEME_LABEL.get(version);
 		scheme = cpcModel.createResource(Names.getCSURI("CPC", version), SKOS.ConceptScheme);
-		scheme.addProperty(SKOS.prefLabel, cpcModel.createLiteral(schemeLabel, "en"));
+		scheme.addProperty(SKOS.prefLabel, cpcModel.createLiteral(Names.getCSLabel("CPC", version), "en"));
 		scheme.addProperty(SKOS.notation, Names.getCSShortName("CPC", version));
 		int numberOfLevels = Names.LEVEL_NAMES.get("CPC").size();
 		scheme.addProperty(XKOS.numberOfLevels, cpcModel.createTypedLiteral(numberOfLevels));
