@@ -43,18 +43,23 @@ import fr.insee.stamina.utils.XKOS;
  */
 public class CPCModelMaker {
 
+	/** Directory for input files */
+	private static String INPUT_FOLDER = "D:\\Temp\\unsd\\";
+	/** Directory for output files */
+	private static String OUTPUT_FOLDER = "src/main/resources/data/";
+	
 	/** Files containing the Access databases */
-	public static Map<String, String> CPC_ACCESS_FILE = new HashMap<String, String>();
+	private static Map<String, String> CPC_ACCESS_FILE = new HashMap<String, String>();
 	/** Name of the Access tables containing the data */
-	public static Map<String, String> CPC_ACCESS_TABLE = new HashMap<String, String>();
+	private static Map<String, String> CPC_ACCESS_TABLE = new HashMap<String, String>();
 	// There are no French labels for the CPC on the UNSD web site
 	/** CSV files containing the additional Spanish labels */
-	public static Map<String, String> CPC_SPANISH_LABELS_FILE = new HashMap<String, String>();
+	private static Map<String, String> CPC_SPANISH_LABELS_FILE = new HashMap<String, String>();
 	// Initialization of the static properties
 	static {
-		CPC_ACCESS_FILE.put("1.1", "D:\\Temp\\unsd\\cpc_v11_english.mdb");
-		CPC_ACCESS_FILE.put("2", "D:\\Temp\\unsd\\CPCv2_english.mdb");
-		CPC_ACCESS_FILE.put("2.1", "D:\\Temp\\unsd\\CPC21_english.mdb");
+		CPC_ACCESS_FILE.put("1.1", "cpc_v11_english.mdb");
+		CPC_ACCESS_FILE.put("2", "CPCv2_english.mdb");
+		CPC_ACCESS_FILE.put("2.1", "CPC21_english.mdb");
 		CPC_ACCESS_TABLE.put("1.1", "tblTitles_English_CPCV11");
 		CPC_ACCESS_TABLE.put("2", "CPC2-structure");
 		CPC_ACCESS_TABLE.put("2.1", "CPC21-structure");
@@ -65,13 +70,7 @@ public class CPCModelMaker {
 
 	// TODO Add correspondence between CPC Ver.1.1 and CPC Ver.2
 	/** CSV file containing the correspondences between CPC Ver.2 and CPC Ver.2.1 */
-	public static String CPC2_TO_CPC21_FILE = "D:\\Temp\\unsd\\cpc2-cpc21.txt";
-
-	/** Base URIs for RDF resources in correspondences. */
-	public final static String CPC2_TO_CPC21_BASE_URI = "http://stamina-project.org/codes/cpc2-cpc21/";
-
-	/** File where the CPC Ver.2 to CPC Ver.2.1 correspondence information is saved as Turtle */
-	private static String CPC2_TO_CPC21_TTL = "src/main/resources/data/cpc2-cpc21.ttl";
+	private static String CPC2_TO_CPC21_FILE = "cpc2-cpc21.txt";
 
 	/** Log4J2 logger */
 	private static final Logger logger = LogManager.getLogger(CPCModelMaker.class);
@@ -118,7 +117,7 @@ public class CPCModelMaker {
 		String noteColumnName = ("2.1".equals(version)) ? "CPC21ExplanatoryNote" : "ExplanatoryNote";
 
 		// Open a cursor on the main table and iterate through all the records
-		Table table = DatabaseBuilder.open(new File(CPC_ACCESS_FILE.get(version))).getTable(CPC_ACCESS_TABLE.get(version));
+		Table table = DatabaseBuilder.open(new File(INPUT_FOLDER + CPC_ACCESS_FILE.get(version))).getTable(CPC_ACCESS_TABLE.get(version));
 		Cursor cursor = CursorBuilder.createCursor(table);
 		logger.debug("Cursor defined on table " + CPC_ACCESS_TABLE.get(version));
 		for (Row row : cursor.newIterable()) {
@@ -148,10 +147,10 @@ public class CPCModelMaker {
 			level.addProperty(SKOS.member, itemResource);
 		}
 		logger.debug("Preparing to create additional Spanish labels");
-		this.addLabels(CPC_SPANISH_LABELS_FILE.get(version), version, "es");
+		this.addLabels(INPUT_FOLDER + CPC_SPANISH_LABELS_FILE.get(version), version, "es");
 
 		// Write the Turtle file and clear the model
-		String turtleFileName = "src/main/resources/data/" + Names.getCSContext("CPC", version) + ".ttl";
+		String turtleFileName = OUTPUT_FOLDER + Names.getCSContext("CPC", version) + ".ttl";
 		cpcModel.write(new FileOutputStream(turtleFileName), "TTL");
 		logger.debug("The Jena model for CPC Ver." + version + " has been written to " + turtleFileName);
 		cpcModel.close();
@@ -224,18 +223,18 @@ public class CPCModelMaker {
 		cpcModel.setNsPrefix("xkos", XKOS.getURI());
 
 		// Creation of the correspondence table resource
-		Resource table = cpcModel.createResource(CPC2_TO_CPC21_BASE_URI + "correspondence", XKOS.Correspondence);
+		Resource table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "2",  "CPC",  "2.1"), XKOS.Correspondence);
 		// TODO Add properties properly
 		table.addProperty(SKOS.definition, "CPC Ver.2 - CPC Ver.2.1 correspondence table");
 		// Comment extracted from the 'readme.txt' file (could be better in a skos:historyNote)
 		table.addProperty(RDFS.comment, cpcModel.createLiteral("The correspondence does not yet include divisions 61 and 62 of the CPC", "en"));
 		try {
-			Reader reader = new FileReader(CPC2_TO_CPC21_FILE);
+			Reader reader = new FileReader(INPUT_FOLDER + CPC2_TO_CPC21_FILE);
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
 			for (CSVRecord record : parser) {
 				String cpc2Code = record.get("CPC2code");
 				String cpc21Code = record.get("CPC21code");
-				Resource association = cpcModel.createResource(CPC2_TO_CPC21_BASE_URI + cpc2Code + "-" + cpc21Code, XKOS.ConceptAssociation);
+				Resource association = cpcModel.createResource(Names.getAssociationURI(cpc2Code, "CPC",  "2", cpc21Code, "CPC", "2.1"), XKOS.ConceptAssociation);
 				association.addProperty(XKOS.sourceConcept, Names.getItemURI(cpc2Code, "CPC", "2"));
 				association.addProperty(XKOS.targetConcept, Names.getItemURI(cpc21Code, "CPC", "2.1"));
 				// There are no descriptions of the correspondences for CPC2-CPC2.1
@@ -248,10 +247,11 @@ public class CPCModelMaker {
 			logger.error("Error reading correspondences from " + CPC2_TO_CPC21_FILE, e);
 		}
 		// Write the Turtle file and clear the model
+		String turtleFileName = Names.getCorrespondenceContext("CPC", "2", "CPC", "2.1") + ".ttl";
 		try {
-			cpcModel.write(new FileOutputStream(CPC2_TO_CPC21_TTL), "TTL");
+			cpcModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
 		} catch (FileNotFoundException e) {
-			logger.error("Error saving the CPC2-CPC21 correspondences to " + CPC2_TO_CPC21_TTL, e);
+			logger.error("Error saving the CPC2-CPC21 correspondences to " + turtleFileName, e);
 		}
 		cpcModel.close();
 	}
