@@ -68,9 +68,10 @@ public class CPCModelMaker {
 		CPC_SPANISH_LABELS_FILE.put("2.1", null); // No Spanish labels for CPC Ver.2.1
 	}
 
-	// TODO Add correspondence between CPC Ver.1.1 and CPC Ver.2
 	/** CSV file containing the correspondences between CPC Ver.2 and CPC Ver.2.1 */
 	private static String CPC2_TO_CPC21_FILE = "cpc2-cpc21.txt";
+	/** CSV file containing the correspondences between CPC Ver.1.1 and CPC Ver.2 */
+	private static String CPC11_TO_CPC2_FILE = "CPCv11_CPCv2.txt";
 
 	/** Log4J2 logger */
 	private static final Logger logger = LogManager.getLogger(CPCModelMaker.class);
@@ -212,29 +213,74 @@ public class CPCModelMaker {
 	}
 
 	/**
-	 * Creates the models for correspondences between CPC Ver.2 and CPC Ver.2.1.
+	 * Creates the models for correspondences between CPC Ver.1.1, CPC Ver.2 and CPC Ver.2.1.
 	 */
 	private void createCorrespondenceModels() {
 
-		// Create model for the correspondences between CPC Ver.2 and CPC Ver.2.1
+		logger.debug("Preparing to create model for the correspondences between CPC Ver.1.1 and CPC Ver.2");
 		cpcModel = ModelFactory.createDefaultModel();
 		cpcModel.setNsPrefix("rdfs", RDFS.getURI());
 		cpcModel.setNsPrefix("skos", SKOS.getURI());
 		cpcModel.setNsPrefix("xkos", XKOS.getURI());
+		cpcModel.setNsPrefix("asso", Names.getCorrespondenceBaseURI("CPC", "1.1", "CPC", "2") + "association/");
 
 		// Creation of the correspondence table resource
-		Resource table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "2",  "CPC",  "2.1"), XKOS.Correspondence);
+		Resource table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "1.1",  "CPC",  "2"), XKOS.Correspondence);
+		// TODO Add properties properly
+		table.addProperty(SKOS.definition, "CPC Ver.1.1 - CPC Ver.2 correspondence table");
+		try {
+			logger.debug("Preparing to read correspondence data from " + CPC11_TO_CPC2_FILE);
+			Reader reader = new FileReader(INPUT_FOLDER + CPC11_TO_CPC2_FILE);
+			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
+			for (CSVRecord record : parser) {
+				String cpc11Code = record.get("CPC11Code");
+				String cpc2Code = record.get("CPC2Code");
+				Resource association = cpcModel.createResource(Names.getAssociationURI(cpc11Code, "CPC",  "1.1", cpc2Code, "CPC", "2"), XKOS.ConceptAssociation);
+				association.addProperty(RDFS.label, "CPC Ver.1.1 " + cpc11Code + " - CPC Ver.2 " + cpc2Code);
+				association.addProperty(XKOS.sourceConcept, Names.getItemURI(cpc11Code, "CPC", "1.1"));
+				association.addProperty(XKOS.targetConcept, Names.getItemURI(cpc2Code, "CPC", "2"));
+				// There are no descriptions of the correspondences for CPC11-CPC2
+				table.addProperty(XKOS.madeOf, association);
+				// TODO Add 'partial' information
+			}
+			parser.close();
+			reader.close();
+		} catch (Exception e) {
+			logger.error("Error reading correspondences from " + CPC11_TO_CPC2_FILE, e);
+		}
+		// Write the Turtle file and clear the model
+		String turtleFileName = Names.getCorrespondenceContext("CPC", "1.1", "CPC", "2") + ".ttl";
+		try {
+			cpcModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
+			logger.info("Correspondences between CPC Ver.1.1 and CPC Ver.2 saved to file " + turtleFileName);
+		} catch (FileNotFoundException e) {
+			logger.error("Error saving the CPC11-CPC2 correspondences to " + turtleFileName, e);
+		}
+		cpcModel.close();
+
+		logger.debug("Preparing to create model for the correspondences between CPC Ver.2 and CPC Ver.2.1");
+		cpcModel = ModelFactory.createDefaultModel();
+		cpcModel.setNsPrefix("rdfs", RDFS.getURI());
+		cpcModel.setNsPrefix("skos", SKOS.getURI());
+		cpcModel.setNsPrefix("xkos", XKOS.getURI());
+		cpcModel.setNsPrefix("asso", Names.getCorrespondenceBaseURI("CPC", "2", "CPC", "2.1") + "association/");
+
+
+		// Creation of the correspondence table resource
+		table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "2",  "CPC",  "2.1"), XKOS.Correspondence);
 		// TODO Add properties properly
 		table.addProperty(SKOS.definition, "CPC Ver.2 - CPC Ver.2.1 correspondence table");
 		// Comment extracted from the 'readme.txt' file (could be better in a skos:historyNote)
 		table.addProperty(RDFS.comment, cpcModel.createLiteral("The correspondence does not yet include divisions 61 and 62 of the CPC", "en"));
 		try {
+			logger.debug("Preparing to read correspondence data from " + CPC2_TO_CPC21_FILE);
 			Reader reader = new FileReader(INPUT_FOLDER + CPC2_TO_CPC21_FILE);
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
 			for (CSVRecord record : parser) {
 				String cpc2Code = record.get("CPC2code");
 				String cpc21Code = record.get("CPC21code");
 				Resource association = cpcModel.createResource(Names.getAssociationURI(cpc2Code, "CPC",  "2", cpc21Code, "CPC", "2.1"), XKOS.ConceptAssociation);
+				association.addProperty(RDFS.label, "CPC Ver.2 " + cpc2Code + " - CPC Ver.2.1 " + cpc21Code);
 				association.addProperty(XKOS.sourceConcept, Names.getItemURI(cpc2Code, "CPC", "2"));
 				association.addProperty(XKOS.targetConcept, Names.getItemURI(cpc21Code, "CPC", "2.1"));
 				// There are no descriptions of the correspondences for CPC2-CPC2.1
@@ -247,13 +293,15 @@ public class CPCModelMaker {
 			logger.error("Error reading correspondences from " + CPC2_TO_CPC21_FILE, e);
 		}
 		// Write the Turtle file and clear the model
-		String turtleFileName = Names.getCorrespondenceContext("CPC", "2", "CPC", "2.1") + ".ttl";
+		turtleFileName = Names.getCorrespondenceContext("CPC", "2", "CPC", "2.1") + ".ttl";
 		try {
 			cpcModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
+			logger.info("Correspondences between CPC Ver.2 and CPC Ver.2.2 saved to file " + turtleFileName);
 		} catch (FileNotFoundException e) {
 			logger.error("Error saving the CPC2-CPC21 correspondences to " + turtleFileName, e);
 		}
 		cpcModel.close();
+
 	}
 
 	/**
