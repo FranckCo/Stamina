@@ -147,13 +147,14 @@ public class CPCModelMaker {
 			Resource level = levels.get(itemCode.length() - 1);
 			level.addProperty(SKOS.member, itemResource);
 		}
-		logger.debug("Preparing to create additional Spanish labels");
-		this.addLabels(INPUT_FOLDER + CPC_SPANISH_LABELS_FILE.get(version), version, "es");
+		// Create additional labels if existing
+		if (CPC_SPANISH_LABELS_FILE.get(version) != null)
+			this.addLabels(INPUT_FOLDER + CPC_SPANISH_LABELS_FILE.get(version), version, "es");
 
 		// Write the Turtle file and clear the model
 		String turtleFileName = OUTPUT_FOLDER + Names.getCSContext("CPC", version) + ".ttl";
 		cpcModel.write(new FileOutputStream(turtleFileName), "TTL");
-		logger.debug("The Jena model for CPC Ver." + version + " has been written to " + turtleFileName);
+		logger.info("The Jena model for CPC Ver." + version + " has been written to " + turtleFileName);
 		cpcModel.close();
 	}
 
@@ -197,6 +198,7 @@ public class CPCModelMaker {
 
 		if (filePath == null) return;
 
+		logger.debug("Preparing to create additional labels for version " + version + ", language is " + language);
 		try {
 			Reader reader = new InputStreamReader(new FileInputStream(filePath), "Cp1252");
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
@@ -252,7 +254,7 @@ public class CPCModelMaker {
 		String turtleFileName = Names.getCorrespondenceContext("CPC", "1.1", "CPC", "2") + ".ttl";
 		try {
 			cpcModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
-			logger.info("Correspondences between CPC Ver.1.1 and CPC Ver.2 saved to file " + turtleFileName);
+			logger.info("The Jena model for the correspondence between CPC Ver.1.1 and CPC Ver.2 has been written to " + OUTPUT_FOLDER + turtleFileName);
 		} catch (FileNotFoundException e) {
 			logger.error("Error saving the CPC11-CPC2 correspondences to " + turtleFileName, e);
 		}
@@ -301,7 +303,6 @@ public class CPCModelMaker {
 			logger.error("Error saving the CPC2-CPC21 correspondences to " + turtleFileName, e);
 		}
 		cpcModel.close();
-
 	}
 
 	/**
