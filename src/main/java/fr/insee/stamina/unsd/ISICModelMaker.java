@@ -223,7 +223,7 @@ public class ISICModelMaker {
 		logger.debug("Preparing to create additional labels, language is " + language + ", source file is " + filePath);
 		try {
 			Reader reader = new InputStreamReader(new FileInputStream(filePath), "Cp1252");
-			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
+			CSVParser parser = new CSVParser(reader, ISIC_LABELS_FILE_FORMAT.get(version));
 			for (CSVRecord record : parser) {
 				String itemCode = record.get(0);
 				Resource itemResource = isicModel.createResource(Names.getItemURI(itemCode, "ISIC", version));
