@@ -1,4 +1,4 @@
-package fr.insee.stamina.isic;
+package fr.insee.stamina.unsd;
 
 import java.io.File;
 import java.io.FileInputStream;
