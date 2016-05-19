@@ -82,10 +82,6 @@ public class ISICModelMaker {
 	/** CSV file containing the correspondences between ISIC Rev.4 and CPC Ver.2.1 */
 	private static String ISIC4_TO_CPC21_FILE = INPUT_FOLDER + "isic4-cpc21.txt";
 
-	/** File where the ISIC31 to ISIC4 correspondence information is saved as Turtle */
-	private static String ISIC31_TO_ISIC4_TTL = "src/main/resources/data/isic31-isic4.ttl";
-	private static String ISIC4_TO_CPC21_TTL = "src/main/resources/data/isic4-cpc21.ttl";
-
 	/** Log4J2 logger */
 	private static final Logger logger = LogManager.getLogger(ISICModelMaker.class);
 
@@ -282,7 +278,7 @@ public class ISICModelMaker {
 			isicModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
 			logger.info("The Jena model for the correspondence between ISIC Rev.3.1 and ISIC Rev.4 has been written to " + OUTPUT_FOLDER + turtleFileName);
 		} catch (FileNotFoundException e) {
-			logger.error("Error saving the ISIC31-ISIC4 correspondence to " + ISIC31_TO_ISIC4_TTL, e);
+			logger.error("Error saving the ISIC31-ISIC4 correspondence to " + turtleFileName, e);
 		}
 		isicModel.close();
 
@@ -325,7 +321,7 @@ public class ISICModelMaker {
 			isicModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
 			logger.info("The Jena model for the correspondence between ISIC Rev.4 and CPC Ver.2.1 has been written to " + OUTPUT_FOLDER + turtleFileName);
 		} catch (FileNotFoundException e) {
-			logger.error("Error saving the ISIC4-CPC21 correspondence to " + ISIC4_TO_CPC21_TTL, e);
+			logger.error("Error saving the ISIC4-CPC21 correspondence to " + turtleFileName, e);
 		}
 		isicModel.close();
 	}
