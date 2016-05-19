@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.jena.datatypes.BaseDatatype;
-import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -17,9 +16,9 @@ import org.apache.jena.vocabulary.XSD;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.stamina.isic.ISICModelMaker;
 import fr.insee.stamina.utils.ADMS;
 import fr.insee.stamina.utils.DCAT;
+import fr.insee.stamina.utils.Names;
 
 /**
  * The <code>ADMSModelMaker</code> creates and saves Jena models corresponding to the ADMS descriptions of the repositories.
@@ -77,9 +76,12 @@ public class ADMSModelMaker {
 		repositoryResource.addProperty(DCTerms.created, dateLiteral);
 		repositoryResource.addProperty(DCTerms.publisher, admsModel.createResource("http://www.unece.org"));
 
-		// Produce the asset and distribution descriptions for ISIC 3.1 and 4
-		this.addISICAssetModel("3.1");
-		this.addISICAssetModel("4");
+		// Produce the asset and distribution descriptions for CPC 1.1, CPC 2, CPC 2.1, ISIC 3.1 and 4
+		this.addISICAssetModel("CPC", "1.1");
+		this.addISICAssetModel("CPC", "2");
+		this.addISICAssetModel("CPC", "2.1");
+		this.addISICAssetModel("ISIC", "3.1");
+		this.addISICAssetModel("ISIC", "4");
 
 		// Write the Turtle file and clear the model
 		admsModel.write(new FileOutputStream(ADMS_TURTLE_FILE), "TTL");
@@ -87,26 +89,27 @@ public class ADMSModelMaker {
 	}
 
 	/**
-	 * Adds the asset and asset distribution information for ISIC in the model.
+	 * Adds the asset and asset distribution information for a classification in the model.
 	 * 
-	 * @param version ISIC version as a string, e.g. '4' or '3.1'.
+	 * @param classification Short name of the classification, e.g. "NACE", "ISIC", etc.
+	 * @param version Version of the classification ("4", "2.1", "2008", etc.).
 	 */
-	private void addISICAssetModel(String version) {
+	private void addISICAssetModel(String classification, String version) {
 
-		Resource isicAssetResource = admsModel.createResource(ADMS_BASE_URI + "asset/isicr" +  version.replaceFirst("\\.", ""), ADMS.Asset);
-		isicAssetResource.addProperty(DCTerms.type, ADMS.TaxonomyAssetType); // Or CodeList
-		isicAssetResource.addProperty(ADMS.identifier, ISICModelMaker.ISIC_SCHEME_NOTATION.get(version));
-		isicAssetResource.addProperty(DCTerms.title, ISICModelMaker.ISIC_SCHEME_LABEL.get(version));
-		isicAssetResource.addProperty(ADMS.status, ADMS.CompletedStatus); // TODO The asset itself is completed, the distribution is under development
+		Resource csAssetResource = admsModel.createResource(ADMS_BASE_URI + "asset/" + Names.getCSContext(classification, version), ADMS.Asset);
+		csAssetResource.addProperty(DCTerms.type, ADMS.TaxonomyAssetType); // Or CodeList
+		csAssetResource.addProperty(ADMS.identifier, Names.getCSShortName(classification, version));
+		csAssetResource.addProperty(DCTerms.title, Names.getCSLabel(classification, version));
+		csAssetResource.addProperty(ADMS.status, ADMS.CompletedStatus); // TODO The asset itself is completed, the distribution is under development
 
 		// TODO Do we directly take the SKOS ConceptScheme resource as ADMS distribution, or do we define a specific resource?
-		Resource isicDistributionResource = admsModel.createResource(isicAssetResource.getURI() + "/skos", ADMS.AssetDistribution);
-		isicDistributionResource.addProperty(ADMS.status, ADMS.UnderDevelopmentStatus);
-		isicDistributionResource.addProperty(ADMS.representationTechnique, ADMS.SKOSRepresentationTechnique);
-		isicDistributionResource.addProperty(ADMS.representationTechnique, ADMS.SPARQLRepresentationTechnique);
-		isicAssetResource.addProperty(DCAT.distribution, isicDistributionResource);
+		Resource csDistributionResource = admsModel.createResource(csAssetResource.getURI() + "/skos", ADMS.AssetDistribution);
+		csDistributionResource.addProperty(ADMS.status, ADMS.UnderDevelopmentStatus);
+		csDistributionResource.addProperty(ADMS.representationTechnique, ADMS.SKOSRepresentationTechnique);
+		csDistributionResource.addProperty(ADMS.representationTechnique, ADMS.SPARQLRepresentationTechnique);
+		csAssetResource.addProperty(DCAT.distribution, csDistributionResource);
 
-		repositoryResource.addProperty(ADMS.includedAsset, isicAssetResource);
+		repositoryResource.addProperty(ADMS.includedAsset, csAssetResource);
 	}
 
 }
