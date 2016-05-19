@@ -103,6 +103,8 @@ public class CPCModelMaker {
 	/**
 	 * Creates an Jena model corresponding to a version of CPC and saves it to a Turtle file.
 	 * 
+	 * @param version Version of the classification ("1.1", "2", "2.1").
+	 * @param withNotes Boolean indicating if the explanatory notes must be produced in the model.
 	 * @throws Exception In case of problem getting the data or creating the file.
 	 */
 	private void createCPCModel(String version, boolean withNotes) throws Exception {
@@ -147,7 +149,8 @@ public class CPCModelMaker {
 			Resource level = levels.get(itemCode.length() - 1);
 			level.addProperty(SKOS.member, itemResource);
 		}
-		// Create additional labels if existing
+		logger.debug("Finished reading table " + CPC_ACCESS_TABLE.get(version));
+		// Create additional labels if they exist
 		if (CPC_SPANISH_LABELS_FILE.get(version) != null)
 			this.addLabels(INPUT_FOLDER + CPC_SPANISH_LABELS_FILE.get(version), version, "es");
 
@@ -165,6 +168,7 @@ public class CPCModelMaker {
 	 */
 	private void initModel(String version) {
 
+		logger.debug("Initializing Jena model for CPC version " + version);
 		cpcModel = ModelFactory.createDefaultModel();
 		cpcModel.setNsPrefix("skos", SKOS.getURI());
 		cpcModel.setNsPrefix("xkos", XKOS.getURI());
@@ -183,7 +187,6 @@ public class CPCModelMaker {
 			level.addProperty(XKOS.depth, cpcModel.createTypedLiteral(levelIndex));
 			levels.add(level);
 		}
-
 		scheme.addProperty(XKOS.levels, cpcModel.createList(levels.toArray(new Resource[levels.size()])));
 	}
 
@@ -225,11 +228,13 @@ public class CPCModelMaker {
 		cpcModel.setNsPrefix("skos", SKOS.getURI());
 		cpcModel.setNsPrefix("xkos", XKOS.getURI());
 		cpcModel.setNsPrefix("asso", Names.getCorrespondenceBaseURI("CPC", "1.1", "CPC", "2") + "association/");
+		// TODO Not sure it is a good idea to create a prefix associated with different namespaces: see what happens when you load data
 
 		// Creation of the correspondence table resource
 		Resource table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "1.1",  "CPC",  "2"), XKOS.Correspondence);
-		// TODO Add properties properly
-		table.addProperty(SKOS.definition, "CPC Ver.1.1 - CPC Ver.2 correspondence table");
+		table.addProperty(SKOS.definition, "Correspondence table between CPC Ver.1.1 - CPC Ver.2");
+		table.addProperty(XKOS.compares, Names.getCSURI("CPC", "1.1"));
+		table.addProperty(XKOS.compares, Names.getCSURI("CPC", "2"));
 		try {
 			logger.debug("Preparing to read correspondence data from " + CPC11_TO_CPC2_FILE);
 			Reader reader = new FileReader(INPUT_FOLDER + CPC11_TO_CPC2_FILE);
@@ -267,11 +272,11 @@ public class CPCModelMaker {
 		cpcModel.setNsPrefix("xkos", XKOS.getURI());
 		cpcModel.setNsPrefix("asso", Names.getCorrespondenceBaseURI("CPC", "2", "CPC", "2.1") + "association/");
 
-
 		// Creation of the correspondence table resource
 		table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "2",  "CPC",  "2.1"), XKOS.Correspondence);
-		// TODO Add properties properly
 		table.addProperty(SKOS.definition, "CPC Ver.2 - CPC Ver.2.1 correspondence table");
+		table.addProperty(XKOS.compares, Names.getCSURI("CPC", "2"));
+		table.addProperty(XKOS.compares, Names.getCSURI("CPC", "2.1"));
 		// Comment extracted from the 'readme.txt' file (could be better in a skos:historyNote)
 		table.addProperty(RDFS.comment, cpcModel.createLiteral("The correspondence does not yet include divisions 61 and 62 of the CPC", "en"));
 		try {
@@ -298,9 +303,9 @@ public class CPCModelMaker {
 		turtleFileName = Names.getCorrespondenceContext("CPC", "2", "CPC", "2.1") + ".ttl";
 		try {
 			cpcModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
-			logger.info("Correspondences between CPC Ver.2 and CPC Ver.2.2 saved to file " + turtleFileName);
+			logger.info("The Jena model for the correspondence between CPC Ver.2 and CPC Ver.2.1 has been written to " + OUTPUT_FOLDER + turtleFileName);
 		} catch (FileNotFoundException e) {
-			logger.error("Error saving the CPC2-CPC21 correspondences to " + turtleFileName, e);
+			logger.error("Error saving the CPC2-CPC21 correspondence to " + turtleFileName, e);
 		}
 		cpcModel.close();
 	}
