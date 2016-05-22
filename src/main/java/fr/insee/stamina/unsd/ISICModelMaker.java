@@ -40,7 +40,7 @@ import fr.insee.stamina.utils.XKOS;
  * The data is extracted from MS Access files available on the UNSD web site (http://unstats.un.org/unsd/cr/registry/regdnld.asp).
  * 
  * @author Franck Cotton
- * @version 0.10, 18 May 2016
+ * @version 0.11, 22 May 2016
  */
 public class ISICModelMaker {
 
@@ -61,6 +61,8 @@ public class ISICModelMaker {
 	private static Map<String, String> ISIC_SPANISH_LABELS_FILE = new HashMap<String, String>();
 	/** CSV format of the files containing additional labels */
 	private static Map<String, CSVFormat> ISIC_LABELS_FILE_FORMAT = new HashMap<String, CSVFormat>();
+	/** CSV files containing the correspondence tables */
+	private static Map<String, String> CORRESPONDENCE_FILE = new HashMap<String, String>();
 	// Initialization of the static properties
 	static {
 		ISIC_ACCESS_FILE.put("3.1", "ISIC31_english.mdb");
@@ -75,12 +77,12 @@ public class ISICModelMaker {
 		ISIC_SPANISH_LABELS_FILE.put("4", "ISIC_Rev_4_spanish_structure.txt");
 		ISIC_LABELS_FILE_FORMAT.put("3.1", CSVFormat.TDF.withQuote(null).withIgnoreEmptyLines());
 		ISIC_LABELS_FILE_FORMAT.put("4", CSVFormat.DEFAULT.withHeader());
+		// The concatenation of ISIC or CPC versions is used as a selector for tables
+		CORRESPONDENCE_FILE.put("3.14", "ISIC31_ISIC4.txt");
+		CORRESPONDENCE_FILE.put("3.11.1", "ISIC31-CPC11-correspondence.txt");
+		CORRESPONDENCE_FILE.put("42", "ISIC4-CPC2.txt");
+		CORRESPONDENCE_FILE.put("42.1", "isic4-cpc21.txt");
 	}
-
-	/** CSV file containing the correspondence between ISIC Rev.3.1 and ISIC Rev.4 */
-	private static String ISIC31_TO_ISIC4_FILE = INPUT_FOLDER + "ISIC31_ISIC4.txt";
-	/** CSV file containing the correspondences between ISIC Rev.4 and CPC Ver.2.1 */
-	private static String ISIC4_TO_CPC21_FILE = INPUT_FOLDER + "isic4-cpc21.txt";
 
 	/** Log4J2 logger */
 	private static final Logger logger = LogManager.getLogger(ISICModelMaker.class);
@@ -107,7 +109,10 @@ public class ISICModelMaker {
 		logger.debug("New ISICModelMaker instance created");
 		modelMaker.createISICModel("4", false);
 		modelMaker.createISICModel("3.1", false);
-		modelMaker.createCorrespondenceModels();
+		modelMaker.createCorrespondenceModel("ISIC", "3.1", "ISIC", "4");
+		modelMaker.createCorrespondenceModel("ISIC", "3.1", "CPC", "1.1");
+		modelMaker.createCorrespondenceModel("ISIC", "4", "CPC", "2");
+		modelMaker.createCorrespondenceModel("ISIC", "4", "CPC", "2.1");
 		logger.debug("Program terminated");
 	}
 
@@ -201,7 +206,7 @@ public class ISICModelMaker {
 
 		levels = new ArrayList<Resource>();
 		for (int levelIndex = 1; levelIndex <= numberOfLevels; levelIndex++) {
-			Resource level = isicModel.createResource(Names.getClassificationLevelLabel("ISIC", version, levelIndex), XKOS.ClassificationLevel);
+			Resource level = isicModel.createResource(Names.getClassificationLevelURI("ISIC", version, levelIndex), XKOS.ClassificationLevel);
 			level.addProperty(SKOS.prefLabel, isicModel.createLiteral(Names.getClassificationLevelLabel("ISIC", version, levelIndex), "en"));
 			level.addProperty(XKOS.depth, isicModel.createTypedLiteral(levelIndex));
 			levels.add(level);
@@ -236,92 +241,70 @@ public class ISICModelMaker {
 		}
 	}
 
-	/**
-	 * Creates the models for correspondences between ISIC Rev.3.1 and ISIC Rev.4 and between ISIC Rev.4 and CPC Ver.2.1.
-	 */
-	private void createCorrespondenceModels() {
+	private void createCorrespondenceModel(String sourceClassification, String sourceVersion, String targetClassification, String targetVersion) {
 
-		logger.debug("Preparing to create model for the correspondences between ISIC Rev.3.1 and ISIC Rev.4");
+		String sourceShortName = Names.getCSShortName(sourceClassification, sourceVersion);
+		String targetShortName = Names.getCSShortName(targetClassification, targetVersion);
+		String selector = sourceVersion + targetVersion;
+
+		logger.debug("Preparing to create model for the correspondences between " + sourceShortName + " and " + targetShortName);
 		isicModel = ModelFactory.createDefaultModel();
 		isicModel.setNsPrefix("rdfs", RDFS.getURI());
 		isicModel.setNsPrefix("skos", SKOS.getURI());
 		isicModel.setNsPrefix("xkos", XKOS.getURI());
-		//isicModel.setNsPrefix("asso", Names.getCorrespondenceBaseURI("ISIC", "3.1", "ISIC", "4") + "association/");
-		// TODO Uncomment previous line to create 'asso' prefix 
+		//isicModel.setNsPrefix("asso", Names.getCorrespondenceBaseURI(sourceClassification, sourceVersion, targetClassification, targetVersion) + "association/");
+		// TODO Uncomment previous line to create 'asso' prefix
 
 		// Creation of the correspondence table resource
-		Resource table = isicModel.createResource(Names.getCorrespondenceURI("ISIC",  "3.1",  "ISIC",  "4"), XKOS.Correspondence);
-		table.addProperty(SKOS.definition, "Correspondence table between ISIC Rev.3.1 and ISIC Rev.4");
-		table.addProperty(XKOS.compares, Names.getCSURI("ISIC", "3.1"));
-		table.addProperty(XKOS.compares, Names.getCSURI("ISIC", "4"));
+		Resource table = isicModel.createResource(Names.getCorrespondenceURI(sourceClassification,  sourceVersion, targetClassification,  targetVersion), XKOS.Correspondence);
+		table.addProperty(SKOS.definition, "Correspondence table between " + sourceShortName + " and " + targetShortName);
+		table.addProperty(XKOS.compares, Names.getCSURI(sourceClassification, sourceVersion));
+		table.addProperty(XKOS.compares, Names.getCSURI(targetClassification, targetVersion));
+		// ISIC31-CPC11, ISIC4-CPC2 and ISIC4-CPC21 have comments in the 'readme.txt' files (could be better in a skos:historyNote)
+		if (selector.equals("3.11.1"))
+			table.addProperty(RDFS.comment, isicModel.createLiteral("Please note, that certain products in the CPC (e.g. waste products in CPC division 39) are not linked to specific industries.", "en"));
+		if (selector.equals("42"))
+			table.addProperty(RDFS.comment, isicModel.createLiteral("The correspondence does not yet include divisions 45-47 of ISIC. Note that waste products of the CPC (i.e. those in division 39) are not linked to an ISIC industry.", "en"));
+		if (selector.equals("42.1"))
+			table.addProperty(RDFS.comment, isicModel.createLiteral("The correspondence does not yet include divisions 45, 46 and 47 of ISIC", "en"));
+
 		try {
-			Reader reader = new FileReader(ISIC31_TO_ISIC4_FILE);
+			Reader reader = new FileReader(INPUT_FOLDER + CORRESPONDENCE_FILE.get(selector));
+			logger.debug("Reading concept associations from " + INPUT_FOLDER + CORRESPONDENCE_FILE.get(selector));
 			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
+			// The column names are coherent across the files, except for ISIC31-CPC11
+			String sourceColumnName = sourceClassification + sourceVersion.replace(".", "") + "code";
+			String targetColumnName = targetClassification + targetVersion.replace(".", "") + "code";
+			if (selector.equals("3.11.1")) {
+				sourceColumnName = "ISICcode";
+				targetColumnName = "CPCcode";
+			}
 			for (CSVRecord record : parser) {
-				String isic31Code = record.get("ISIC31code");
-				String isic4Code = record.get("ISIC4code");
-				Resource association = isicModel.createResource(Names.getAssociationURI(isic31Code, "ISIC", "3.1", isic4Code, "ISIC", "4"), XKOS.ConceptAssociation);
-				association.addProperty(XKOS.sourceConcept, Names.getItemURI(isic31Code, "ISIC", "3.1"));
-				association.addProperty(XKOS.targetConcept, Names.getItemURI(isic4Code, "ISIC", "4"));
-				if (record.get("Detail").length() > 0) association.addProperty(RDFS.comment, isicModel.createLiteral(record.get("Detail"), "en"));
+				String sourceCode = record.get(sourceColumnName);
+				String targetCode = record.get(targetColumnName);
+				// The next line is to avoid the line "83960","0","n/a" in "ISIC4-CPC2.txt"
+				if (targetCode.equals("0")) continue;
+				Resource association = isicModel.createResource(Names.getAssociationURI(sourceCode, sourceClassification, sourceVersion, targetCode, targetClassification, targetVersion), XKOS.ConceptAssociation);
+				association.addProperty(RDFS.label, sourceShortName + " " + sourceCode + " - " + targetShortName + " " + targetCode);
+				association.addProperty(XKOS.sourceConcept, Names.getItemURI(sourceCode, sourceClassification, sourceVersion));
+				association.addProperty(XKOS.targetConcept, Names.getItemURI(targetCode, targetClassification, targetVersion));
+				// Notes on associations only in ISIC31-ISIC4 correspondence
+				if ((selector.equals("3.14")) && (record.get("Detail").length() > 0)) association.addProperty(RDFS.comment, isicModel.createLiteral(record.get("Detail"), "en"));
 				table.addProperty(XKOS.madeOf, association);
 				// TODO Add 'partial' information
 			}
 			parser.close();
 			reader.close();
 		} catch (Exception e) {
-			logger.error("Error reading correspondences from " + ISIC31_TO_ISIC4_FILE, e);
+			logger.error("Error reading correspondences from " + INPUT_FOLDER + CORRESPONDENCE_FILE.get(selector), e);
 		}
 		// Write the Turtle file and clear the model
-		String turtleFileName = Names.getCorrespondenceContext("ISIC", "3.1", "ISIC", "4") + ".ttl";
+		String turtleFileName = Names.getCorrespondenceContext(sourceClassification, sourceVersion, targetClassification, targetVersion) + ".ttl";
 		try {
 			isicModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
-			logger.info("The Jena model for the correspondence between ISIC Rev.3.1 and ISIC Rev.4 has been written to " + OUTPUT_FOLDER + turtleFileName);
+			logger.info("The Jena model for the correspondence between " + sourceShortName + " and " + targetShortName + " has been written to " + OUTPUT_FOLDER + turtleFileName);
 		} catch (FileNotFoundException e) {
 			logger.error("Error saving the ISIC31-ISIC4 correspondence to " + turtleFileName, e);
-		}
-		isicModel.close();
-
-		logger.debug("Preparing to create model for the correspondences between ISIC Rev.4 and CPC Ver.2.1");
-		isicModel = ModelFactory.createDefaultModel();
-		isicModel.setNsPrefix("rdfs", RDFS.getURI());
-		isicModel.setNsPrefix("skos", SKOS.getURI());
-		isicModel.setNsPrefix("xkos", XKOS.getURI());
-		//isicModel.setNsPrefix("asso", Names.getCorrespondenceBaseURI("ISIC", "4", "CPC", "2.1") + "association/");
-		// TODO Uncomment previous line to create 'asso' prefix 
-
-		// Creation of the correspondence table resource
-		table = isicModel.createResource(Names.getCorrespondenceURI("ISIC",  "4",  "CPC",  "2.1"), XKOS.Correspondence);
-		table.addProperty(SKOS.definition, "Correspondence table between ISIC Rev.4 and CPC Ver.2.1");
-		table.addProperty(XKOS.compares, Names.getCSURI("ISIC", "4"));
-		table.addProperty(XKOS.compares, Names.getCSURI("CPC", "2.1"));
-		// Comment extracted from the 'readme.txt' file (could be better in a skos:historyNote)
-		table.addProperty(RDFS.comment, isicModel.createLiteral("The correspondence does not yet include divisions 45, 46 and 47 of ISIC", "en"));
-		try {
-			Reader reader = new FileReader(ISIC4_TO_CPC21_FILE);
-			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
-			for (CSVRecord record : parser) {
-				String isic4Code = record.get("ISIC4code");
-				String cpc21Code = record.get("CPC21code");
-				Resource association = isicModel.createResource(Names.getAssociationURI(isic4Code, "ISIC", "4", cpc21Code, "CPC", "2.1"), XKOS.ConceptAssociation);
-				association.addProperty(XKOS.sourceConcept, Names.getItemURI(isic4Code, "ISIC", "4"));
-				association.addProperty(XKOS.targetConcept, Names.getItemURI(cpc21Code, "CPC", "2.1"));
-				// There are no descriptions for the ISIC4-CPC21 correspondences
-				table.addProperty(XKOS.madeOf, association);
-				// TODO Add 'partial' information
-			}
-			parser.close();
-			reader.close();
-		} catch (Exception e) {
-			logger.error("Error reading correspondences from " + ISIC4_TO_CPC21_FILE, e);
-		}
-		// Write the Turtle file and clear the model
-		turtleFileName = Names.getCorrespondenceContext("ISIC", "4", "CPC", "2.1") + ".ttl";
-		try {
-			isicModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
-			logger.info("The Jena model for the correspondence between ISIC Rev.4 and CPC Ver.2.1 has been written to " + OUTPUT_FOLDER + turtleFileName);
-		} catch (FileNotFoundException e) {
-			logger.error("Error saving the ISIC4-CPC21 correspondence to " + turtleFileName, e);
 		}
 		isicModel.close();
 	}
