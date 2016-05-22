@@ -37,7 +37,7 @@ Regarding **correspondence tables** (all files are zipped CSV):
 * Between CPC versions 2 and 2.1: [CPCv2_CPCv21.zip](http://unstats.un.org/unsd/cr/registry/regdntransfer.asp?f=291)
 * Between CPC versions 1.1 and 2: [CPCv11_CPCv2.zip](http://unstats.un.org/unsd/cr/registry/regdntransfer.asp?f=127)
 * Between ISIC revision 4 and CPC version 2.1: [ISIC4_CPCv21.zip](http://unstats.un.org/unsd/cr/registry/regdntransfer.asp?f=289)
-* Between ISIC revision 4 and CPC version 2: [ISIC4-CPC2.zip](http://unstats.un.org/unsd/cr/registry/regdntransfer.asp?f=261)
+* Between ISIC revision 4 and CPC version 2: [ISIC4-CPC2.zip](http://unstats.un.org/unsd/cr/registry/regdntransfer.asp?f=261). Note that this file contains a invalid line ("83960","0","n/a") which is ignored by the program.
 * Between ISIC revision 3.1 and CPC version 1.1: [ISIC_Rev_3_1-CPC_V1_1.zip](http://unstats.un.org/unsd/cr/registry/regdntransfer.asp?f=45)
 
 The following precisions are copied from the "readme" files available in the archives:
@@ -53,5 +53,5 @@ All files should be put in the main/resources/data folder and unzipped before ru
 
 The following Turtle files are produced by the programs:
 
-* isic31.ttl, isic4.ttl, cpc11.ttl, cpc2.ttl and cpc21.ttl correspond to the classification schemes for ISIC Rev.3.1, ISIC Rev.4, CPC Ver.1.1, CPC Ver.2 and CPC Ver.2.1
-* isic31-isic4.ttl, isic4-cpc2.ttl, isic4-cpc21.ttl, cpc11-cpc2.ttl and cpc2-cpc21.ttl contain the correspondence tables between ISIC Rev.3.1 and ISIC Rev.4, ISIC Rev.4 and CPC Ver.2, ISIC Rev.4 and CPC Ver.2.1, CPC Ver.1.1 and CPC Ver.2, and CPC Ver.2 and CPC Ver.2.1 respectively
+* isicr31.ttl, isicr4.ttl, cpcv11.ttl, cpcv2.ttl and cpcv21.ttl correspond to the classification schemes for ISIC Rev.3.1, ISIC Rev.4, CPC Ver.1.1, CPC Ver.2 and CPC Ver.2.1
+* isicr31-isicr4.ttl, isicr31-cpcv11.ttl, isicr4-cpcv2.ttl, isicr4-cpcv21.ttl, cpcv11-cpcv2.ttl and cpcv2-cpcv21.ttl contain the correspondence tables between ISIC Rev.3.1 and ISIC Rev.4, ISIC Rev.3.1 and CPC Ver.1.1, ISIC Rev.4 and CPC Ver.2, ISIC Rev.4 and CPC Ver.2.1, CPC Ver.1.1 and CPC Ver.2, and CPC Ver.2 and CPC Ver.2.1 respectively
