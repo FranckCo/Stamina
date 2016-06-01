@@ -2,6 +2,7 @@ package fr.insee.stamina.eurostat;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -48,25 +49,26 @@ import fr.insee.stamina.utils.XKOS;
 public class NACECPAModelMaker {
 
 	/** Base local folder for input files */
-	public static String LOCAL_FOLDER = "src/main/resources/data/";
-	/** Expression for filtering NACE Rev. 1.1 files*/
-	public static String NACE_R11_FILE_FILTER = "NACE_REV_1_1_*.xml";
-	/** Expression for filtering NACE Rev. 2 files*/
-	public static String NACE_R2_FILE_FILTER = "NACE_REV2_*.xml";
-	/** Expression for filtering CPA Version 2008 files */
-	public static String CPA_V2008_FILE_FILTER = "CPA_2008_*.xml";
-	/** Expression for filtering CPA Version 2.1 files */
-	public static String CPA_V21_FILE_FILTER = "CPA_2_1_*.xml";
+	public static String LOCAL_FOLDER = "D:\\Temp\\NACE\\";
+	/** Expression for filtering files corresponding to a given classification scheme or correspondence */
+	private static Map<String, String> FILE_FILTER = new HashMap<String, String>();
+	static {
+		FILE_FILTER.put("NACE1.1", "NACE_1_1_*.xml");
+		FILE_FILTER.put("NACE2", "NACE_REV2_*.xml");
+		FILE_FILTER.put("CPA2008", "CPA_2008_*.xml");
+		FILE_FILTER.put("CPA2.1", "CPA_2_1_*.xml");
+		// For correspondences, we use the concatenation of keys
+		FILE_FILTER.put("NACE1.1NACE2", "NACE REV. 1.1 - NACE REV. 2_*.csv"); // NACE Rev. 1.1 to NACE Rev. 2 correspondence
+		FILE_FILTER.put("CPA2008CPA2.1", "CPA 2008 - CPA 2.1_*.csv"); // CPA Ver. 2008 to CPA Ver. 2.1 correspondence
+		// TODO Add the following
+		FILE_FILTER.put("NACE2CPA2008", null); // NACE Rev. 2 to CPA Ver. 2008 correspondence
+		FILE_FILTER.put("NACE2CPA2.1", null); // NACE Rev. 2 to CPA Ver. 2.1 correspondence
+	}
 
-	/** Expression for filtering CPA Version 2008 to CPA Version 2.1 correspondence files */
-	public static String CPA_V2008__V21_FILE_FILTER = "CPA 2008 - CPA 2.1_*.csv";
-	/** Expression for filtering NACE Rev. 1.1 to NACE Rev. 2 correspondence files */
-	public static String NACE_R11_R2_FILE_FILTER = "NACE REV. 1.1 - NACE REV. 2_*.csv";
-
-	/** XSL transformation for NACE (hopefully independent of version) */
-	public static String NACE_XSL_FILE = LOCAL_FOLDER + "nacer2-to-xkos.xsl";
-	/** XSL transformation for CPA (hopefully independent of version) */
-	public static String CPA_XSL_FILE = LOCAL_FOLDER + "cpav21-to-xkos.xsl";
+	/** XSL transformation file for NACE */
+	public static String NACE_XSL_FILE = LOCAL_FOLDER + "nace-to-xkos.xsl";
+	/** XSL transformation file for CPA */
+	public static String CPA_XSL_FILE = LOCAL_FOLDER + "cpa-to-xkos.xsl";
 
 	/** Log4J2 logger */ // This must be before the configuration initialization
 	private static final Logger logger = LogManager.getLogger(NACECPAModelMaker.class);
@@ -95,14 +97,21 @@ public class NACECPAModelMaker {
 		// Create the models for the classifications
 		for (String classification : BASE_CONFIGURATION.keySet()) {
 			for (String version : BASE_CONFIGURATION.get(classification).keySet()) {
+				if (BASE_CONFIGURATION.get(classification).get(version) == null)
+					logger.warn("No input file found for " + classification + " " + version);
+				else try {
+					modelMaker.createClassificationModel(classification, version);
+				} catch (Exception e) {
+					logger.error("Error during the creation of the classification model", e);
+				}
 				logger.info("Creation of the Turtle file corresponding to " + classification + version);
-				modelMaker.createClassificationModel(BASE_CONFIGURATION.get(classification).get(version));
+				
 			}
 		}
 		// Create the models for the correspondence tables
-		String cpa2008cpa21CorrespondenceFile = getMatchingFileName(CPA_V2008__V21_FILE_FILTER);
+		String cpa2008cpa21CorrespondenceFile = getMatchingFileName(FILE_FILTER.get("CPA2008CPA2.1"));
 		if (cpa2008cpa21CorrespondenceFile != null)
-			modelMaker.createHistoricalCorrespondenceModel(LOCAL_FOLDER + cpa2008cpa21CorrespondenceFile, "CPA", "2008", "2.1");
+			modelMaker.createHistoricalCorrespondenceModel(cpa2008cpa21CorrespondenceFile, "CPA", "2008", "2.1");
 		logger.debug("End of programm");
 	}
 
@@ -112,34 +121,32 @@ public class NACECPAModelMaker {
 	 * @param specification The specification (input, transformation and output files) to use.
 	 * @throws Exception In case of error during the creation of the model.
 	 */
-	private void createClassificationModel(TransformationSpecification specification) throws Exception {
+	private void createClassificationModel(String classification, String version) throws Exception {
 
-		if (specification == null) {
-			logger.warn("No input file found for this classification and version" );
-			return;
-		}
+		TransformationSpecification specification = BASE_CONFIGURATION.get(classification).get(version); // Not null at this stage
+
 		// Strip extraneous or useless lines in Ramon files
 		String inputFileName = removeLines(specification.getInputFile(), ramonLines);
-		// Execute the transformation and store the result in a temporary file
-		String tempFileName = specification.getOutputFile() + ".tmp";
+		// Execute the transformation and store the result in a RDF/XML file
+		String rdfFileName = specification.getOutputFile().replace(".ttl", ".rdf");
 		// We need Saxon to process XSLT v2
 		TransformerFactory transformerFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", null);
 		Transformer transformer = transformerFactory.newTransformer(new StreamSource(specification.getTransformationFile()));
-		transformer.transform(new StreamSource(inputFileName), new StreamResult(tempFileName));
+		transformer.setParameter("base-url", Names.getCSBaseURI(classification, version));
+		transformer.setParameter("version", version);
+		transformer.transform(new StreamSource(inputFileName), new StreamResult(new File(rdfFileName)));
 		// Convert RDF/XML format to Turtle
 		this.initializeModel();
-		model.read(tempFileName, "RDF/XML");
+		model.read(rdfFileName, "RDF/XML");
 		model.write(new FileOutputStream(specification.getOutputFile()), "TTL");
 		model.close();
-		// TODO Add prefixes
-		
-		// Delete intermediary files (XML sanitized copy and RDF/XML file)
+
+		// Delete intermediary input file
 		try {
-			Files.delete(Paths.get(specification.getInputFile()));
-			Files.delete(Paths.get(tempFileName));
-			logger.debug("Files " + specification.getInputFile() + " and " + tempFileName + " deleted");
+			Files.delete(Paths.get(inputFileName));
+			logger.debug("File " + specification.getInputFile() + " deleted");
 		} catch (Exception e) {
-			logger.debug("Error deleting intermediary files " + specification.getInputFile() + " and/or " + tempFileName);
+			logger.debug("Error deleting intermediary file " + inputFileName, e);
 		}
 	}
 
@@ -377,19 +384,24 @@ public class NACECPAModelMaker {
 	 * Returns the name of a RAMON file matching a given filter.
 	 * 
 	 * @param filter The file name filter to match.
-	 * @return The name of the most recent file matching the filter.
-	 * @throws IOException In case of error accessing the file system.
+	 * @return The name of the most recent file matching the filter, or <code>null</code> if no file matches or in case of error.
 	 */
-	private static String getMatchingFileName(String filter) throws IOException {
+	private static String getMatchingFileName(String filter) {
 
 		logger.debug("Matching files in " + LOCAL_FOLDER + " for filter " + filter);
 		List<String> fileList = new ArrayList<>();
 		// Get all the files whose name matches the filter 
-		DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(LOCAL_FOLDER), filter);
-		for (Path path: stream) {
-			fileList.add(path.getFileName().toString());
+		DirectoryStream<Path> stream;
+		try {
+			stream = Files.newDirectoryStream(Paths.get(LOCAL_FOLDER), filter);
+			for (Path path: stream) {
+				fileList.add(path.getFileName().toString());
+			}
+			stream.close();
+		} catch (IOException e) {
+			logger.error("Error accesssing the file system", e);
+			return null;
 		}
-		stream.close();
 		logger.debug("Found " + fileList.size() + " matching file(s)");
 		// If no file matches the specification is set to null, else sort the list and take the last element (ie: most recent file)
 		if (fileList.isEmpty()) return null;
@@ -413,40 +425,23 @@ public class NACECPAModelMaker {
 
 		// We first initialize the input file to the file filter
 		Map<String, TransformationSpecification> cpaSpecification = new HashMap<String, TransformationSpecification>();
-		cpaSpecification.put("2008", new TransformationSpecification(CPA_V2008_FILE_FILTER, CPA_XSL_FILE, getTurtleFilePath("CPA", "2008")));
-		cpaSpecification.put("2.1", new TransformationSpecification(CPA_V21_FILE_FILTER, CPA_XSL_FILE, getTurtleFilePath("CPA", "2.1")));
+		cpaSpecification.put("2008", new TransformationSpecification(FILE_FILTER.get("CPA2008"), CPA_XSL_FILE, getTurtleFilePath("CPA", "2008")));
+		cpaSpecification.put("2.1", new TransformationSpecification(FILE_FILTER.get("CPA2.1"), CPA_XSL_FILE, getTurtleFilePath("CPA", "2.1")));
 		Map<String, TransformationSpecification> naceSpecification = new HashMap<String, TransformationSpecification>();
-		naceSpecification.put("1.1", new TransformationSpecification(NACE_R11_FILE_FILTER, NACE_XSL_FILE, getTurtleFilePath("NACE", "1.1")));
-		naceSpecification.put("2", new TransformationSpecification(NACE_R2_FILE_FILTER, NACE_XSL_FILE, getTurtleFilePath("NACE", "2")));
+		naceSpecification.put("1.1", new TransformationSpecification(FILE_FILTER.get("NACE1.1"), NACE_XSL_FILE, getTurtleFilePath("NACE", "1.1")));
+		naceSpecification.put("2", new TransformationSpecification(FILE_FILTER.get("NACE2"), NACE_XSL_FILE, getTurtleFilePath("NACE", "2")));
 
-		baseConfiguration.put("CPC", cpaSpecification);
+		baseConfiguration.put("CPA", cpaSpecification);
 		baseConfiguration.put("NACE", naceSpecification);
 
 		// Then we resolve the name of the actual input file (if there is no match, the specification will be null)
-		List<String> fileList = null;
-		try {
-			for (String classification : baseConfiguration.keySet()) {
-				for (String version : baseConfiguration.get(classification).keySet()) {
-					fileList = new ArrayList<>();
-					// Get all the files whose name matches the filter 
-					DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(LOCAL_FOLDER), baseConfiguration.get(classification).get(version).getInputFile());
-					for (Path path: stream) {
-						fileList.add(path.getFileName().toString());
-					}
-					stream.close();
-					// If no file matches the specification is set to null, else sort the list and take the last element (ie: most recent file)
-					if (fileList.isEmpty()) baseConfiguration.get(classification).put(version, null);
-					else {
-						Collections.sort(fileList);
-						baseConfiguration.get(classification).get(version).setInputFile(LOCAL_FOLDER + fileList.get(fileList.size() - 1));
-					}
+		for (String classification : baseConfiguration.keySet()) {
+			for (String version : baseConfiguration.get(classification).keySet()) {
+				baseConfiguration.get(classification).get(version).setInputFile(getMatchingFileName(FILE_FILTER.get(classification + version)));
 				logger.info("Specification for " + classification + " " + version + " is: " + baseConfiguration.get(classification).get(version));
-				}
 			}
-		} catch (IOException e) {
-			logger.fatal("Error while initialising the configuration", e);
-			return null;
 		}
+
 		return baseConfiguration;
 	}
 
