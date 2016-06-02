@@ -26,8 +26,11 @@ public class Names {
 		LEVEL_NAMES.put("ISIC", Arrays.asList("section", "division", "group", "class"));
 		LEVEL_NAMES.put("CPC", Arrays.asList("section", "division", "group", "class", "subclass"));
 		LEVEL_NAMES.put("NACE", Arrays.asList("section", "division", "group", "class"));
+		// NACE revisions 1 and 1.1 had subsections
+		LEVEL_NAMES.put("NACEX", Arrays.asList("section", "subsection", "division", "group", "class"));
 		LEVEL_NAMES.put("CPA", Arrays.asList("section", "division", "group", "class", "category", "subcategory"));
-		// TODO Distinguish according to NACE and CPA versions (CPA 2002 and NACE 1.1 have subsections)
+		// CPA 2002 and before had subsections
+		LEVEL_NAMES.put("CPAX", Arrays.asList("section", "subsection", "division", "group", "class", "category", "subcategory"));
 		// TODO Add other cases
 	}
 
@@ -88,8 +91,8 @@ public class Names {
 		if ("CPC".equals(shortName)) return String.format("Central Product Classification, Ver.%s", version);
 		if ("NACE".equals(shortName)) return String.format("Statistical Classification of Economic Activities in the European Community, Rev. %s", version);
 		if ("CPA".equals(shortName)) return String.format("Statistical Classification of Products by Activity, Version %s", version);
-		if ("NAF".equals(shortName)) return String.format("Nomenclature d'activités française - NAF rév. %s", version);
-		if ("CPF".equals(shortName)) return String.format("Classification des produits française - CPF rév. %s", version);
+		if ("NAF".equals(shortName)) return String.format("Nomenclature d'activitÃ©s franÃ§aise - NAF rÃ©v. %s", version);
+		if ("CPF".equals(shortName)) return String.format("Classification des produits franÃ§aise - CPF rÃ©v. %s", version);
 
 		return null;
 	}
@@ -110,8 +113,8 @@ public class Names {
 		if ("CPC".equals(shortName)) return String.format("CPC Ver.%s", version);
 		if ("NACE".equals(shortName)) return String.format("NACE Rev. %s", version);
 		if ("CPA".equals(shortName)) return String.format("CPA %s", version);
-		if ("NAF".equals(shortName)) return String.format("NAF rév. %s", version);
-		if ("CPF".equals(shortName)) return String.format("CPF rév. %s", version);
+		if ("NAF".equals(shortName)) return String.format("NAF rÃ©v. %s", version);
+		if ("CPF".equals(shortName)) return String.format("CPF rÃ©v. %s", version);
 
 		return null;
 	}
@@ -146,7 +149,7 @@ public class Names {
 
 		String levelName = LEVEL_NAMES.get(classification).get(depth - 1);
 
-		return getCSLabel(classification, version) + " - " + levelName.substring(0, 1).toUpperCase() + levelName.substring(1);
+		return getCSLabel(classification, version) + " - " + levelName.substring(0, 1).toUpperCase() + levelName.substring(1) + " level";
 	}
 
 	/**
@@ -216,7 +219,7 @@ public class Names {
 	 */
 	public static String getItemURI(String code, String classification, String version) {
 
-		return getCSContext(classification, version) + getItemPathInContext(code, classification, version);
+		return getCSBaseURI(classification, version) + getItemPathInContext(code, classification, version);
 	}
 
 	/**
@@ -231,7 +234,8 @@ public class Names {
 	public static String getItemPathInContext(String code, String classification, String version) {
 
 		String selector = classification.toUpperCase();
-		// TODO If CPA do additional things
+		if (selector.equals("NACE") && (version.startsWith("1"))) selector = "NACEX";
+		if (selector.equals("CPA") && (version.length() >= 4) && (Integer.parseInt(version) <= 2002)) selector = "CPAX";
 
 		return LEVEL_NAMES.get(selector).get(getItemLevelDepth(code, classification, version) - 1) + "/" + code;
 		
