@@ -11,7 +11,7 @@ import java.util.Set;
  * Implementation of the URI and naming policy for the project.
  * 
  * @author Franck Cotton
- * @version 0.1, 28 Apr 2016
+ * @version 0.2, 2 Jun 2016
  */
 public class Names {
 

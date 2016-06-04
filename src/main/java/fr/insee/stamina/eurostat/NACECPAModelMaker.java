@@ -44,7 +44,7 @@ import fr.insee.stamina.utils.XKOS;
  * The source data is downloaded from RAMON
  * 
  * @author Franck Cotton
- * @version 0.9, 20 Apr 2016
+ * @version 0.10, 2 Jun 2016
  */
 public class NACECPAModelMaker {
 
@@ -60,9 +60,7 @@ public class NACECPAModelMaker {
 		// For correspondences, we use the concatenation of keys
 		FILE_FILTER.put("NACE1.1NACE2", "NACE REV. 1.1 - NACE REV. 2_*.csv"); // NACE Rev. 1.1 to NACE Rev. 2 correspondence
 		FILE_FILTER.put("CPA2008CPA2.1", "CPA 2008 - CPA 2.1_*.csv"); // CPA Ver. 2008 to CPA Ver. 2.1 correspondence
-		// TODO Add the following
-		FILE_FILTER.put("NACE2CPA2008", null); // NACE Rev. 2 to CPA Ver. 2008 correspondence
-		FILE_FILTER.put("NACE2CPA2.1", null); // NACE Rev. 2 to CPA Ver. 2.1 correspondence
+		FILE_FILTER.put("ISIC4NACE2", "ISIC4_NACE2.txt"); // ISIC Rev.4 to NACE Rev. 2 correspondence
 	}
 
 	/** XSL transformation file for NACE */
@@ -94,39 +92,48 @@ public class NACECPAModelMaker {
 		logger.debug("Creating new instance of model maker");
 		NACECPAModelMaker modelMaker = new NACECPAModelMaker();
 
-		// Create the models for the classifications
+		// Create the models for the classifications and versions listed in the base configuration
 		for (String classification : BASE_CONFIGURATION.keySet()) {
 			for (String version : BASE_CONFIGURATION.get(classification).keySet()) {
 				if (BASE_CONFIGURATION.get(classification).get(version) == null)
-					logger.warn("No input file found for " + classification + " " + version);
+					logger.warn("No input file found for " + Names.getCSShortName(classification, version));
 				else try {
 					modelMaker.createClassificationModel(classification, version);
 				} catch (Exception e) {
 					logger.error("Error during the creation of the classification model", e);
 				}
-				logger.info("Creation of the Turtle file corresponding to " + classification + version);
-				
+				logger.debug("Creation of the Turtle file corresponding to " + classification + version);
 			}
 		}
-		// Create the models for the correspondence tables
-		String cpa2008cpa21CorrespondenceFile = getMatchingFileName(FILE_FILTER.get("CPA2008CPA2.1"));
-		if (cpa2008cpa21CorrespondenceFile != null)
-			modelMaker.createHistoricalCorrespondenceModel(cpa2008cpa21CorrespondenceFile, "CPA", "2008", "2.1");
+		logger.debug("All classification models created, starting to process correspondence models");
+		String nace11NACE2CorrespondenceFile = getMatchingFileName(FILE_FILTER.get("NACE1.1NACE2"));
+		if (nace11NACE2CorrespondenceFile != null)
+			modelMaker.createHistoricalCorrespondenceModel(nace11NACE2CorrespondenceFile, "NACE", "1.1", "2");
+		String cpa2008CPA21CorrespondenceFile = getMatchingFileName(FILE_FILTER.get("CPA2008CPA2.1"));
+		if (cpa2008CPA21CorrespondenceFile != null) {
+			modelMaker.createHistoricalCorrespondenceModel(cpa2008CPA21CorrespondenceFile, "CPA", "2008", "2.1");
+			modelMaker.createNACECPACorrespondence(cpa2008CPA21CorrespondenceFile, "2", "2008", 0, false);
+			modelMaker.createNACECPACorrespondence(cpa2008CPA21CorrespondenceFile, "2", "2.1", 1, false);
+		}
+		modelMaker.createISICNACECorrespondence(FILE_FILTER.get("ISIC4NACE2"), "4", "2", false, true);
+
 		logger.debug("End of programm");
 	}
 
 	/**
-	 * Creates the Jena model corresponding to a given specification.
+	 * Creates the Jena model corresponding to a given specification and saves it as Turtle.
 	 * 
-	 * @param specification The specification (input, transformation and output files) to use.
+	 * @param classification The classification ("NACE" or "CPA").
+	 * @param version The version of the source classification ("1.1" or "2" for NACE, "2008" or "2.1" for CPA).
 	 * @throws Exception In case of error during the creation of the model.
 	 */
-	private void createClassificationModel(String classification, String version) throws Exception {
+	public void createClassificationModel(String classification, String version) throws Exception {
 
 		TransformationSpecification specification = BASE_CONFIGURATION.get(classification).get(version); // Not null at this stage
-
 		// Strip extraneous or useless lines in Ramon files
 		String inputFileName = removeLines(specification.getInputFile(), ramonLines);
+		logger.info("Creation of XKOS data for classification " + Names.getCSShortName(classification, version) + " from file " + inputFileName);
+
 		// Execute the transformation and store the result in a RDF/XML file
 		String rdfFileName = specification.getOutputFile().replace(".ttl", ".rdf");
 		// We need Saxon to process XSLT v2
@@ -134,13 +141,15 @@ public class NACECPAModelMaker {
 		Transformer transformer = transformerFactory.newTransformer(new StreamSource(specification.getTransformationFile()));
 		transformer.setParameter("base-url", Names.getCSBaseURI(classification, version));
 		transformer.setParameter("version", version);
+		logger.debug("XSL Transformer created, starting transformation " + specification.getTransformationFile());
 		transformer.transform(new StreamSource(inputFileName), new StreamResult(new File(rdfFileName)));
-		// Convert RDF/XML format to Turtle
+		logger.debug("Transformation ended, result stored in RDF/XML file " + rdfFileName);
+		// Convert RDF/XML format to Turtle with Jena
 		this.initializeModel();
 		model.read(rdfFileName, "RDF/XML");
 		model.write(new FileOutputStream(specification.getOutputFile()), "TTL");
 		model.close();
-
+		logger.info("The XKOS data for " + Names.getCSShortName(classification, version) + " has been written to Turtle file " + specification.getOutputFile());
 		// Delete intermediary input file
 		try {
 			Files.delete(Paths.get(inputFileName));
@@ -167,6 +176,8 @@ public class NACECPAModelMaker {
 		String tableBaseURI = Names.getCorrespondenceBaseURI(classification, sourceVersion, classification, targetVersion);
 		String sourceCSShortName = Names.getCSShortName(classification, sourceVersion);
 		String targetCSShortName = Names.getCSShortName(classification, targetVersion);
+
+		logger.info("Creation of XKOS data for correspondence " + sourceCSShortName + " - " + targetCSShortName + " from file " + filePath);
 
 		String definition = "Correspondence table from " + sourceCSShortName + " to " + targetCSShortName;
 		logger.debug(definition + " - Preparing to initialise Jena model");
@@ -207,7 +218,7 @@ public class NACECPAModelMaker {
 		parser.close();
 
 		String turtleFilePath = getTurtleFilePath(classification, sourceVersion, classification, targetVersion);
-		logger.debug(associationCount + " associations created - writing model to " + turtleFilePath);
+		logger.info(associationCount + " associations created - writing model to " + turtleFilePath);
 		model.write(new FileOutputStream(turtleFilePath), "TTL");
 		model.close();
 
@@ -246,6 +257,8 @@ public class NACECPAModelMaker {
 		String tableBaseURI = Names.getCorrespondenceBaseURI("NACE", naceVersion, "CPA", cpaVersion);
 		String naceShortName = Names.getCSShortName("NACE", naceVersion);
 		String cpaShortName = Names.getCSShortName("CPA", cpaVersion);
+
+		logger.info("Creation of XKOS data for correspondence " + naceShortName + " - " + cpaShortName + " from file " + filePath);
 
 		String definition = "Correspondence table from " + naceShortName + " to " + cpaShortName;
 		logger.debug(definition + " - Preparing to initialise Jena model");
@@ -289,7 +302,7 @@ public class NACECPAModelMaker {
 		parser.close();
 
 		String turtleFilePath = getTurtleFilePath("NACE", naceVersion, "CPA", cpaVersion);
-		logger.debug(associationCount + " associations created - writing model to " + turtleFilePath);
+		logger.info(associationCount + " associations created - writing model to " + turtleFilePath);
 		model.write(new FileOutputStream(turtleFilePath), "TTL");
 		model.close();
 
@@ -300,6 +313,76 @@ public class NACECPAModelMaker {
 		} catch (Exception e) {
 			logger.error("Could not delete temporary file " + inputFilePath);
 		}
+	}
+
+	/**
+	 * Creates the Jena model corresponding to the correspondence table between associated versions of the ISIC and the NACE.
+	 * The method does not verify the coherence of the versions of NACE and CPA.
+	 * 
+	 * @param inputFilePath Path of the CSV file containing the correspondences.
+	 * @param isicVersion Version of the ISIC classification.
+	 * @param naceVersion Version of the NACE classification.
+	 * @param allLevels Indicates if the associations are produced for all classification levels (<code>true</code>) or only for the most detailed level.
+	 * @param skosProperties Indicates if SKOS narrowMatch and exactMatch properties should be created (<code>true</code>) or not.
+	 * @throws IOException In case of error reading the file or creating the model.
+	 */
+	public void createISICNACECorrespondence(String inputFilePath, String isicVersion, String naceVersion, boolean allLevels, boolean skosProperties) throws Exception {
+
+		// Get a local copy of useful naming elements to avoid repeated calls to the naming authority
+		String tableBaseURI = Names.getCorrespondenceBaseURI("ISIC", isicVersion, "NACE", naceVersion);
+		String isicShortName = Names.getCSShortName("ISIC", isicVersion);
+		String naceShortName = Names.getCSShortName("NACE", naceVersion);
+
+		logger.info("Creation of XKOS data for correspondence " + isicShortName + " - " + naceShortName + " from file " + inputFilePath);
+
+		String definition = "Correspondence table from " + isicShortName + " to " + naceShortName;
+		logger.debug(definition + " - Preparing to initialise Jena model");
+
+		this.initializeModel();
+		model.setNsPrefix("asso", tableBaseURI + "association/"); // This reduces the output file size
+
+		// Creation of the correspondence table resource
+		Resource table = model.createResource(Names.getCorrespondenceURI("ISIC", isicVersion, "NACE", naceVersion), XKOS.Correspondence);
+		table.addProperty(SKOS.notation, model.createLiteral(Names.getCorrespondenceShortName("ISIC", isicVersion, "NACE", naceVersion)));
+		table.addProperty(SKOS.definition, model.createLiteral(definition, "en"));
+		definition = "Table de correspondance entre la " + isicShortName + " et la " + naceShortName;
+		table.addProperty(SKOS.definition, model.createLiteral(definition, "fr"));
+		table.addProperty(XKOS.compares, model.createResource(Names.getCSURI("ISIC", isicVersion)));
+		table.addProperty(XKOS.compares, model.createResource(Names.getCSURI("NACE", naceVersion)));
+
+		logger.debug("Preparing to read CSV file " + inputFilePath);
+		Reader reader = new FileReader(inputFilePath);
+		int associationCount = 0;
+		CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
+		for (CSVRecord record : parser) {
+			String isicCode = record.get("ISIC4code");
+			String isicItemURI = Names.getItemURI(isicCode, "ISIC", isicVersion);
+			// If only the most detailed level is considered, we retain only ISIC codes of length 4 (nnnn)
+			if ((!allLevels) && (isicCode.length() != 4)) continue;
+			String naceCode = record.get("NACE2code");
+			String naceItemURI = Names.getItemURI(naceCode, "NACE", naceVersion);
+			String associationURI = tableBaseURI + Names.getAssociationPathInContext(isicCode, naceCode);
+			Resource association = model.createResource(associationURI, XKOS.ConceptAssociation);
+			association.addProperty(XKOS.sourceConcept, isicItemURI);
+			association.addLiteral(XKOS.targetConcept, naceItemURI);
+			String associationLabel = isicShortName + " " + isicCode + " - " + naceShortName + " " + naceCode;
+			association.addProperty(RDFS.label, model.createLiteral(associationLabel));
+			table.addProperty(XKOS.madeOf, association);
+			associationCount++;
+			// NACE is a refinement of ISIC, so we can also create skos:exactMatch and skos:narrowMatch properties if requested
+			if (skosProperties) {
+				Resource isicItemResource = model.createResource(isicItemURI);
+				Resource naceItemResource = model.createResource(naceItemURI);
+				if (record.get("ISIC4part").equals("0")) isicItemResource.addProperty(SKOS.exactMatch, naceItemResource);
+				else isicItemResource.addProperty(SKOS.closeMatch, naceItemResource);
+			}
+		}
+		parser.close();
+
+		String turtleFilePath = getTurtleFilePath("ISIC", isicVersion, "NACE", naceVersion);
+		logger.info(associationCount + " associations created - writing model to " + turtleFilePath);
+		model.write(new FileOutputStream(turtleFilePath), "TTL");
+		model.close();
 	}
 
 	/**
