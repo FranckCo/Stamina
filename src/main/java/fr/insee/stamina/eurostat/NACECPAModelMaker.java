@@ -208,8 +208,8 @@ public class NACECPAModelMaker {
 			String targetItemURI = targetBaseURI + Names.getItemPathInContext(record.get("Target"), classification, targetVersion);
 			String associationURI = tableBaseURI + Names.getAssociationPathInContext(record.get("Source"), record.get("Target"));
 			Resource association = model.createResource(associationURI, XKOS.ConceptAssociation);
-			association.addProperty(XKOS.sourceConcept, sourceItemURI);
-			association.addLiteral(XKOS.targetConcept, targetItemURI);
+			association.addProperty(XKOS.sourceConcept, model.createResource(sourceItemURI));
+			association.addLiteral(XKOS.targetConcept, model.createResource(targetItemURI));
 			String associationLabel = sourceCSShortName + " " + record.get("Source") + " - " + targetCSShortName + " " + record.get("Target");
 			association.addProperty(RDFS.label, model.createLiteral(associationLabel));
 			table.addProperty(XKOS.madeOf, association);
@@ -292,8 +292,8 @@ public class NACECPAModelMaker {
 			String naceItemURI = naceBaseURI + Names.getItemPathInContext(naceCode, "NACE", naceVersion);
 			String associationURI = tableBaseURI + Names.getAssociationPathInContext(naceCode, cpaCode);
 			Resource association = model.createResource(associationURI, XKOS.ConceptAssociation);
-			association.addProperty(XKOS.sourceConcept, naceItemURI);
-			association.addLiteral(XKOS.targetConcept, cpaItemURI);
+			association.addProperty(XKOS.sourceConcept, model.createResource(naceItemURI));
+			association.addLiteral(XKOS.targetConcept, model.createResource(cpaItemURI));
 			String associationLabel = naceShortName + " " + naceCode + " - " + cpaShortName + " " + cpaCode;
 			association.addProperty(RDFS.label, model.createLiteral(associationLabel));
 			table.addProperty(XKOS.madeOf, association);
@@ -363,8 +363,8 @@ public class NACECPAModelMaker {
 			String naceItemURI = Names.getItemURI(naceCode, "NACE", naceVersion);
 			String associationURI = tableBaseURI + Names.getAssociationPathInContext(isicCode, naceCode);
 			Resource association = model.createResource(associationURI, XKOS.ConceptAssociation);
-			association.addProperty(XKOS.sourceConcept, isicItemURI);
-			association.addLiteral(XKOS.targetConcept, naceItemURI);
+			association.addProperty(XKOS.sourceConcept, model.createResource(isicItemURI));
+			association.addLiteral(XKOS.targetConcept, model.createResource(naceItemURI));
 			String associationLabel = isicShortName + " " + isicCode + " - " + naceShortName + " " + naceCode;
 			association.addProperty(RDFS.label, model.createLiteral(associationLabel));
 			table.addProperty(XKOS.madeOf, association);

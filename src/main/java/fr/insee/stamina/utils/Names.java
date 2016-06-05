@@ -248,7 +248,7 @@ public class Names {
 	 * @param code The item code.
 	 * @param classification The classification to which the item belongs, e.g. "NACE", "ISIC", etc.
 	 * @param version The version of the classification to which the item belongs ("4", "2.1", "2008", etc.).
-	 * @return The item URI.
+	 * @return The depth of the level.
 	 */
 	public static int getItemLevelDepth(String code, String classification, String version) {
 

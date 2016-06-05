@@ -286,8 +286,8 @@ public class ISICModelMaker {
 				if (targetCode.equals("0")) continue;
 				Resource association = isicModel.createResource(Names.getAssociationURI(sourceCode, sourceClassification, sourceVersion, targetCode, targetClassification, targetVersion), XKOS.ConceptAssociation);
 				association.addProperty(RDFS.label, sourceShortName + " " + sourceCode + " - " + targetShortName + " " + targetCode);
-				association.addProperty(XKOS.sourceConcept, Names.getItemURI(sourceCode, sourceClassification, sourceVersion));
-				association.addProperty(XKOS.targetConcept, Names.getItemURI(targetCode, targetClassification, targetVersion));
+				association.addProperty(XKOS.sourceConcept, isicModel.createResource(Names.getItemURI(sourceCode, sourceClassification, sourceVersion)));
+				association.addProperty(XKOS.targetConcept, isicModel.createResource(Names.getItemURI(targetCode, targetClassification, targetVersion)));
 				// Notes on associations only in ISIC31-ISIC4 correspondence
 				if ((selector.equals("3.14")) && (record.get("Detail").length() > 0)) association.addProperty(RDFS.comment, isicModel.createLiteral(record.get("Detail"), "en"));
 				table.addProperty(XKOS.madeOf, association);

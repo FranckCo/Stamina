@@ -244,8 +244,8 @@ public class CPCModelMaker {
 				String cpc2Code = record.get("CPC2Code");
 				Resource association = cpcModel.createResource(Names.getAssociationURI(cpc11Code, "CPC",  "1.1", cpc2Code, "CPC", "2"), XKOS.ConceptAssociation);
 				association.addProperty(RDFS.label, "CPC Ver.1.1 " + cpc11Code + " - CPC Ver.2 " + cpc2Code);
-				association.addProperty(XKOS.sourceConcept, Names.getItemURI(cpc11Code, "CPC", "1.1"));
-				association.addProperty(XKOS.targetConcept, Names.getItemURI(cpc2Code, "CPC", "2"));
+				association.addProperty(XKOS.sourceConcept, cpcModel.createResource(Names.getItemURI(cpc11Code, "CPC", "1.1")));
+				association.addProperty(XKOS.targetConcept, cpcModel.createResource(Names.getItemURI(cpc2Code, "CPC", "2")));
 				// There are no descriptions of the correspondences for CPC11-CPC2
 				table.addProperty(XKOS.madeOf, association);
 				// TODO Add 'partial' information
@@ -288,8 +288,8 @@ public class CPCModelMaker {
 				String cpc21Code = record.get("CPC21code");
 				Resource association = cpcModel.createResource(Names.getAssociationURI(cpc2Code, "CPC",  "2", cpc21Code, "CPC", "2.1"), XKOS.ConceptAssociation);
 				association.addProperty(RDFS.label, "CPC Ver.2 " + cpc2Code + " - CPC Ver.2.1 " + cpc21Code);
-				association.addProperty(XKOS.sourceConcept, Names.getItemURI(cpc2Code, "CPC", "2"));
-				association.addProperty(XKOS.targetConcept, Names.getItemURI(cpc21Code, "CPC", "2.1"));
+				association.addProperty(XKOS.sourceConcept, cpcModel.createResource(Names.getItemURI(cpc2Code, "CPC", "2")));
+				association.addProperty(XKOS.targetConcept, cpcModel.createResource(Names.getItemURI(cpc21Code, "CPC", "2.1")));
 				// There are no descriptions of the correspondences for CPC2-CPC2.1
 				table.addProperty(XKOS.madeOf, association);
 				// TODO Add 'partial' information
