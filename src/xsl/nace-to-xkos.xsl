@@ -134,11 +134,10 @@
     </xsl:template>
 
     <!-- Naming policy and other useful functions -->
-    <!-- For NACE, the structure is different between 1.1 and 2 so the are lots of tests on the version number -->
+    <!-- For NACE, the structure is different between 1.1 and 2 so there are lots of tests on the version number -->
 
     <xsl:function name="lf:item-uri" as="xs:string">
         <xsl:param name="item-code" as="xs:string"/>
-        <xsl:message select="concat('Code ', $item-code, ', depth ', lf:item-depth($item-code))"/>
         <xsl:value-of select="concat($base-url, lf:level-concept-name(lf:item-depth($item-code)) ,'/', $item-code)"/>
     </xsl:function>
 

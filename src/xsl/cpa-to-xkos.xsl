@@ -48,7 +48,7 @@
 
     <xsl:template match="Level">
         <!-- The information on the levels in the source file is useless: recreate from scratch -->
-        <xsl:variable name="level-names" select="tokenize('Sections,Divisions,Groups,Classes,Categories,Sub-categories', ',')"/>
+        <xsl:variable name="level-names" select="tokenize('Sections,Divisions,Groups,Classes,Categories,Subcategories', ',')"/>
         <xsl:variable name="level-patterns" select="tokenize('[A-U],[0-9]{2},[0-9]{2}\.[0-9],[0-9]{2}\.[0-9]{2},[0-9]{2}\.[0-9]{2}\.[0-9],[0-9]{2}\.[0-9]{2}\.[0-9]{2}', ',')"/>
         <xsl:variable name="level-node" select="."/>
         <xsl:variable name="level-count"><xsl:value-of select="max(descendant-or-self::Level/xs:integer(@id))"/></xsl:variable> <!-- Number of levels -->
