@@ -369,12 +369,18 @@ public class NACECPAModelMaker {
 			association.addProperty(RDFS.label, model.createLiteral(associationLabel));
 			table.addProperty(XKOS.madeOf, association);
 			associationCount++;
-			// NACE is a refinement of ISIC, so we can also create skos:exactMatch and skos:narrowMatch properties if requested
+			// NACE is a refinement of ISIC, so we can also create skos:exactMatch and skos:broadMatch/skos:narrowMatch properties if requested
 			if (skosProperties) {
 				Resource isicItemResource = model.createResource(isicItemURI);
 				Resource naceItemResource = model.createResource(naceItemURI);
-				if (record.get("ISIC4part").equals("0")) isicItemResource.addProperty(SKOS.exactMatch, naceItemResource);
-				else isicItemResource.addProperty(SKOS.closeMatch, naceItemResource);
+				if (record.get("ISIC4part").equals("0")) {
+					isicItemResource.addProperty(SKOS.exactMatch, naceItemResource);
+					naceItemResource.addProperty(SKOS.exactMatch, isicItemResource);
+				}
+				else {
+					isicItemResource.addProperty(SKOS.narrowMatch, naceItemResource);
+					naceItemResource.addProperty(SKOS.broadMatch, isicItemResource);
+				}
 			}
 		}
 		parser.close();
