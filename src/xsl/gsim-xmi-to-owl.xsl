@@ -17,7 +17,7 @@
 		<xsl:for-each
 			select="/gsim:Model/gsim:Package/gsim:Classes/gsim:Class/gsim:Name">
 			<gsim:item>
-				<xsl:value-of select="concat($short-base-uri,':',string(.))" />
+				<xsl:value-of select="concat($short-base-uri,':',gsim:cleanClassesName(string(.)))" />
 			</gsim:item>
 		</xsl:for-each>
 	</xsl:variable>
@@ -179,7 +179,7 @@
 	</xsl:template>
 
 	<xsl:template match="gsim:Package">
-		<xsl:variable name="package-name" select="gsim:Name" />
+		<xsl:variable name="package-name" select="gsim:cleanClassesName(gsim:Name)" />
 		<xsl:comment>
 			Classes from package
 			<xsl:value-of select="$package-name" />
@@ -198,15 +198,18 @@
 
 	<xsl:template match="gsim:Class">
 		<xsl:param name="base-class" />
-		<rdf:Description rdf:about="{$short-base-uri}:{gsim:Name}">
+		<rdf:Description rdf:about="{$short-base-uri}:{gsim:cleanClassesName(gsim:Name)}">
 			<rdf:type rdf:resource="owl:Class" />
 			<rdfs:label xml:lang="en">
 				<xsl:value-of select="gsim:Name" />
 			</rdfs:label>
-			<rdfs:subClassOf rdf:resource="{$base-uri}{$base-class}" />
+			
+			<rdfs:subClassOf rdf:resource="{$short-base-uri}:{$base-class}" />
 			<xsl:for-each select="gsim:Specializes">
 			<!-- TODO : check subclasses -->
-				<rdfs:subClassOf rdf:resource="{$short-base-uri}{@class}" />
+			<xsl:if test="count(gsim:equal-classesName(@class)) &gt; 0">
+				<rdfs:subClassOf rdf:resource="{gsim:equal-classesName(@class)}" />
+			</xsl:if>
 			<!-- /TODO : check subclasses -->
 			</xsl:for-each>
 			<xsl:apply-templates select="gsim:Doc" />
@@ -217,6 +220,13 @@
 			-->
 		</rdf:Description>
 	</xsl:template>
+
+	<xsl:function name="gsim:cleanClassesName">
+	<!-- First Character : [A-Za-z]  -->
+	<!-- Other characters: [A-Za-z0-9\\-]* -->
+	<xsl:param name="s" as="xs:string"/>
+	<xsl:value-of select="translate($s,' ','-')"/>
+	</xsl:function>
 
 	<xsl:function name="gsim:PropertyName">
 		<xsl:param name="property" as="element()" />
@@ -321,7 +331,7 @@
 
 	<xsl:function name="gsim:equal-classesName">
 		<xsl:param name="initialValue" as="xs:string" />
-		<xsl:copy-of select="$classesName/*[text() = $initialValue or text() = concat($short-base-uri,':',$initialValue)]" />
+		<xsl:copy-of select="$classesName/*[text() = gsim:cleanClassesName($initialValue) or text() = concat($short-base-uri,':',gsim:cleanClassesName($initialValue))]" />
 	</xsl:function>
 
 	<xsl:function name="gsim:equal-range-classes">
