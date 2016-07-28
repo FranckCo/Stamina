@@ -60,7 +60,7 @@ public class NACECPAModelMaker {
 		// For correspondences, we use the concatenation of keys
 		FILE_FILTER.put("NACE1.1NACE2", "NACE REV. 1.1 - NACE REV. 2_*.csv"); // NACE Rev. 1.1 to NACE Rev. 2 correspondence
 		FILE_FILTER.put("CPA2008CPA2.1", "CPA 2008 - CPA 2.1_*.csv"); // CPA Ver. 2008 to CPA Ver. 2.1 correspondence
-		FILE_FILTER.put("ISIC4NACE2", "ISIC4_NACE2.txt"); // ISIC Rev.4 to NACE Rev. 2 correspondence
+		FILE_FILTER.put("ISIC4NACE2", "ISIC4_NACE2.txt"); // ISIC Rev.4 to NACE Rev. 2 correspondence, not really a filter
 	}
 
 	/** XSL transformation file for NACE */
@@ -209,7 +209,7 @@ public class NACECPAModelMaker {
 			String associationURI = tableBaseURI + Names.getAssociationPathInContext(record.get("Source"), record.get("Target"));
 			Resource association = model.createResource(associationURI, XKOS.ConceptAssociation);
 			association.addProperty(XKOS.sourceConcept, model.createResource(sourceItemURI));
-			association.addLiteral(XKOS.targetConcept, model.createResource(targetItemURI));
+			association.addProperty(XKOS.targetConcept, model.createResource(targetItemURI));
 			String associationLabel = sourceCSShortName + " " + record.get("Source") + " - " + targetCSShortName + " " + record.get("Target");
 			association.addProperty(RDFS.label, model.createLiteral(associationLabel));
 			table.addProperty(XKOS.madeOf, association);
@@ -293,7 +293,7 @@ public class NACECPAModelMaker {
 			String associationURI = tableBaseURI + Names.getAssociationPathInContext(naceCode, cpaCode);
 			Resource association = model.createResource(associationURI, XKOS.ConceptAssociation);
 			association.addProperty(XKOS.sourceConcept, model.createResource(naceItemURI));
-			association.addLiteral(XKOS.targetConcept, model.createResource(cpaItemURI));
+			association.addProperty(XKOS.targetConcept, model.createResource(cpaItemURI));
 			String associationLabel = naceShortName + " " + naceCode + " - " + cpaShortName + " " + cpaCode;
 			association.addProperty(RDFS.label, model.createLiteral(associationLabel));
 			table.addProperty(XKOS.madeOf, association);
@@ -350,8 +350,9 @@ public class NACECPAModelMaker {
 		table.addProperty(XKOS.compares, model.createResource(Names.getCSURI("ISIC", isicVersion)));
 		table.addProperty(XKOS.compares, model.createResource(Names.getCSURI("NACE", naceVersion)));
 
-		logger.debug("Preparing to read CSV file " + inputFilePath);
-		Reader reader = new FileReader(inputFilePath);
+		// Since we don't go through the file matching operation here, LOCAL_FOLDER must be added explicitely
+		logger.debug("Preparing to read CSV file " + LOCAL_FOLDER + inputFilePath);
+		Reader reader = new FileReader(LOCAL_FOLDER + inputFilePath);
 		int associationCount = 0;
 		CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
 		for (CSVRecord record : parser) {
@@ -364,7 +365,7 @@ public class NACECPAModelMaker {
 			String associationURI = tableBaseURI + Names.getAssociationPathInContext(isicCode, naceCode);
 			Resource association = model.createResource(associationURI, XKOS.ConceptAssociation);
 			association.addProperty(XKOS.sourceConcept, model.createResource(isicItemURI));
-			association.addLiteral(XKOS.targetConcept, model.createResource(naceItemURI));
+			association.addProperty(XKOS.targetConcept, model.createResource(naceItemURI));
 			String associationLabel = isicShortName + " " + isicCode + " - " + naceShortName + " " + naceCode;
 			association.addProperty(RDFS.label, model.createLiteral(associationLabel));
 			table.addProperty(XKOS.madeOf, association);
