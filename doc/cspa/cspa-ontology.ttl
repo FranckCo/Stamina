@@ -497,7 +497,7 @@ cspa:restrictions a owl:DatatypeProperty;
 .
 cspa:gsbpmSubProcess a owl:ObjectProperty;
 	rdfs:domain cspa:BusinessFunction;
-	rdfs:range cspa:GsbpmSubProcess;
+	rdfs:range gsbpm:SubProcess;
 	rdfs:label "GSBPM sub-process";
 	rdfs:comment "See GSBPM documentation"
 .
