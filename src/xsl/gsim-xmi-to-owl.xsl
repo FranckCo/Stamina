@@ -9,7 +9,7 @@
 	<!-- TODO change version in GSIM namespace -->
 	<!-- TODO Check OWL1 or OWL2 -->
 	<xsl:output method="xml" encoding="utf-8" indent="yes" />
-	<xsl:variable name="base-uri">http://stamina-project.org/models/gsim/</xsl:variable>
+	<xsl:variable name="base-uri">http://rdf.unece.org/models/gsim#</xsl:variable>
 	<xsl:variable name="short-base-uri">gsim</xsl:variable>
 
 	<xsl:variable name="classesName">
@@ -70,6 +70,8 @@
 		</gsim:range-class>
 	</xsl:variable>
 
+<xsl:variable name="gsimObjectClass" >gsimObject</xsl:variable> 
+
 	<xsl:template match="/">
 		<rdf:RDF>
 			<xsl:apply-templates select="gsim:Model" />
@@ -77,6 +79,11 @@
 	</xsl:template>
 
 	<xsl:template match="gsim:Model">
+		<rdf:Description rdf:about="{$short-base-uri}:{$gsimObjectClass}">
+		<rdf:type rdf:resource="owl:Class" />
+		<rdfs:label xml:lang="en">GSIM Object</rdfs:label>
+		</rdf:Description>
+		
 		<xsl:apply-templates select="gsim:Package">
 			<xsl:sort select="gsim:Name" />
 		</xsl:apply-templates>
@@ -180,6 +187,7 @@
 
 	<xsl:template match="gsim:Package">
 		<xsl:variable name="package-name" select="gsim:cleanClassesName(gsim:Name)" />
+				
 		<xsl:comment>
 			Classes from package
 			<xsl:value-of select="$package-name" />
@@ -189,6 +197,7 @@
 			<rdfs:label xml:lang="en">
 				<xsl:value-of select="gsim:Name" />
 			</rdfs:label>
+			<rdfs:subClassOf rdf:resource="{$short-base-uri}:{$gsimObjectClass}" />
 		</rdf:Description>
 		<xsl:apply-templates select="gsim:Classes/gsim:Class">
 			<xsl:sort select="gsim:Name" />
