@@ -1,6 +1,6 @@
-##Prefixes
-#cspa, gsbpm and gsim prefixes are speculative
-Prefix cspa:  <http://rdf.unece.org/models/cspa#>
+## Prefixes
+# cspa, gsbpm and gsim prefixes and associated namespaces are tentative
+Prefix cspa: <http://rdf.unece.org/models/cspa#>
 Prefix dcterms: <http://purl.org/dc/terms/>
 Prefix foaf: <http://xmlns.com/foaf/0.1/>
 Prefix gsbpm: <http://rdf.unece.org/models/gsbpm#>
@@ -14,92 +14,131 @@ Prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 Prefix xml: <http://www.w3.org/XML/1998/namespace>
 Prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
+#################
+# CSPA ontology #
+#################
 
-
-
-
-
-
-##Function and Package
+## Function and Package
 cspa:PackageOrFunction a owl:Class;
 owl:disjointUnionOf (
 		cspa:Function
 		cspa:Package) 
 .
 cspa:Package a owl:Class;
-	 rdfs:subClassOf cspa:PackageOrFucntion
+	 rdfs:subClassOf cspa:PackageOrFunction;
+	 rdfs:label "CSPA Package";
+	 rdfs:comment "CSPA bundle of functions or other packages"
 .
 cspa:Function a owl:Class;
-	 rdfs:subClassOf cspa:PackageOrFucntion
+	 rdfs:subClassOf cspa:PackageOrFunction;
+	 rdfs:label "CSPA Function";
+	 rdfs:comment "CSPA function or atomic service"
 .
 cspa:hasPackage a owl:ObjectProperty;
-	rdfs:domain cspa:PackageOrFucntion;
-	rdfs:range cspa:Package
+	rdfs:domain cspa:PackageOrFunction;
+	rdfs:range cspa:Package;
+	rdfs:label "CSPA package or CSPA function is a member of a CSPA package";
+	rdfs:comment "A CSPA package or a CSPA function may be a member of a CSPA package."
 .
-##Levels
+
+## Levels
 cspa:DescriptionLevel a owl:Class;
 	owl:disjointUnionOf (
 		cspa:ServiceDefinition
 		cspa:ServiceSpecification
-		cspa:ServiceImplementationDescription)
+		cspa:ServiceImplementationDescription);
+	rdfs:label "CSPA 3 levels of description";
+	rdfs:comment "CSPA offers 3 levels of description: service definition which is the most conceptual, service specification and service implementation description (which is the most physical description level)."
 .
 cspa:ServiceDefinition a owl:Class;
 	rdfs:subClassOf cspa:DescriptionLevel;
 	owl:disjointUnionOf (
 		cspa:FunctionDefinition
-		cspa:PackageDefinition)
+		cspa:PackageDefinition);
+	rdfs:label "CSPA package or function definition";
+	rdfs:comment "Function or package description at conceptual level."
 .
 cspa:ServiceSpecification a owl:Class;
 	rdfs:subClassOf cspa:DescriptionLevel;
 	owl:disjointUnionOf (
 		cspa:FunctionSpecification
-		cspa:PackageSpecification)
+		cspa:PackageSpecification);
+	rdfs:label "CSPA package or function specification";
+	rdfs:comment "Function or package description at logical level."
 .
 cspa:ServiceImplementationDescription a owl:Class;
 	rdfs:subClassOf cspa:DescriptionLevel;
 	owl:disjointUnionOf (
 		cspa:FunctionImplementation
-		cspa:PackageImplementation)
+		cspa:PackageImplementation);
+	rdfs:label "CSPA package or function implementation description";
+	rdfs:comment "Function or package description at physical level."
 .
-cspa:FunctionDefinition a owl:Class
+cspa:FunctionDefinition a owl:Class;
+	rdfs:label "CSPA function definition";
+	rdfs:comment "Function description at conceptual level."
 .
-cspa:PackageDefinition a owl:Class
+cspa:PackageDefinition a owl:Class;
+	rdfs:label "CSPA package definition";
+	rdfs:comment "Package description at conceptual level."
 .
-cspa:FunctionSpecification a owl:Class
+cspa:FunctionSpecification a owl:Class;
+	rdfs:label "CSPA function specification";
+	rdfs:comment "Function description at logical level."
 .
-cspa:PackageSpecification a owl:Class
+cspa:PackageSpecification a owl:Class;
+	rdfs:label "CSPA package specification";
+	rdfs:comment "Package description at logical level."
 .
-cspa:FunctionImplementation a owl:Class
+cspa:FunctionImplementation a owl:Class;
+	rdfs:label "CSPA function implementation";
+	rdfs:comment "Function description at physical implementation level."
 .
-cspa:PackageImplementation a owl:Class
+cspa:PackageImplementation a owl:Class;
+	rdfs:label "CSPA package implementation";
+	rdfs:comment "Package description at physical implementation level."
 .
-##Links between Package or function and Levels
+
+## Links between Package or function and Levels
 cspa:hasPackageDefinition a owl:ObjectProperty; 
 	rdfs:domain cspa:Package;
-	rdfs:range cspa:PackageDefinition
+	rdfs:range cspa:PackageDefinition;
+	rdfs:label "Definition of a CSPA package";
+	rdfs:comment "Link between a CSPA package and its definition."
 .
 cspa:hasPackageSpecification a owl:ObjectProperty;
 	rdfs:domain cspa:Package;
-	rdfs:range cspa:PackageSpecification
+	rdfs:range cspa:PackageSpecification;
+	rdfs:label "Specification of a CSPA package";
+	rdfs:comment "Link between a CSPA package and its specification"
 .
 cspa:hasPackageImplementation a owl:ObjectProperty;
 	rdfs:domain cspa:Package;
-	rdfs:range cspa:PackageImplementation
+	rdfs:range cspa:PackageImplementation;
+	rdfs:label "Implementation of a CSPA package";
+	rdfs:comment "Link between a CSPA package and its implementation"
 .
 cspa:hasFunctionDefinition a owl:ObjectProperty;
 	rdfs:domain cspa:Function;
-	rdfs:range cspa:FunctionDefinition
+	rdfs:range cspa:FunctionDefinition;
+	rdfs:label "Definition of a CSPA function";
+	rdfs:comment "Link between a CSPA function and its definition"
 .
 cspa:hasFunctionSpecification a owl:ObjectProperty;
 	rdfs:domain cspa:Function;
-	rdfs:range cspa:FunctionSpecification
+	rdfs:range cspa:FunctionSpecification;
+	rdfs:label "Specification of a CSPA function";
+	rdfs:comment "Link between a CSPA function and its specification"
 .
 cspa:hasFunctionImplementation a owl:ObjectProperty;
 	rdfs:domain cspa:Function;
-	rdfs:range cspa:FunctionImplementation
+	rdfs:range cspa:FunctionImplementation;
+	rdfs:label "Implementation description of a CSPA function";
+	rdfs:comment "Link between a CSPA function and its implementation description"
 .
-##Classes for topics
-cspa:PropertiesTopic a owl:Class;
+
+## Classes for topics
+cspa:PropertyTopic a owl:Class;
 	owl:disjointUnionOf (
 	cspa:Provenance
 	cspa:Documentation
@@ -107,167 +146,227 @@ cspa:PropertiesTopic a owl:Class;
 	cspa:Interface
 	cspa:Input
 	cspa:Output
-	cspa:BusinessFunction )
+	cspa:BusinessFunction );
+	rdfs:label "Properties about CSPA function or package grouped by topic.";
+	rdfs:comment "The properties used to describe CSPA function and packages are numerous and designed to be extended. To ease the finding of relevant information, properties are grouped by topics. One topic (such as Input or Output) can be sevaral time in a description level."
 .
 cspa:Provenance a owl:Class;
-	rdfs:subClassOf cspa:PropertiesTopic, prov:Entity
+	rdfs:subClassOf cspa:PropertyTopic, prov:Entity;
+	rdfs:label "Provenance of a CSPA service";
+	rdfs:comment "The provenance of a CSPA service says who did what in the building of a CSPA package or function."
 .
 cspa:Documentation a owl:Class;
-	rdfs:subClassOf cspa:PropertiesTopic
+	rdfs:subClassOf cspa:PropertyTopic;
+	rdfs:label "Documentation of a CSPA service";
+	rdfs:comment "Any kind of information which does not fit elsewhere can be put here."
 .
-cspa:BusinessFunction  a owl:Class;
-	rdfs:subClassOf cspa:PropertiesTopic, gsim:BusinessFunction
+cspa:BusinessFunction a owl:Class;
+	rdfs:subClassOf cspa:PropertyTopic, gsim:BusinessFunction;
+	rdfs:label "Business function of a CSPA service";
+	rdfs:comment "Documents the intented goal of a CSPA service. Useful when someone scroll through many packages to find a relevant one."
 .
 cspa:Dependency a owl:Class;
-	rdfs:subClassOf cspa:PropertiesTopic;
+	rdfs:subClassOf cspa:PropertyTopic;
 	owl:disjointUnionOf (
 		cspa:DefinitionDependency
 		cspa:SpecificationDependency
-		cspa:ImplementationDependency)
+		cspa:ImplementationDependency);
+	rdfs:label "Dependency of a CSPA service";
+	rdfs:comment "A dependency is something needed to run a CSPA service such as an operating system or a database. One instance of the class describe one dependency: there should be as many instances as different dependecies. It can be linked to a description level or to an interface."
 .
 cspa:Interface a owl:Class;
-	rdfs:subClassOf cspa:PropertiesTopic;
+	rdfs:subClassOf cspa:PropertyTopic;
 	owl:disjointUnionOf (
 		cspa:DefinitionInterface
 		cspa:SpecificationInterface
-		cspa:ImplementationInterface)
+		cspa:ImplementationInterface);
+		rdfs:label "Interface of a CSPA service";
+		rdfs:comment "An interface is a way to call a CSPA service for instance a REST web API."
 .
 cspa:Input a owl:Class;
-	rdfs:subClassOf cspa:PropertiesTopic;
+	rdfs:subClassOf cspa:PropertyTopic;
 	owl:disjointUnionOf (
 		cspa:DefinitionInput
 		cspa:SpecificationInput
-		cspa:ImplementationInput)
+		cspa:ImplementationInput);
+	rdfs:label "Input of a CSPA function";
+	rdfs:comment "One instance of the classs describe one input: there should be as many instances as different inputs."
 .
 cspa:Output a owl:Class;
-	rdfs:subClassOf cspa:PropertiesTopic;
+	rdfs:subClassOf cspa:PropertyTopic;
 	owl:disjointUnionOf (
 		cspa:DefinitionOutput
 		cspa:SpecificationOutput
-		cspa:ImplementationOutput)
+		cspa:ImplementationOutput);
+	rdfs:label "Output of a CSPA function";
+	rdfs:comment "One instance of the classs describe one input: there should be as many instances as different inputs."
 .
-cspa:DefinitionDependency a owl:Class
+cspa:DefinitionDependency a owl:Class;
+	rdfs:label "Dependency at the definition description level"
 .
-cspa:SpecificationDependency a owl:Class
+cspa:SpecificationDependency a owl:Class;
+	rdfs:label "Dependency at the specification description level"
 .
-cspa:ImplementationDependency a owl:Class
+cspa:ImplementationDependency a owl:Class;
+	rdfs:label "Dependency at the implementation description level"
 .
-cspa:DefinitionInterface a owl:Class
+cspa:DefinitionInterface a owl:Class;
+	rdfs:label "Interface at the definition description level"
 .
-cspa:SpecificationInterface a owl:Class
+cspa:SpecificationInterface a owl:Class;
+	rdfs:label "Interface at the specification description level"
 .
-cspa:ImplementationInterface a owl:Class
+cspa:ImplementationInterface a owl:Class;
+	rdfs:label "Interface at the implementation description level"
 .
-cspa:DefinitionInput a owl:Class
+cspa:DefinitionInput a owl:Class;
+	rdfs:label "Input at the definition description level"
 .
-cspa:SpecificationInput a owl:Class
+cspa:SpecificationInput a owl:Class;
+	rdfs:label "Input at the specification description level"
 .
-cspa:ImplementationInput a owl:Class
+cspa:ImplementationInput a owl:Class;
+	rdfs:label "Input at the implementation description level"
 .
-cspa:DefinitionOutput a owl:Class
+cspa:DefinitionOutput a owl:Class;
+	rdfs:label "Output at the definition description level"
 .
-cspa:SpecificationOutput a owl:Class
+cspa:SpecificationOutput a owl:Class;
+	rdfs:label "Output at the specification description level"
 .
-cspa:ImplementationOutput a owl:Class
+cspa:ImplementationOutput a owl:Class;
+	rdfs:label "Output at the implementation description level"
 .
-##Links between topics and levels
+
+## Links between topics and levels
 cspa:comesFrom a owl:ObjectProperty;
 	rdfs:domain cspa:DescriptionLevel;
-	rdfs:range cspa:Provenance
+	rdfs:range cspa:Provenance;
+	rdfs:label "Link between a description level and a Provenance"
 .
 cspa:isDocumentedBy a owl:ObjectProperty;
 	rdfs:domain cspa:DescriptionLevel;
-	rdfs:range cspa:Documentation
+	rdfs:range cspa:Documentation;
+	rdfs:label "Link between a description level and a Documentation"
 .
 cspa:aimsAt a owl:ObjectProperty;
 	rdfs:domain cspa:ServiceDefinition;
-	rdfs:range cspa:BusinessFunction
+	rdfs:range cspa:BusinessFunction;
+	rdfs:label "Link between a description level and Business function"
 .
 cspa:definitionDependsOn a owl:ObjectProperty;
 	rdfs:domain cspa:ServiceDefinition;
-	rdfs:range cspa:DefinitionDependency
+	rdfs:range cspa:DefinitionDependency;
+	rdfs:label "Link between a service definition description level and a Dependency"
 .
 cspa:definitionIsInvokedBy a owl:ObjectProperty;
 	rdfs:domain cspa:ServiceDefinition;
-	rdfs:range cspa:DefinitionInterface
+	rdfs:range cspa:DefinitionInterface;
+	rdfs:label "Link between a service definition description level and an Interface"
 .
 cspa:definitionHasInput a owl:ObjectProperty;
 	rdfs:domain cspa:FunctionDefinition;
-	rdfs:range cspa:DefinitionInput
+	rdfs:range cspa:DefinitionInput;
+	rdfs:label "Link between a service definition description level and an Input"
 .
 cspa:definitionHasOuput a owl:ObjectProperty;
 	rdfs:domain cspa:FunctionDefinition;
-	rdfs:range cspa:DefinitionOutput
+	rdfs:range cspa:DefinitionOutput;
+	rdfs:label "Link between a service definition description level and an Output"
 .
 cspa:specificationDependsOn a owl:ObjectProperty;
 	rdfs:domain cspa:ServiceSpecification;
-	rdfs:range cspa:SpecificationDependency
+	rdfs:range cspa:SpecificationDependency;
+	rdfs:label "Link between a specification description level and a Dependency"
 .
 cspa:specificationIsInvokedBy a owl:ObjectProperty;
 	rdfs:domain cspa:ServiceSpecification;
-	rdfs:range cspa:SpecificationInterface
+	rdfs:range cspa:SpecificationInterface;
+	rdfs:label "Link between a specification description level and an Interface"
 .
 cspa:specificationHasInput a owl:ObjectProperty;
 	rdfs:domain cspa:FunctionSpecification;
-	rdfs:range cspa:SpecificationInput
+	rdfs:range cspa:SpecificationInput;
+	rdfs:label "Link between a specification description level and an Input"
 .
 cspa:specificationHasOuput a owl:ObjectProperty;
 	rdfs:domain cspa:FunctionSpecification;
-	rdfs:range cspa:SpecificationOutput
+	rdfs:range cspa:SpecificationOutput;
+	rdfs:label "Link between a specification description level and Output"
 .
 cspa:implementationDependsOn a owl:ObjectProperty;
 	rdfs:domain cspa:ServiceImplementation, cspa:ImplementationInterface ;
-	rdfs:range cspa:ImplementationDependency
+	rdfs:range cspa:ImplementationDependency;
+	rdfs:label "Link between a implementation description level and a Dependency"
 .
 cspa:implementationIsInvokedBy a owl:ObjectProperty;
 	rdfs:domain cspa:ServiceImplementation;
-	rdfs:range cspa:ImplementationInterface
+	rdfs:range cspa:ImplementationInterface;
+	rdfs:label "Link between a implementation description level and an Interface"
 .
 cspa:implementationHasInput a owl:ObjectProperty;
 	rdfs:domain cspa:FunctionImplementation;
-	rdfs:range cspa:ImplementationInput
+	rdfs:range cspa:ImplementationInput;
+	rdfs:label "Link between a implementation description level and an Input"
 .
 cspa:implementationHasOutput a owl:ObjectProperty;
 	rdfs:domain cspa:FunctionImplementation;
-	rdfs:range cspa:ImplementationOutput
+	rdfs:range cspa:ImplementationOutput;
+	rdfs:label "Link between a implementation description level and an Output"
 .
-##Identifiers
+
+## Identifiers
 cspa:Identifier a owl:Class;
 	owl:DisjointUnionOf(
 		cspa:DependencyIdentifier
 		cspa:InterfaceIdentifier
 		cspa:InputIdentifier
-		cspa:OutputIdentifier)
+		cspa:OutputIdentifier);
+	rdfs:label "CSPA Identifier";
+	rdfs:comment "Used to identify one object described multiple times at different description levels."
 .
 cspa:DependencyIdentifier a owl:Class;
-	rdfs:subClassOf cspa:Identifier
+	rdfs:subClassOf cspa:Identifier;
+	rdfs:label "Dependency identifier";
+	rdfs:comment "Used to identify one dependency described multiple times at different description levels."
 .
 cspa:InterfaceIdentifier a owl:Class;
-	rdfs:subClassOf cspa:Identifier
+	rdfs:subClassOf cspa:Identifier;
+	rdfs:label "Interface identifier";
+	rdfs:comment "Used to identify one interface described multiple times at different description levels."
 .
 cspa:InputIdentifier a owl:Class;
-	rdfs:subClassOf cspa:Identifier
+	rdfs:subClassOf cspa:Identifier;
+	rdfs:label "Input identifier";
+	rdfs:comment "Used to identify one input described multiple times at different description levels."
 .
 cspa:OutputIdentifier a owl:Class;
-	rdfs:subClassOf cspa:Identifier
+	rdfs:subClassOf cspa:Identifier;
+	rdfs:label "Output identifier";
+	rdfs:comment "Used to identify one output described multiple times at different description levels."
 .
 cspa:hasDependencyIdentifier a owl:ObjectProperty;
 	rdfs:domain cspa:Dependency;
-	rdfs:range cspa:DependencyIdentifier
+	rdfs:range cspa:DependencyIdentifier;
+	rdfs:label "Link between a dependency and its identifier"
 .
 cspa:hasInputIdentifier a owl:ObjectProperty;
 	rdfs:domain cspa:Input;
-	rdfs:range cspa:InputIdentifier
+	rdfs:range cspa:InputIdentifier;
+	rdfs:label "Link between an input and its identifier"
 .
 cspa:hasInterfaceIdentifier a owl:ObjectProperty;
 	rdfs:domain cspa:Interface;
-	rdfs:range cspa:InterfaceIdentifier
+	rdfs:range cspa:InterfaceIdentifier;
+	rdfs:label "Link between an interface and its identifier"
 .
 cspa:hasOutputIdentifier a owl:ObjectProperty;
 	rdfs:domain cspa:Output;
-	rdfs:range cspa:OutputIdentifier
+	rdfs:range cspa:OutputIdentifier;
+	rdfs:label "Link between an output and its identifier"
 .
-##Identification and Description properties
+
+## Identification and Description properties
 cspa:label a owl:DatatypeProperty;
 	rdfs:domain	
 		cspa:DescriptionLevel,
@@ -278,123 +377,159 @@ cspa:label a owl:DatatypeProperty;
 		cspa:Input,
 		cspa:Output;
 	rdfs:range xsd:string;
-	rdfs:subPropertyOf rdfs:label 
+	rdfs:subPropertyOf rdfs:label ;
+	rdfs:label "Label"
 .
 cspa:version a owl:DatatypeProperty;
 	rdfs:domain
 		cspa:DescriptionLevel,
 		cspa:PackageOrFunction;
 	rdfs:range xsd:string;
-	rdfs:subPropertyOf pav:version
+	rdfs:subPropertyOf pav:version;
+	rdfs:label "Version"
 .
 cspa:description a owl:DatatypeProperty;
 	rdfs:domain
 		cspa:DescriptionLevel,
 		cspa:PackageOrFunction,
-		cspa:PropertiesTopic;
+		cspa:PropertyTopic;
 	rdfs:range xsd:string;
-	rdfs:subPropertyOf dcterms:description
+	rdfs:subPropertyOf dcterms:description;
+	rdfs:label "Description"
 .
 
-
-##Provenance properties
+## Provenance properties
 cspa:Organization a owl:Class;
-	rdfs:subClassOf prov:Organization, org:Organization
+	rdfs:subClassOf prov:Organization, org:Organization;
+	rdfs:label "Organization"
 .
 cspa:genericOrganization a owl:ObjectProperty;
 	rdfs:domain cspa:Provenance;
 	rdfs:range cspa:Organization;
-	rdfs:subPropertyOf prov:wasGeneratedBy
+	rdfs:subPropertyOf prov:wasGeneratedBy;
+	rdfs:label "Generic Organization"
 .
 cspa:organizationName a owl:DatatypeProperty;
 	rdfs:domain cspa:Organization;
 	rdfs:range xsd:string;
-	rdfs:subPropertyOf foaf:name
+	rdfs:subPropertyOf foaf:name;
+	rdfs:label "Organization name"
 .
 
-##Provenance properties : roles
+## Provenance properties: roles
 cspa:assemblerOrganization a owl:ObjectProperty;
-	rdfs:subPropertyOf cspa:genericOrganization
+	rdfs:subPropertyOf cspa:genericOrganization;
+	rdfs:label "Assembler organization"
 .
 cspa:builderOrganization a owl:ObjectProperty;
-	rdfs:subPropertyOf cspa:genericOrganization
+	rdfs:subPropertyOf cspa:genericOrganization;
+	rdfs:label "Builder organization"
 .
 cspa:configurerOrganization a owl:ObjectProperty;
-	rdfs:subPropertyOf cspa:genericOrganization
+	rdfs:subPropertyOf cspa:genericOrganization;
+	rdfs:label "Configurer organization"
 .
 cspa:designerOrganization a owl:ObjectProperty;
-	rdfs:subPropertyOf cspa:genericOrganization
+	rdfs:subPropertyOf cspa:genericOrganization;
+	rdfs:label "Designer organization"
 .
 cspa:environmentProviderOrganization a owl:ObjectProperty;
-	rdfs:subPropertyOf cspa:genericOrganization
+	rdfs:subPropertyOf cspa:genericOrganization;
+	rdfs:label "Environment provider organization"
 .
 cspa:investorOrganization a owl:ObjectProperty;
-	rdfs:subPropertyOf cspa:genericOrganization
+	rdfs:subPropertyOf cspa:genericOrganization;
+	rdfs:label "Investor organization"
 .
 cspa:serviceProviderOrganization a owl:ObjectProperty;
-	rdfs:subPropertyOf cspa:genericOrganization
+	rdfs:subPropertyOf cspa:genericOrganization;
+	rdfs:label "Service provider organization"
 .
 cspa:userOrganization a owl:ObjectProperty;
-	rdfs:subPropertyOf cspa:genericOrganization
+	rdfs:subPropertyOf cspa:genericOrganization;
+	rdfs:label "User organization"
 .
 
-
-##Documentation properties
+## Documentation properties
 cspa:methods a owl:DatatypeProperty;
 	rdfs:domain cspa:Documentation;
-	rdfs:range xsd:string
+	rdfs:range xsd:string;
+	rdfs:label "Methods";
+	rdfs:comment "Any method used by the service to achieve its goal."
 .
 cspa:additionalInformation a owl:DatatypeProperty;
 	rdfs:domain cspa:Documentation;
-	rdfs:range xsd:string
+	rdfs:range xsd:string;
+	rdfs:label "Additional information";
+	rdfs:comment "Information which does not fit elsewhere."
 .
 cspa:installationGuide a owl:ObjectProperty;
 	rdfs:domain cspa:Documentation;
-	rdfs:range cspa:Document
+	rdfs:range cspa:Document;
+	rdfs:label "Installation guide";
+	rdfs:comment "Document explaining how to install the service."
 .
 cspa:homepage a owl:ObjectProperty;
 	rdfs:subPropertyOf foaf:homepage;
 	rdfs:domain cspa:Documentation;
-	rdfs:range cspa:Document
+	rdfs:range cspa:Document;
+	rdfs:label "Homepage";
+	rdfs:comment "Homepage of the service; a web page containing information about the service."
 .
 cspa:Document a owl:Class;
- owl:sameAs foaf:Document
+	owl:sameAs foaf:Document;
+	rdfs:label "Document";
+	rdfs:comment "Any document of any kind."
 .
-##BusinessFunction properties and classes
+
+## BusinessFunction properties and classes
 cspa:outcomes a owl:DatatypeProperty;
 	rdfs:domain cspa:BusinessFunction;
-	rdfs:range xsd:string
+	rdfs:range xsd:string;
+	rdfs:label "Outcomes";
+	rdfs:comment "Outcomes of the service."
 .
 cspa:restrictions a owl:DatatypeProperty;
 	rdfs:domain cspa:BusinessFunction;
-	rdfs:range xsd:string
+	rdfs:range xsd:string;
+	rdfs:label "Restrisctions";
+	rdfs:comment "Restrictions of the service."
 .
 cspa:gsbpmSubProcess a owl:ObjectProperty;
 	rdfs:domain cspa:BusinessFunction;
-	rdfs:range cspa:GsbpmSubProcess
+	rdfs:range cspa:GsbpmSubProcess;
+	rdfs:label "GSBPM sub-process";
+	rdfs:comment "See GSBPM documentation"
 .
-##Input  and Output properties
-cspa:cspaLIM a owl:ObjectProperty;
+
+## Input and Output properties
+cspa:limObject a owl:ObjectProperty;
 	rdfs:domain cspa:SpecificationInput, cspa:SpecificationOutput; ;
-	rdfs:range cspa:CspaLIMClass
+	rdfs:range cspa:LIMClass;
+	rdfs:label "CSPA LIM object"
 .
 cspa:gsimInput a owl:ObjectProperty;
 	rdfs:domain cspa:DefinitionInput;
-	rdfs:range gsim:Object
+	rdfs:range gsim:Object;
+	rdfs:label "GSIM Input"
 .
 cspa:gsimOutput a owl:ObjectProperty;
 	rdfs:domain cspa:DefinitionOutput;
-	rdfs:range gsim:Object
+	rdfs:range gsim:Object;
+	rdfs:label "GSIM Output"
 .
 cspa:dataByReferenceProtocol a owl:DatatypeProperty;
 	rdfs:domain cspa:ImplementationInput;
-	rdfs:range xsd:string
+	rdfs:range xsd:string;
+	rdfs:label "Data by reference Protocol"
 .
-cspa:GsimInputClass a owl:Class;
- owl:sameAs gsim:ProcessInput
+cspa:GSIMInputClass a owl:Class;
+	owl:sameAs gsim:ProcessInput;
+	rdfs:label "GSIM Input class"
 .
-cspa:GsimOutputClass a owl:Class;
- owl:sameAs gsim:ProcessOutput
+cspa:GSIMOutputClass a owl:Class;
+	owl:sameAs gsim:ProcessOutput;
+	rdfs:label "GSIM Output class"
 .
-#CspaLIM class is not defined today (June 2016)
-cspa:CspaLIMClass  a owl:Class.
+# The LIMClass class is not defined as of today (August 2016)
+cspa:LIMClass a owl:Class.
