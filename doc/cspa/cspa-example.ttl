@@ -1,0 +1,68 @@
+@prefix cspa:<http://rdf.unece.org/models/cspa#> .
+
+<http://unece.org/services/sa-service> a cspa:package;
+	cspa:label "Seasonal Adjustment service";
+
+	cspa:hasPackageDefinition [ a cspa:ServiceDefinition; 
+		cspa:aimsAt[ a cspa:BusinessFunction;
+			cspa:description "Seasonally adjust and trend time series";
+			cspa:outcomes "This results in seasonally adjusted and trend estimates suitable for publication / release";
+			# cspa:gsbpmSubProcess "6.1. Prepare draft outputs";
+			cspa:restrictions "none"
+		]
+	];
+	
+	cspa:hasPackageSpecification [ a cspa:ServiceSpecification;
+		cspa:specificationIsInvokedBy [ a cspa:SpecificationInterface;
+			cspa:description 
+				"The Seasonal Adjustment Service is a stateless service which exposes two functions for seasonal adjustment : one using the TramoSeats algorithm and another using the X13 algorithm. This functions are invoked using a request / response protocol. Because it is a stateless service, all the relevant input data must be provided through the request, and all the output data will be contained in the response. "
+		]
+	];
+	
+	cspa:hasPackageImplementation [ a cspa:ServiceImplementationDescription;
+		cspa:version "1";
+		cspa:comesFrom [ a cspa:Provenance; 
+			cspa:builderOrganization [ a cspa:Organization;
+				cspa:organizationName "INSEE"
+			]
+		];
+		
+		cspa:isDocumentedBy [ a cspa:Documentation; 
+			cspa:homepage 
+				"http://default-environment-iefnmepgh8.elasticbeanstalk.com/static/default.htm";
+			cspa:additionalInformation 
+				"A Swagger specification could be found here : http://default-environment-iefnmepgh8.elasticbeanstalk.com/static/sas-swagger.json";
+			cspa:installationGuide
+				"The service, once packaged with Maven, is a WAR that could be deployed on compatible container (see above).";
+			cspa:additionalInformation 
+				"There are examples of requests in https://github.com/FranckCo/CSPA-SA/tree/master/src/test/resources, especially tsrequest.xml and x13request.xml.";
+			cspa:additionalInformation
+				"We also set up a little graphical test client there: http://cspa-sas-client-env.elasticbeanstalk.com/"
+		];
+		
+		cspa:implementationDependsOn [ a cspa:ImplementationInterface;
+				cspa:label "REST API";
+				cspa:description
+					"This implementation is a REST API which can be accessed by HTTP calls.";
+		];
+		
+		cspa:implementationDependsOn [ a cspa:ImplementationDependency;
+			cspa:label "Java 7 application";
+			cspa:description
+				"The service is a Java 7 application compliant to the applicable standards, it could be packaged as a WAR and deployed in a JEE or more lightweight container (like Tomcat or Jetty). As a consequence it could be run on any platform that could execute a JRE compatible with Java 7."
+		];
+		
+		cspa:implementationDependsOn [ a cspa:ImplementationDependency;
+			cspa:label "Stateless service";
+			cspa:description
+				"It is a stateless service and does not require a database."
+		];
+		
+		cspa:implementationDependsOn [ a cspa:ImplementationDependency;
+			cspa:label "JDemetra+";
+			cspa:description
+				"The main dependency (other than technical ones like serialisation libraries or REST implementation) is the JDemetra+ library which provides the seasonal adjustment algorithms (Tramo-Seats and X13)."
+		]
+				
+	]
+.
