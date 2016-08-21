@@ -39,7 +39,7 @@ import fr.insee.stamina.utils.Names;
 import fr.insee.stamina.utils.XKOS;
 
 /**
- * The <code>NACECPAModelMaker</code> creates and saves Jena models corresponding to the European classifications (NACE and CPA).
+ * The <code>NACECPAModelMaker</code> class creates and saves Jena models corresponding to the European classifications (NACE and CPA).
  * 
  * The source data is downloaded from RAMON
  * 

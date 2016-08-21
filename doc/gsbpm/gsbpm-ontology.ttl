@@ -1,0 +1,69 @@
+@prefix gsbpm:  <http://rdf.unece.org/models/gsbpm#> .
+@prefix igsbpm: <http://id.unece.org/models/gsbpm/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cc:      <http://creativecommons.org/ns#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix vann:    <http://purl.org/vocab/vann/> .
+@prefix voaf:    <http://purl.org/vocommons/voaf#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#>
+
+######################################################
+# Ontology
+######################################################
+
+<http://rdf.unece.org/models/gsbpm> a owl:Ontology , voaf:Vocabulary ;
+      owl:versionInfo "Version 5.0" ;
+      cc:license <http://creativecommons.org/licenses/by/3.0/> ;
+      dcterms:creator [ a foaf:Person ; foaf:name "Franck Cotton" ] ;
+	  dcterms:title "GSBPM Vocabulary"@en , "Vocabulaire GSBPM"@fr ;
+      dcterms:description "Vocabulary for the representation of the GSBPM as RDF"@en , "Vocabulaire pour la représentation du GSBPM en RDF"@fr ;
+      dcterms:issued "2015-06-10"^^xsd:date ;
+      dcterms:modified "2015-06-10"^^xsd:date ;
+      dcterms:publisher <http://dbpedia.org/resource/United_Nations_Economic_Commission_for_Europe> ;
+      vann:preferredNamespacePrefix "gsbpm" ;
+      vann:preferredNamespaceUri <http://rdf.unece.org/models/gsbpm#> ;
+      dc:rights "Copyright © 2015 INSEE" ;
+      voaf:classNumber "3"^^xsd:integer ;
+      voaf:propertyNumber "0"^^xsd:integer .
+
+######################################################
+# Classes
+######################################################
+
+gsbpm:StatisticalProductionActivity
+    a rdfs:Class, owl:Class ;
+    rdfs:isDefinedBy <http://rdf.unece.org/def/gsbpm#> ;
+    rdfs:label "Statistical production activity"@en , "Activité de production statistique"@fr ;
+	rdfs:subClassOf prov:Activity , skos:Concept .
+
+gsbpm:Phase
+    a rdfs:Class, owl:Class ;
+    rdfs:isDefinedBy <http://rdf.unece.org/def/gsbpm#> ;
+    rdfs:label "GSBPM phase"@en , "Phase du GSBPM"@fr ;
+	rdfs:subClassOf gsbpm:StatisticalProductionActivity .
+
+gsbpm:SubProcess
+    a rdfs:Class, owl:Class ;
+    rdfs:isDefinedBy <http://rdf.unece.org/def/gsbpm#> ;
+    rdfs:label "GSBPM sub-process"@en , "Sous-processus du GSBPM"@fr ;
+	rdfs:subClassOf gsbpm:StatisticalProductionActivity .
+
+######################################################
+# Individuals
+######################################################
+
+igsbpm:GSBPM
+    a skos:ConceptScheme ;
+	rdfs:label "Generic Statistical Business Process Model"@en, "Modèle générique de processus métier statistique"@fr ;
+	foaf:homepage <http://www1.unece.org/stat/platform/display/GSBPM/GSBPM+v5.0> .
+	
+igsbpm:StatisticalProductionProcess
+    a gsbpm:StatisticalProductionActivity ;
+	rdfs:label "Statistical Production Process"@en, "Processus de production statistique"@fr ;
+	skos:inScheme igsbpm:GSBPM .
