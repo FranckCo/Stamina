@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.insee.losm</groupId>
-	<artifactId>losm</artifactId>
+	<artifactId>stamina</artifactId>
 	<packaging>jar</packaging>
 	<version>0.1</version>
 	<name>Linked Open Statistical Metadata</name>

@@ -479,7 +479,7 @@ public class NACECPAModelMaker {
 	private static String getMatchingFileName(String filter) {
 
 		logger.debug("Matching files in " + LOCAL_FOLDER + " for filter " + filter);
-		List<String> fileList = new ArrayList<>();
+		List<String> fileList = new ArrayList<String>();
 		// Get all the files whose name matches the filter 
 		DirectoryStream<Path> stream;
 		try {
