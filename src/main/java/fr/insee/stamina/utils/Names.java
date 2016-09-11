@@ -153,6 +153,25 @@ public class Names {
 	}
 
 	/**
+	 * Returns the parent section code for a given division code of NACE, CPF and associated classifications.
+	 * 
+	 * @param division The code of the division.
+	 * @return The code of the parent section, or <code>null</code> if the division code is invalid.
+	 */
+	public static String getNACESectionForDivision(String division) {
+
+		// For verification      "000000000111111111122222222223333333333444444444455555555556666666666777777777788888888889999999999";
+		// For verification      "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+		final String CONVERTER = "AAAXBBBBBCCCCCCCCCCCCCCCCCCCCCCCCXDEEEEXFFFXGGGXHHHHHXIIXJJJJJJKKKXLMMMMMMMXNNNNNNXOPQQQXRRRRSSSTTU";
+
+		try {
+			int index = Integer.parseInt(division);
+			String section = CONVERTER.substring(index - 1, index);
+			return (section.equals("X") ? null : section);
+		} catch (Exception e) { return null; }
+	}
+
+	/**
 	 * Returns the base URI corresponding to a correspondence table between two classification versions.
 	 * <i>Note<i>: the base URI is not the URI of the correspondence itself (see getCorrespondenceURI).
 	 * 
