@@ -17,7 +17,17 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.SKOS;
 
-public class SIMSReader {
+/**
+ * The <code>SIMSSimpleModelMaker</code> creates and saves a Jena model corresponding to a concept scheme based on the SIMS.
+ * 
+ * The source used here is the version with only the SIMS structure (see ref. below).
+ * A more complete version is produced by the SIMSModelMaker class.
+ * 
+ * @see http://ec.europa.eu/eurostat/documents/64157/4373903/SIMS-2-0-Revised-standards-November-2015-ESSC-final.pdf/47c0b80d-0e19-4777-8f9e-28f89f82ce18
+ * @author Franck Cotton
+ * @version 0.10, 12 May 2016
+ */
+public class SIMSSimpleModelMaker {
 
 	static String SIMS_PDF = "src/main/resources/data/SIMS-2-0-Revised-standards-November-2015-ESSC-final.pdf";
 	static String SIMS_TTL = "src/main/resources/data/sims.ttl";
@@ -31,16 +41,16 @@ public class SIMSReader {
 	/** The RDF model containing the SKOS concept scheme */
 	Model simsModel = null;
 
-	private static Logger logger = LogManager.getLogger(SIMSReader.class);
+	private static Logger logger = LogManager.getLogger(SIMSSimpleModelMaker.class);
 
-	public SIMSReader() {
+	public SIMSSimpleModelMaker() {
 		entryMap = new TreeMap<String, String>();
 		simsModel = ModelFactory.createDefaultModel();
 	}
 
 	public static void main(String[] args) {
 
-		SIMSReader reader = new SIMSReader();
+		SIMSSimpleModelMaker reader = new SIMSSimpleModelMaker();
 
 		try {
 			reader.extractFromPDF();
