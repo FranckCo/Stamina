@@ -37,7 +37,7 @@
                     <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2008-01-01</dcterms:issued>
                 </xsl:when>
             </xsl:choose> <!-- No otherwise -->
-            <xkos:hasLevels rdf:resource="{$base-url}levels/list"/>
+            <xkos:levels rdf:resource="{$base-url}levels/list"/>
             <xsl:for-each select="Item[@idLevel='1']">
                 <skos:hasTopConcept rdf:resource="{lf:item-uri(@id)}"/>
             </xsl:for-each>
