@@ -510,12 +510,12 @@ cspa:limObject a owl:ObjectProperty;
 .
 cspa:gsimInput a owl:ObjectProperty;
 	rdfs:domain cspa:DefinitionInput;
-	rdfs:range gsim:gsimObject;
+	rdfs:range gsim:GSIMObject;
 	rdfs:label "GSIM Input"
 .
 cspa:gsimOutput a owl:ObjectProperty;
 	rdfs:domain cspa:DefinitionOutput;
-	rdfs:range gsim:gsimObject;
+	rdfs:range gsim:GSIMObject;
 	rdfs:label "GSIM Output"
 .
 cspa:dataByReferenceProtocol a owl:DatatypeProperty;
