@@ -2,11 +2,11 @@
 
 ## Introduction
 
-This document describes some best practices for representing statistical classifications as XKOS.
+This document describes some best practices for representing statistical classifications as XKOS. For each proposed rule, a SPARQL query is provided: for a conformant RDF store, the query should return no result.
 
 ## Classifications and classifications schemes
 
-* All classification schemes should have a `skos:notation` property which value is the short name of the classification scheme with no language tag.
+* All classification schemes must have a `skos:notation` property which value is the short name of the classification scheme with no language tag.
 
 Associated query:
 
@@ -62,3 +62,27 @@ PREFIX dcterms:<http://purl.org/dc/terms/>
     }
   }
 ```
+
+* All classification schemes must have a `skos:prefLabel` property which value is the complete name of the classification scheme in English. Names in other languages may be provided with the same property. All names must have a language tag.
+
+Associated query:
+
+```
+TBD
+```
+
+* All classification schemes should have a `dc:description` property which value is the short descriptive text about the classification scheme in English. Description in other languages may be provided with the same property. All descriptive texts should have a language tag.
+
+Associated query:
+
+```
+TBD
+```
+* All classification schemes should have a `skos:scopeNote` property which value is a resource of type `xkos:ExplanatoryNote`. The explanatory note must have a `xkos:plainText` property which value is a long descriptive text about the classification scheme in English, with a language tag set at '@en'. Long descriptives in other languages may be provided: for each language a dedicated `xkos:ExplanatoryNote` resource will be created, with a `xkos:plainText` string bearing the corresponding language tag.
+
+Associated query:
+
+```
+TBD
+```
+
