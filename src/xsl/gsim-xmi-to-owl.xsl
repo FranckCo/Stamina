@@ -15,7 +15,9 @@
 	<xsl:output method="xml" encoding="UTF-8" indent="yes" />
 
 	<xsl:variable name="short-base-uri">gsim</xsl:variable>
-
+	<xsl:variable name="long-base-uri">http://stamina-project.org/models/gsim/</xsl:variable>
+	<xsl:variable name="long-owl-uri">http://www.w3.org/2002/07/owl#</xsl:variable>
+	
 	<xsl:variable name="classesName">
 		<!-- Clean class names: suppress spaces or other characters -->
 		<xsl:for-each select="/gsim-xmi:Model/gsim-xmi:Package/gsim-xmi:Classes/gsim-xmi:Class/gsim-xmi:Name">
@@ -85,10 +87,10 @@
 	</xsl:template>
 
 	<xsl:template match="gsim-xmi:Model">
-		<xsl:element name="{$short-base-uri}:{$gsimObjectClass}">
-			<rdf:type> <owl:Class/> </rdf:type>
+		<rdf:Description rdf:about="{$long-base-uri}{$gsimObjectClass}">
+			<rdf:type rdf:resource="{$long-owl-uri}Class" />
 			<rdfs:label xml:lang="en">GSIM Object</rdfs:label>
-		</xsl:element>
+		</rdf:Description>
 		<xsl:apply-templates select="gsim-xmi:Package">
 			<xsl:sort select="gsim-xmi:Name" />
 		</xsl:apply-templates>
@@ -121,12 +123,19 @@
 						group-by="concat(xslGSIM:PropertyRangeMinCardinality(.),'..',xslGSIM:PropertyRangeMaxCardinality(.))">
 						<!-- It works because we check that a couple property-domain appear only once. -->
 						<xsl:variable name="cardinality4" select="count(current-group())" />
-						<xsl:if test="$cardinality4!=1 and $cardinality4 != $cardinality3  and $cardinality4 != $cardinality2 and $cardinality4 != $cardinality1">
-							<xsl:message select="concat($cardinality1,'-',$cardinality2,'-',$cardinality3,'-',$cardinality4)">Problem of programming</xsl:message>
-						</xsl:if>
 						
-						<xsl:element
-						name="{$short-base-uri}:{xslGSIM:PropertyFinalName(.,$cardinality1, $cardinality2, $cardinality3, $cardinality4)}">
+						<xsl:variable name="min-cardinality-string" select="xslGSIM:PropertyRangeMinCardinality(.)"/>
+						<xsl:variable name="max-cardinality-string" select="xslGSIM:PropertyRangeMaxCardinality(.)"/>
+						
+						<xsl:variable name="domains-value">
+							<xsl:for-each select="current-group()">
+								<xsl:sort select="xslGSIM:PropertyDomainName(.)"></xsl:sort>
+								<xslGSIM:item name="{xslGSIM:PropertyDomainName(.)}" min="{xslGSIM:PropertyDomainMinCardinality(.)}" max="{xslGSIM:PropertyDomainMaxCardinality(.)}"/>
+							</xsl:for-each>
+						</xsl:variable>
+
+						<rdf:Description
+						rdf:about="{$long-base-uri}{xslGSIM:PropertyFinalName(.,$cardinality1, $cardinality2, $cardinality3, $cardinality4,$min-cardinality-string,$max-cardinality-string)}">
 							<xsl:call-template name="xslGSIM:propertyType" />
 							<rdfs:label xml:lang="en">
 								<xsl:value-of select="xslGSIM:PropertyName(.)" />
@@ -134,13 +143,11 @@
 							
 							<xsl:call-template name="property-Domain">
 								<xsl:with-param name="Domains">
-								<xsl:for-each select="current-group()">
-							<xslGSIM:item name="{xslGSIM:PropertyDomainName(.)}" min="{xslGSIM:PropertyDomainMinCardinality(.)}" max="{xslGSIM:PropertyDomainMinCardinality(.)}"/>
-							</xsl:for-each>
+								<xsl:copy-of select="$domains-value"/>
 								</xsl:with-param>
 							</xsl:call-template>
 							<xsl:call-template name="property-range"/>
-						</xsl:element>
+						</rdf:Description>
 						
 					</xsl:for-each-group>
 				</xsl:for-each-group>
@@ -150,23 +157,36 @@
 	
 	<xsl:template name="property-Domain">
 		<xsl:param name="Domains" />
-		<rdfs:domain>
+		
 				<xsl:choose>
 				<xsl:when test="count($Domains/xslGSIM:item)=1">
 					<xsl:copy-of select="xslGSIM:propertyDomains($Domains)"/>
 				</xsl:when>
 				<xsl:when test="count($Domains/xslGSIM:item)&gt;1">
+					<rdfs:domain>
 					<owl:Class>
 						<owl:unionOf rdf:parseType="Collection">
-							<xsl:copy-of select="xslGSIM:propertyDomains($Domains)"/>
+							<xsl:for-each select="xslGSIM:propertyDomains($Domains)">
+							<xsl:choose>
+							<xsl:when test="@rdf:resource">
+							<owl:Class rdf:about="{@rdf:resource}"/>
+							</xsl:when>
+							<xsl:when test="owl:Restriction">
+							<xsl:copy-of select="owl:Restriction"></xsl:copy-of>
+							</xsl:when>
+							<xsl:otherwise><xsl:message>unplanned case for domain union</xsl:message></xsl:otherwise>
+							
+							</xsl:choose>
+							</xsl:for-each>
 						</owl:unionOf>
 					</owl:Class>
+					</rdfs:domain>
 				</xsl:when>
 				<xsl:otherwise>
 				<xsl:message>Problem: no domain</xsl:message>
 				</xsl:otherwise>
 				</xsl:choose>
-			</rdfs:domain>
+			
 		</xsl:template>
 		
 	<xsl:function name="xslGSIM:propertyDomains">
@@ -176,20 +196,22 @@
 					<xsl:with-param name="restricted-class" select="./@name" />
 					<xsl:with-param name="minCardinality" select="./@min" />
 					<xsl:with-param name="maxCardinality" select="./@max" />
+					<xsl:with-param name="class" select="'rdfs:domain'"/>
 			</xsl:call-template>
 		</xsl:for-each>
 	</xsl:function>
 
 	<xsl:template name="property-range">
-		<rdfs:range>
+
 			<xsl:call-template name="xslGSIM:cardinalityRestriction">
 				<xsl:with-param name="restricted-class" select="xslGSIM:PropertyRangeName(.)" />
 				<xsl:with-param name="minCardinality"
 					select="xslGSIM:PropertyRangeMinCardinality(.)" />
 				<xsl:with-param name="maxCardinality"
 					select="xslGSIM:PropertyRangeMaxCardinality(.)" />
+				<xsl:with-param name="class" select="'rdfs:range'"/>
 			</xsl:call-template>
-		</rdfs:range>
+
 	</xsl:template>
 
 	<xsl:template match="gsim-xmi:Package">
@@ -199,16 +221,13 @@
 			Classes from package
 			<xsl:value-of select="$package-name" />
 		</xsl:comment>
-		<xsl:element name="{$short-base-uri}:{$package-name}">
-			<rdf:type> <owl:Class/> </rdf:type>
+		<rdf:Description rdf:about="{$long-base-uri}{$package-name}">
+			<rdf:type rdf:resource="{$long-owl-uri}Class"/>
 			<rdfs:label xml:lang="en">
 				<xsl:value-of select="gsim-xmi:Name" />
 			</rdfs:label>
-			<rdfs:subClassOf>
-				<xsl:element name="{$short-base-uri}:{$gsimObjectClass}">
-				</xsl:element>
-			</rdfs:subClassOf>
-		</xsl:element>
+			<rdfs:subClassOf rdf:resource="{$long-base-uri}{$gsimObjectClass}"/>
+		</rdf:Description>
 		<xsl:apply-templates select="gsim-xmi:Classes/gsim-xmi:Class">
 			<xsl:sort select="gsim-xmi:Name" />
 			<xsl:with-param name="base-class" select="$package-name" />
@@ -217,17 +236,17 @@
 
 	<xsl:template match="gsim-xmi:Class">
 		<xsl:param name="base-class" />
-		<xsl:element name="{$short-base-uri}:{xslGSIM:cleanClassesName(gsim-xmi:Name)}">
-			<rdf:type> <owl:Class/> </rdf:type>
+		<rdf:Description rdf:about="{$long-base-uri}{xslGSIM:cleanClassesName(gsim-xmi:Name)}">
+			<rdf:type rdf:resource="{$long-owl-uri}Class"/>
 			<rdfs:label xml:lang="en">
 				<xsl:value-of select="gsim-xmi:Name" />
 			</rdfs:label>
 			
-			<rdfs:subClassOf> <xsl:element name="{$short-base-uri}:{$base-class}"/> </rdfs:subClassOf>
+			<rdfs:subClassOf rdf:resource="{$long-base-uri}{$base-class}"/>
 			<xsl:for-each select="gsim-xmi:Specializes">
 			<!-- TODO: check subclasses -->
 			<xsl:if test="count(xslGSIM:equal-classesName(@class)) &gt; 0">
-				<rdfs:subClassOf> <xsl:element name="{xslGSIM:equal-classesName(@class)}"/>  </rdfs:subClassOf>
+				<rdfs:subClassOf rdf:resource="{xslGSIM:extendNameGsim(xslGSIM:equal-classesName(@class))}"/>
 			</xsl:if>
 			<!-- /TODO: check subclasses -->
 			</xsl:for-each>
@@ -237,7 +256,7 @@
 			@abstract (true/false) indicates if the class is abstract
 			xslGSIM:Generalizes/@class inverse of subClass Of 
 			-->
-		</xsl:element>
+		</rdf:Description>
 	</xsl:template>
 
 	<xsl:function name="xslGSIM:cleanClassesName">
@@ -274,8 +293,19 @@
 	)" />
 	</xsl:function>
 <xsl:function name="xslGSIM:stripURI">
-<xsl:param name="s" as="xs:string" />
-<xsl:value-of select="substring($s,string-length($short-base-uri)+2)"/>
+	<xsl:param name="inputString" as="xs:string" />
+	<!-- TODO : Ugly, make a liste and iterate over it -->
+	<xsl:choose>
+		<xsl:when test="starts-with($inputString,$short-base-uri)">
+			<xsl:value-of select="substring($inputString,string-length($short-base-uri)+2)"/>
+		</xsl:when>
+		<xsl:when test="starts-with($inputString,'xs')">
+			<xsl:value-of select="substring($inputString,string-length('xs')+2)"/>
+		</xsl:when>
+		<xsl:otherwise><xsl:message>Error : unplanned extension</xsl:message></xsl:otherwise>
+	</xsl:choose>
+
+
 </xsl:function>
 	<xsl:function name="xslGSIM:PropertyFinalName">
 		<xsl:param name="property" as="element()" />
@@ -283,13 +313,15 @@
 		<xsl:param name="cardinality-2" as="xs:integer" />
 		<xsl:param name="cardinality-3" as="xs:integer" />
 		<xsl:param name="cardinality-4" as="xs:integer" />
+		<xsl:param name="min-cardinality-string" as="xs:string" />
+		<xsl:param name="max-cardinality-string" as="xs:string" />
 		
 		<xsl:variable name="propertyName" select="xslGSIM:PropertyName($property)"/>
 		<!-- Name of the property Domain: -->
-		<xsl:if
-			test="$cardinality-4 = 1 and $cardinality-3 != $cardinality-4">
+		<xsl:if test="$cardinality-3 != $cardinality-4 and $cardinality-4 = 1">
 			<xsl:value-of select="concat(xslGSIM:stripURI(xslGSIM:PropertyDomainName($property)),'-')" />
 		</xsl:if>
+			
 		<!-- Initial Name of the property: -->
 		<xsl:value-of select="translate(if(matches($propertyName,'^[/\\(].*')) then substring($propertyName,2) else $propertyName,' (/)','---')" />
 		<xsl:if
@@ -302,10 +334,32 @@
 			<xsl:value-of select="concat('--',xslGSIM:ObjectPropertySourceName($property))" />
 		</xsl:if>
 		<!-- Name of the property Range: -->
+
+		<xsl:if test="$cardinality-3 != $cardinality-4 and $cardinality-4 != 1">
+			<xsl:choose>
+			<xsl:when test="$min-cardinality-string='' and $max-cardinality-string=''"></xsl:when>
+			<xsl:when test="$min-cardinality-string='' and $max-cardinality-string!=''">
+			<xsl:value-of select="concat('-max',$max-cardinality-string)" />
+			</xsl:when>
+			<xsl:when test="$min-cardinality-string!='' and $max-cardinality-string=''">
+			<xsl:value-of select="concat('-min',$min-cardinality-string)" />
+			</xsl:when>
+			<xsl:when test="$min-cardinality-string!='' and $max-cardinality-string!='' and $min-cardinality-string=$max-cardinality-string">
+			<xsl:value-of select="concat('-exact',$min-cardinality-string)" />
+			</xsl:when>
+			<xsl:otherwise>
+			<xsl:value-of select="concat('-min',$min-cardinality-string,'-max',$max-cardinality-string)" />
+			</xsl:otherwise>
+			</xsl:choose>
+		</xsl:if>
+
 		<xsl:if
 			test="$cardinality-2 != $cardinality-4">
 			<xsl:value-of select="concat('-',xslGSIM:stripURI(xslGSIM:PropertyRangeName($property)))" />
 		</xsl:if>
+		
+
+		
 	</xsl:function>
 
 
@@ -334,11 +388,11 @@
 		<xsl:choose>
 			<xsl:when
 				test="count(xslGSIM:equal-range-classes(xslGSIM:PropertyRangeName(.)))&gt;0">
-				<rdf:type> <owl:DataProperty/> </rdf:type>
+				<rdf:type rdf:resource="{$long-owl-uri}DataProperty" /> 
 			</xsl:when>
 			<xsl:when
 				test="count(xslGSIM:equal-classesName(xslGSIM:PropertyRangeName(.)))&gt;0">
-				<rdf:type> <owl:ObjectProperty/> </rdf:type>
+				<rdf:type rdf:resource="{$long-owl-uri}ObjectProperty"/> 
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:message select="xslGSIM:PropertyRangeName(.)">
@@ -406,22 +460,22 @@
 
 	<xsl:function name="xslGSIM:PropertyDomainMinCardinality">
 		<xsl:param name="property" as="element()" />
-		<xsl:value-of select="xslGSIM:extractCardinality(concat($property/xslGSIM:Min,$property/xslGSIM:Destination/xslGSIM:Min))" />
+		<xsl:value-of select="xslGSIM:extractCardinality(concat($property/gsim-xmi:Min,$property/gsim-xmi:Destination/gsim-xmi:Min))" />
 	</xsl:function>
 
 	<xsl:function name="xslGSIM:PropertyDomainMaxCardinality">
 		<xsl:param name="property" as="element()" />
-		<xsl:value-of select="xslGSIM:extractCardinality(concat($property/xslGSIM:Max,$property/xslGSIM:Destination/xslGSIM:Max))" />
+		<xsl:value-of select="xslGSIM:extractCardinality(concat($property/gsim-xmi:Max,$property/gsim-xmi:Destination/gsim-xmi:Max))" />
 	</xsl:function>
 
 	<xsl:function name="xslGSIM:PropertyRangeMinCardinality">
 		<xsl:param name="property" as="element()" />
-		<xsl:value-of select="xslGSIM:extractCardinality($property/xslGSIM:Source/xslGSIM:Min)" />
+		<xsl:value-of select="xslGSIM:extractCardinality($property/gsim-xmi:Source/gsim-xmi:Min)" />
 	</xsl:function>
 
 	<xsl:function name="xslGSIM:PropertyRangeMaxCardinality">
 		<xsl:param name="property" as="element()" />
-		<xsl:value-of select="xslGSIM:extractCardinality($property/xslGSIM:Source/xslGSIM:Max)" />
+		<xsl:value-of select="xslGSIM:extractCardinality($property/gsim-xmi:Source/gsim-xmi:Max)" />
 	</xsl:function>
 
 	<xsl:template match="gsim-xmi:Doc">
@@ -466,36 +520,55 @@
 	</xsl:function>
 
 
+	<xsl:function name="xslGSIM:extendNameGsim">
+				<xsl:param name="inputString" />
+				<!-- TODO : Ugly, make a liste and iterate over it -->
+				<xsl:choose>
+				<xsl:when test="starts-with($inputString,$short-base-uri)">
+					<xsl:value-of select="concat($long-base-uri,substring-after($inputString,concat($short-base-uri,':')))"></xsl:value-of>
+				</xsl:when>
+				<xsl:when test="starts-with($inputString,'xs')">
+					<xsl:value-of select="concat('http://www.w3.org/2001/XMLSchema',substring-after($inputString,concat('xs',':')))"></xsl:value-of>
+				</xsl:when>
+				<xsl:otherwise><xsl:message>Error : unplanned extension</xsl:message></xsl:otherwise>
+				</xsl:choose>
+				
+	</xsl:function>
+
 	<xsl:template name="xslGSIM:cardinalityRestriction">
 		<xsl:param name="restricted-class" as="xs:string" />
 		<xsl:param name="minCardinality" as="xs:string" />
 		<xsl:param name="maxCardinality" as="xs:string" />
-
+		<xsl:param name="class" as="xs:string"/>
+		
 		<xsl:choose>
 			<xsl:when test="$minCardinality = '' and $maxCardinality = '' ">
-				<xsl:element name="{$restricted-class}"> </xsl:element>
+				<xsl:element name="{$class}">
+				<xsl:attribute name=" rdf:resource"><xsl:value-of select="xslGSIM:extendNameGsim($restricted-class)"/></xsl:attribute>
+				</xsl:element>
 			</xsl:when>
 			<xsl:otherwise>
+				<xsl:element name="{$class}">
 				<owl:Restriction>
-				<owl:onClass> <xsl:element name="{$restricted-class}"/> </owl:onClass>
+				<owl:onClass rdf:resource="{xslGSIM:extendNameGsim($restricted-class)}"/>
 				<xsl:choose>
 						<xsl:when test="$minCardinality != '' and $maxCardinality = '' ">
 							<owl:minQualifiedCardinality
-								rdf:datatype="xsd:nonNegativeInteger">
+								rdf:datatype="{xslGSIM:extendNameGsim('xs:nonNegativeInteger')}">
 								<xsl:value-of select="$minCardinality" />
 							</owl:minQualifiedCardinality>
 						</xsl:when>
 
 						<xsl:when test="$minCardinality = '' and $maxCardinality != '' ">
 							<owl:maxQualifiedCardinality
-								rdf:datatype="xsd:nonNegativeInteger">
+								rdf:datatype="{xslGSIM:extendNameGsim('xs:nonNegativeInteger')}">
 								<xsl:value-of select="$maxCardinality" />
 							</owl:maxQualifiedCardinality>
 						</xsl:when>
 
 						<xsl:when
 							test="$minCardinality != '' and $maxCardinality != '' and $minCardinality = $maxCardinality ">
-							<owl:qualifiedCardinality rdf:datatype="xsd:nonNegativeInteger">
+							<owl:qualifiedCardinality rdf:datatype="{xslGSIM:extendNameGsim('xs:nonNegativeInteger')}">
 								<xsl:value-of select="$minCardinality" />
 							</owl:qualifiedCardinality>
 						</xsl:when>
@@ -503,11 +576,11 @@
 						<xsl:when
 							test="$minCardinality != '' and $maxCardinality != '' and $minCardinality != $maxCardinality ">
 							<owl:minQualifiedCardinality
-								rdf:datatype="xsd:nonNegativeInteger">
+								rdf:datatype="{xslGSIM:extendNameGsim('xs:nonNegativeInteger')}">
 								<xsl:value-of select="$minCardinality" />
 							</owl:minQualifiedCardinality>
 							<owl:maxQualifiedCardinality
-								rdf:datatype="xsd:nonNegativeInteger">
+								rdf:datatype="{xslGSIM:extendNameGsim('xs:nonNegativeInteger')}">
 								<xsl:value-of select="$maxCardinality" />
 							</owl:maxQualifiedCardinality>
 						</xsl:when>
@@ -516,7 +589,9 @@
 						</xsl:otherwise>
 					</xsl:choose>
 				</owl:Restriction>
+				</xsl:element>
 			</xsl:otherwise>
 		</xsl:choose>
+		
 	</xsl:template>
 </xsl:stylesheet>
