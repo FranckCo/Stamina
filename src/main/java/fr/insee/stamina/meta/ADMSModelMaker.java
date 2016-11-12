@@ -49,7 +49,7 @@ public class ADMSModelMaker {
 	public static void main(String[] args) throws Exception {
 
 		ADMSModelMaker modelMaker = new ADMSModelMaker();
-		logger.debug("New ISICModelMaker instance created");
+		logger.debug("New ADMSModelMaker instance created");
 		modelMaker.createRepositoryModel();
 	}
 
