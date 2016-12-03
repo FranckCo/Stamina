@@ -194,25 +194,25 @@ public class SBIModelMaker {
 		Resource level2 = model.createResource(BASE_URI + "/divisions", XKOS.ClassificationLevel);
 		level2.addProperty(SKOS.prefLabel, model.createLiteral("SBI 2008 - level 2 - Divisions", "en"));
 		level2.addProperty(XKOS.depth, model.createTypedLiteral(2));
-		level2.addProperty(XKOS.notationPattern, "[1-9]{2}");
+		level2.addProperty(XKOS.notationPattern, "[0-9]{2}");
 		level2.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sbi2008/division"));
 
 		Resource level3 = model.createResource(BASE_URI + "/groups", XKOS.ClassificationLevel);
 		level3.addProperty(SKOS.prefLabel, model.createLiteral("SBI 2008 - level 3 - Groups", "en"));
 		level3.addProperty(XKOS.depth, model.createTypedLiteral(3));
-		level3.addProperty(XKOS.notationPattern, "[1-9]{3}");
+		level3.addProperty(XKOS.notationPattern, "[0-9]{3}");
 		level3.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sbi2008/group"));
 
 		Resource level4 = model.createResource(BASE_URI + "/classes", XKOS.ClassificationLevel);
-		level4.addProperty(SKOS.prefLabel, model.createLiteral("SBI 2008 - level 3 - Classes", "en"));
+		level4.addProperty(SKOS.prefLabel, model.createLiteral("SBI 2008 - level 4 - Classes", "en"));
 		level4.addProperty(XKOS.depth, model.createTypedLiteral(4));
-		level4.addProperty(XKOS.notationPattern, "[1-9]{4}");
+		level4.addProperty(XKOS.notationPattern, "[0-9]{4}");
 		level4.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sbi2008/class"));
 
 		Resource level5 = model.createResource(BASE_URI + "/subclasses", XKOS.ClassificationLevel);
-		level5.addProperty(SKOS.prefLabel, model.createLiteral("SBI 2008 - level 3 - Subclasses", "en"));
+		level5.addProperty(SKOS.prefLabel, model.createLiteral("SBI 2008 - level 5 - Subclasses", "en"));
 		level5.addProperty(XKOS.depth, model.createTypedLiteral(5));
-		level5.addProperty(XKOS.notationPattern, "[1-9]{5}");
+		level5.addProperty(XKOS.notationPattern, "[0-9]{5}");
 		level5.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sbi2008/subclass"));
 
 		// Attach the level list to the classification

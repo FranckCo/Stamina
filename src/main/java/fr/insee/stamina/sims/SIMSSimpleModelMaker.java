@@ -18,7 +18,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.SKOS;
 
 /**
- * The <code>SIMSSimpleModelMaker</code> creates and saves a Jena model corresponding to a concept scheme based on the SIMS.
+ * The <code>SIMSSimpleModelMaker</code> class creates and saves a Jena model corresponding to a concept scheme based on the SIMS.
  * 
  * The source used here is the version with only the SIMS structure (see ref. below).
  * A more complete version is produced by the SIMSModelMaker class.

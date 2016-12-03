@@ -78,12 +78,12 @@ public class SICModelMaker {
 	public static void main(String[] args) throws Exception {
 
 		SICModelMaker modelMaker = new SICModelMaker();
-		// Creation of the classification and its levels
-//		modelMaker.initializeModel();
-//		modelMaker.createClassificationAndLevels();
-//		modelMaker.populateScheme();
-		modelMaker.getNotes();
-//		modelMaker.writeModel(LOCAL_FOLDER + "sic2007.ttl");
+		// Creation of the classification with its levels and items
+		modelMaker.initializeModel();
+		modelMaker.createClassificationAndLevels();
+		modelMaker.populateScheme();
+//		modelMaker.getNotes();
+		modelMaker.writeModel(LOCAL_FOLDER + "sic2007.ttl");
 		// Creation of the NACE-SIC hierarchy
 //		modelMaker.initializeModel();
 //		modelMaker.createNACESICHierarchy();
@@ -93,32 +93,27 @@ public class SICModelMaker {
 	/**
 	 * Creates the statements corresponding to the classification items.
 	 * 
-	 * @throws Exception
+	 * @throws Exception In case of problems reading the source file.
 	 */
 	private void populateScheme() throws Exception {
 
-		// Read the Excel file and create the classification items
+		// Read the Excel file
 		InputStream sourceFile = new FileInputStream(new File(LOCAL_FOLDER + SIC_STRUCTURE_FILE));
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
 		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
 
+		// Iterate over the rows and create the classification items
 		Iterator<Row> rows = items.rowIterator ();
 		while (rows.hasNext() && rows.next().getRowNum() < 1); // Skip the two header lines
 		while (rows.hasNext()) {
 			Row row = rows.next();
 
-			// The cell containing the code is generally numeric, except for composite sector codes
-			String itemCode = null;
-			if (row.getCell(1).getCellType() == Cell.CELL_TYPE_STRING) {
-				itemCode = row.getCell(1, Row.CREATE_NULL_AS_BLANK).toString();
-			}
-			else {
-				int itemCodeValue = (int)row.getCell(1, Row.CREATE_NULL_AS_BLANK).getNumericCellValue();
-				itemCode = Integer.toString(itemCodeValue);				
-			}
-			String itemLabel = row.getCell(2, Row.CREATE_NULL_AS_BLANK).toString();
+			// The lines start at different columns depending on the level
+			short codeIndex = row.getFirstCellNum();
+			String itemCode = getCodeInCell(row.getCell(codeIndex, Row.CREATE_NULL_AS_BLANK));
+			String itemLabel = row.getCell(codeIndex + 1, Row.CREATE_NULL_AS_BLANK).toString();
 			int level = getItemLevelDepth(itemCode);
-			logger.debug(itemCode);
+			logger.debug("About to create resources for SIC item " + itemCode + " at level " + level);
 
 			// Create the resource representing the classification item (skos:Concept), with its code and label
 			Resource itemResource = model.createResource(getItemURI(itemCode), SKOS.Concept);
@@ -187,7 +182,6 @@ public class SICModelMaker {
 		}
 	}
 
-
 	private void getNotes() throws IOException {
 
 		PDDocument document = PDDocument.load(new File(LOCAL_FOLDER + SIC_NOTES_FILE));
@@ -247,11 +241,12 @@ public class SICModelMaker {
 	/**
 	 * Reads a code in a cell, whether the cell type is numeric or string.
 	 * 
-	 * @param cell The <code>Cell</code> containing the code to read
+	 * @param cell The <code>Cell</code> containing the code to read.
 	 * @return The code value as a string.
 	 */
 	private String getCodeInCell(Cell cell) {
 
+		if (cell == null) return "";
 		String code = null;
 		if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
 			code = cell.toString();
@@ -262,52 +257,53 @@ public class SICModelMaker {
 		}
 		return code.trim();
 	}
+
 	/**
 	 * Creates in the model the resources representing the classification and its levels.
 	 */
  	public void createClassificationAndLevels() {
 
 		// Create the resource representing the classification (skos:ConceptScheme)
-		scheme = model.createResource(SIC_BASE_URI + "naics", SKOS.ConceptScheme);
-		scheme.addProperty(SKOS.prefLabel, model.createLiteral("North American Industry Classification System (NAICS) 2012", "en"));
-		scheme.addProperty(SKOS.notation, "NAICS 2012");
-		scheme.addProperty(SKOS.definition, model.createLiteral("The North American Industry Classification System (NAICS) is the standard used by Federal statistical agencies in classifying business establishments for the purpose of collecting, analyzing, and publishing statistical data related to the U.S. business economy.", "en"));
-		scheme.addProperty(DC.publisher, model.createResource("http://www.census.gov"));
-		scheme.addProperty(DC.date, model.createTypedLiteral("2012-01-01", "http://www.w3.org/2001/XMLSchema#date"));
-		scheme.addProperty(FOAF.homepage, model.createResource("http://www.census.gov/eos/www/naics/"));
+		scheme = model.createResource(SIC_BASE_URI + "sic", SKOS.ConceptScheme);
+		scheme.addProperty(SKOS.prefLabel, model.createLiteral("UK Standard Industrial Classification of Economic Activities (SIC) 2007", "en"));
+		scheme.addProperty(SKOS.notation, "UK SIC 2007");
+		scheme.addProperty(SKOS.definition, model.createLiteral("The current Standard Industrial Classification (SIC) used in classifying business establishments and other statistical units by the type of economic activity in which they are engaged.", "en"));
+		scheme.addProperty(DC.publisher, model.createResource("http://www.ons.gov.uk"));
+		scheme.addProperty(DC.date, model.createTypedLiteral("2007-01-01", "http://www.w3.org/2001/XMLSchema#date"));
+		scheme.addProperty(FOAF.homepage, model.createResource("https://www.ons.gov.uk/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007"));
 		scheme.addProperty(XKOS.covers, model.createResource("http://eurovoc.europa.eu/5992"));
 		scheme.addProperty(XKOS.numberOfLevels, model.createTypedLiteral(5));
 
 		// Create the resources representing the levels (xkos:ClassificationLevel)
-		Resource level1 = model.createResource(SIC_BASE_URI + "/sectors", XKOS.ClassificationLevel);
-		level1.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 1 - Sectors", "en"));
+		Resource level1 = model.createResource(SIC_BASE_URI + "/sections", XKOS.ClassificationLevel);
+		level1.addProperty(SKOS.prefLabel, model.createLiteral("UK SIC 2007 - level 1 - Sections", "en"));
 		level1.addProperty(XKOS.depth, model.createTypedLiteral(1));
-		level1.addProperty(XKOS.notationPattern, "[1-9]{2}");
-		level1.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/sector"));
+		level1.addProperty(XKOS.notationPattern, "[A-U]");
+		level1.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sic2007/section"));
 
-		Resource level2 = model.createResource(SIC_BASE_URI + "/subsectors", XKOS.ClassificationLevel);
-		level2.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 2 - Subsectors", "en"));
+		Resource level2 = model.createResource(SIC_BASE_URI + "/divisions", XKOS.ClassificationLevel);
+		level2.addProperty(SKOS.prefLabel, model.createLiteral("UK SIC 2007 - level 2 - Divisions", "en"));
 		level2.addProperty(XKOS.depth, model.createTypedLiteral(2));
-		level2.addProperty(XKOS.notationPattern, "[1-9]{3}");
-		level2.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/subsector"));
+		level2.addProperty(XKOS.notationPattern, "[0-9]{2}");
+		level2.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sic2007/division"));
 
 		Resource level3 = model.createResource(SIC_BASE_URI + "/groups", XKOS.ClassificationLevel);
-		level3.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 3 - Groups", "en"));
+		level3.addProperty(SKOS.prefLabel, model.createLiteral("UK SIC 2007 - level 3 - Groups", "en"));
 		level3.addProperty(XKOS.depth, model.createTypedLiteral(3));
-		level3.addProperty(XKOS.notationPattern, "[1-9]{4}");
-		level3.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/group"));
+		level3.addProperty(XKOS.notationPattern, "[0-9]{2}\\.[0-9]");
+		level3.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sic2007/group"));
 
-		Resource level4 = model.createResource(SIC_BASE_URI + "/naics-industries", XKOS.ClassificationLevel);
-		level4.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 4 - NAICS Industries", "en"));
+		Resource level4 = model.createResource(SIC_BASE_URI + "/classes", XKOS.ClassificationLevel);
+		level4.addProperty(SKOS.prefLabel, model.createLiteral("UK SIC 2007 - level 4 - Classes", "en"));
 		level4.addProperty(XKOS.depth, model.createTypedLiteral(4));
-		level4.addProperty(XKOS.notationPattern, "[1-9]{5}");
-		level4.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/naics-industry"));
+		level4.addProperty(XKOS.notationPattern, "[0-9]{2}\\.[0-9]{2}");
+		level4.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sic2007/class"));
 
-		Resource level5 = model.createResource(SIC_BASE_URI + "/national-industries", XKOS.ClassificationLevel);
-		level5.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 5 - National Industries", "en"));
+		Resource level5 = model.createResource(SIC_BASE_URI + "/subclasses", XKOS.ClassificationLevel);
+		level5.addProperty(SKOS.prefLabel, model.createLiteral("UK SIC 2007 - level 5 - Subclasses", "en"));
 		level5.addProperty(XKOS.depth, model.createTypedLiteral(5));
-		level5.addProperty(XKOS.notationPattern, "[1-9]{5}[0-9]");
-		level5.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/national-industry"));
+		level5.addProperty(XKOS.notationPattern, "[0-9]{2}\\.[0-9]{2}\\/[0-9]");
+		level5.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sic2007/subclass"));
 
 		// Attach the level list to the classification
 		levelList = model.createList(new RDFNode[] {level1, level2, level3, level4, level5});
@@ -336,7 +332,8 @@ public class SICModelMaker {
 	/**
 	 * Writes the model to the output Turtle file.
 	 * 
-	 * @throws Exception In case of problem writing the file	 */
+	 * @throws Exception In case of problem writing the file.
+	 */
 	private void writeModel(String fileName) throws IOException {
 
 		model.write(new FileOutputStream(fileName), "TTL");
@@ -345,20 +342,21 @@ public class SICModelMaker {
 	}
 	
 	/**
-	 * Computes the parent code for one given code.
+	 * Computes the parent code for one given SIC code.
+	 * 
+	 * @param code The code of the child SIC item.
+	 * @return The code of the parent, or <code>null</code> for sections and invalid codes.
 	 */
 	private static String getParentCode(String code) {
 
-		if ((code.length() <= 2) || (code.contains("-"))) return null;
+		if (code == null) return null;
 
-		String parentCode = code.substring(0, code.length() - 1);
-		// There are special cases for "composite" sector codes (31-33, 44-45, 48-49)
-		if (code.length() == 3) {
-			if (parentCode.startsWith("3")) return "31-33";
-			if (parentCode.equals("44") || (parentCode.equals("45"))) return "44-45";
-			if (parentCode.equals("48") || (parentCode.equals("49"))) return "48-49";
-		}
-		return parentCode;
+		if (code.length() == 7) return code.substring(0, 5);
+		if (code.length() == 5) return code.substring(0, 4);
+		if (code.length() == 4) return code.substring(0, 2);
+		if (code.length() == 2) return Names.getNACESectionForDivision(code);
+
+		return null;
 	}
 
 	/**
