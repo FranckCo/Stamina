@@ -233,8 +233,8 @@ public class CPCModelMaker {
 		// Creation of the correspondence table resource
 		Resource table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "1.1",  "CPC",  "2"), XKOS.Correspondence);
 		table.addProperty(SKOS.definition, "Correspondence table between CPC Ver.1.1 - CPC Ver.2");
-		table.addProperty(XKOS.compares, Names.getCSURI("CPC", "1.1"));
-		table.addProperty(XKOS.compares, Names.getCSURI("CPC", "2"));
+		table.addProperty(XKOS.compares, cpcModel.createResource(Names.getCSURI("CPC", "1.1")));
+		table.addProperty(XKOS.compares, cpcModel.createResource(Names.getCSURI("CPC", "2")));
 		try {
 			logger.debug("Preparing to read correspondence data from " + CPC11_TO_CPC2_FILE);
 			Reader reader = new FileReader(INPUT_FOLDER + CPC11_TO_CPC2_FILE);
@@ -275,8 +275,8 @@ public class CPCModelMaker {
 		// Creation of the correspondence table resource
 		table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "2",  "CPC",  "2.1"), XKOS.Correspondence);
 		table.addProperty(SKOS.definition, "CPC Ver.2 - CPC Ver.2.1 correspondence table");
-		table.addProperty(XKOS.compares, Names.getCSURI("CPC", "2"));
-		table.addProperty(XKOS.compares, Names.getCSURI("CPC", "2.1"));
+		table.addProperty(XKOS.compares, cpcModel.createResource(Names.getCSURI("CPC", "2")));
+		table.addProperty(XKOS.compares, cpcModel.createResource(Names.getCSURI("CPC", "2.1")));
 		// Comment extracted from the 'readme.txt' file (could be better in a skos:historyNote)
 		table.addProperty(RDFS.comment, cpcModel.createLiteral("The correspondence does not yet include divisions 61 and 62 of the CPC", "en"));
 		try {

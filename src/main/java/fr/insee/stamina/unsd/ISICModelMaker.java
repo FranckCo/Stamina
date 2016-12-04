@@ -258,8 +258,8 @@ public class ISICModelMaker {
 		// Creation of the correspondence table resource
 		Resource table = isicModel.createResource(Names.getCorrespondenceURI(sourceClassification,  sourceVersion, targetClassification,  targetVersion), XKOS.Correspondence);
 		table.addProperty(SKOS.definition, "Correspondence table between " + sourceShortName + " and " + targetShortName);
-		table.addProperty(XKOS.compares, Names.getCSURI(sourceClassification, sourceVersion));
-		table.addProperty(XKOS.compares, Names.getCSURI(targetClassification, targetVersion));
+		table.addProperty(XKOS.compares, isicModel.createResource(Names.getCSURI(sourceClassification, sourceVersion)));
+		table.addProperty(XKOS.compares, isicModel.createResource(Names.getCSURI(targetClassification, targetVersion)));
 		// ISIC31-CPC11, ISIC4-CPC2 and ISIC4-CPC21 have comments in the 'readme.txt' files (could be better in a skos:historyNote)
 		if (selector.equals("3.11.1"))
 			table.addProperty(RDFS.comment, isicModel.createLiteral("Please note, that certain products in the CPC (e.g. waste products in CPC division 39) are not linked to specific industries.", "en"));
