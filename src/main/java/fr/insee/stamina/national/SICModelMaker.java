@@ -79,15 +79,15 @@ public class SICModelMaker {
 
 		SICModelMaker modelMaker = new SICModelMaker();
 		// Creation of the classification with its levels and items
-		modelMaker.initializeModel();
-		modelMaker.createClassificationAndLevels();
-		modelMaker.populateScheme();
-//		modelMaker.getNotes();
-		modelMaker.writeModel(LOCAL_FOLDER + "sic2007.ttl");
-		// Creation of the NACE-SIC hierarchy
 //		modelMaker.initializeModel();
-//		modelMaker.createNACESICHierarchy();
-//		modelMaker.writeModel(LOCAL_FOLDER + "nacer2-sic2007.ttl");
+//		modelMaker.createClassificationAndLevels();
+//		modelMaker.populateScheme();
+//		modelMaker.getNotes();
+//		modelMaker.writeModel(LOCAL_FOLDER + "sic2007.ttl");
+		// Creation of the NACE-SIC hierarchy
+		modelMaker.initializeModel();
+		modelMaker.createNACESICHierarchy();
+		modelMaker.writeModel(LOCAL_FOLDER + "nacer2-sic2007.ttl");
 	}
 
 	/**
@@ -104,12 +104,15 @@ public class SICModelMaker {
 
 		// Iterate over the rows and create the classification items
 		Iterator<Row> rows = items.rowIterator ();
-		while (rows.hasNext() && rows.next().getRowNum() < 1); // Skip the two header lines
+		while (rows.hasNext() && rows.next().getRowNum() < 2); // Skip the two header lines
 		while (rows.hasNext()) {
 			Row row = rows.next();
 
 			// The lines start at different columns depending on the level
-			short codeIndex = row.getFirstCellNum();
+			short codeIndex = getFirstNonEmptyCellIndex(row);
+			if (codeIndex < 0) continue;
+			if (codeIndex == 3) continue; // HACK: unwanted comment in line 572 of the spreadsheet
+
 			String itemCode = getCodeInCell(row.getCell(codeIndex, Row.CREATE_NULL_AS_BLANK));
 			String itemLabel = row.getCell(codeIndex + 1, Row.CREATE_NULL_AS_BLANK).toString();
 			int level = getItemLevelDepth(itemCode);
@@ -124,7 +127,7 @@ public class SICModelMaker {
 			Resource levelResource = (Resource) levelList.get(level - 1);
 			levelResource.addProperty(SKOS.member, itemResource);
 			
-			// Attach the item to its classification
+			// Attach the item to its classification, as top concept for level 1
 			itemResource.addProperty(SKOS.inScheme, scheme);
 			if (level == 1) {
 				scheme.addProperty(SKOS.hasTopConcept, itemResource);
@@ -142,41 +145,64 @@ public class SICModelMaker {
 
 	/**
 	 * Creates a model containing the resources representing the correspondence between NACE and SIC.
+	 * 
+	 * Since the sub-class level of SIC is not complete, we create exact matches between classes when there
+	 * are no SIC sub-classes, and broad/narrow matches between SIC sub-classes and NACE class otherwise.
 	 */
 	private void createNACESICHierarchy() throws Exception {
 
-		// Read the Excel file and create the classification items
+		// Due to the design choices made, the process is not purely sequential, so we
+		// have to read the whole spreadsheet before starting creating the resources
+
+		List<String> mostDetailedCodes = new ArrayList<String>();
+
 		InputStream sourceFile = new FileInputStream(new File(LOCAL_FOLDER + SIC_STRUCTURE_FILE));
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
 		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
 
+		Iterator<Row> rows = items.rowIterator ();
+		while (rows.hasNext() && rows.next().getRowNum() < 2); // Skip the two header lines
+		while (rows.hasNext()) {
+			Row row = rows.next();
+
+			short codeIndex = getFirstNonEmptyCellIndex(row);
+			if (codeIndex < 0) continue;
+			if (codeIndex < 6) continue; // We only want classes and sub-classes
+
+			String sicCode = getCodeInCell(row.getCell(codeIndex, Row.CREATE_NULL_AS_BLANK));
+			String naceCode = sicCode.substring(0, 5);
+			mostDetailedCodes.add(sicCode);
+			if (sicCode.length() == 7) {
+				// We create broad/narrow matches, so we have to remove the class code
+				mostDetailedCodes.remove(naceCode); // No-op after the first removal
+				mostDetailedCodes.add(sicCode);
+			}
+		}
+
 		// Creation of the correspondence table resource
 		Resource table = model.createResource(NACE_SIC_BASE_URI + "correspondence", XKOS.Correspondence);
-		table.addProperty(SKOS.definition, "Correspondence table between NACE Rev. 2 and SIC 2007");
+		table.addProperty(SKOS.definition, "Correspondence table between NACE Rev. 2 and UK SIC 2007");
 		table.addProperty(XKOS.compares, model.createResource(Names.getCSURI("NACE", "2")));
 		table.addProperty(XKOS.compares, model.createResource(SIC_BASE_URI + "sic"));
 
-		Iterator<Row> rows = items.rowIterator ();
-		while (rows.hasNext() && rows.next().getRowNum() < 3); // Skip the header lines
-		while (rows.hasNext()) {
-			Row row = rows.next();
-			// TODO In fact read the first non-empty cell
-			String sicCode = getCodeInCell(row.getCell(0, Row.CREATE_NULL_AS_BLANK));
-			String naceCode = sicCode.substring(0, 5);
+		for (String sicCode : mostDetailedCodes) {
 
+			String naceCode = sicCode.substring(0, 5);
 			Resource association = model.createResource(NACE_SIC_BASE_URI + "association/" + naceCode + "-" + sicCode, XKOS.ConceptAssociation);
-			association.addProperty(RDFS.label, "NACE Rev.2 " + naceCode + " - Ateco 2007 " + sicCode);
+			association.addProperty(RDFS.label, "NACE Rev.2 " + naceCode + " - UK SIC 2007 " + sicCode);
 			Resource naceItemResource = model.createResource(Names.getItemURI(naceCode, "NACE", "2"));
-			Resource atecoItemResource = model.createResource(getItemURI(sicCode));
+			Resource sicItemResource = model.createResource(getItemURI(sicCode));
 			association.addProperty(XKOS.sourceConcept, naceItemResource);	
-			association.addProperty(XKOS.targetConcept, atecoItemResource);
-			// We make the hypothesis that we have exact match when Ateco code ends with '00', broader / narrower match otherwise
-			if (sicCode.endsWith(".00")) {
-				naceItemResource.addProperty(SKOS.exactMatch, atecoItemResource);
-				atecoItemResource.addProperty(SKOS.exactMatch, naceItemResource);
+			association.addProperty(XKOS.targetConcept, sicItemResource);
+			// We create exact matches when SIC stops at class level, broader / narrower match when there are SIC sub-classes
+			if (sicCode.length() == 5) {
+				naceItemResource.addProperty(SKOS.exactMatch, sicItemResource);
+				sicItemResource.addProperty(SKOS.exactMatch, naceItemResource);
+				logger.debug("Created exact matches between NACE " + naceCode + " and SIC " + sicCode);
 			} else {
-				naceItemResource.addProperty(SKOS.narrowMatch, atecoItemResource);
-				atecoItemResource.addProperty(SKOS.broadMatch, naceItemResource);
+				naceItemResource.addProperty(SKOS.narrowMatch, sicItemResource);
+				sicItemResource.addProperty(SKOS.broadMatch, naceItemResource);
+				logger.debug("Created broad/narrow matches between NACE " + naceCode + " and SIC " + sicCode);
 			}
 			table.addProperty(XKOS.madeOf, association);
 		}
@@ -236,6 +262,29 @@ public class SICModelMaker {
 			}
 
 		}
+	}
+
+	/**
+	 * Returns the index of the first non-empty cell in a row.
+	 * 
+	 * @param cell The <code>Row</code> to analyse.
+	 * @return The (zero-based) index of the first non-empty cell, or -1 if the row is empty.
+	 */
+	private short getFirstNonEmptyCellIndex(Row row) {
+
+		if (row == null) return -1;
+		short index = row.getFirstCellNum();
+		short maxIndex = row.getLastCellNum();
+		if (index >= maxIndex) return -1;
+		while (index < maxIndex) {
+			Cell cell = row.getCell(index);
+			index++;
+			if (cell == null) continue;
+			if (cell.getCellType() == Cell.CELL_TYPE_BLANK) continue;
+			if ((cell.getCellType() == Cell.CELL_TYPE_NUMERIC) && (cell.getNumericCellValue() > 0)) return --index;
+			if ((cell.getCellType() == Cell.CELL_TYPE_STRING) && (cell.toString().trim().length() > 0)) return --index;
+		}
+		return -1;
 	}
 
 	/**
@@ -367,7 +416,7 @@ public class SICModelMaker {
 	 */
 	private static String getItemURI(String code) {
 
-		if ((code.length() == 1) || (code.contains("-"))) return SIC_BASE_URI + "section/" + code;
+		if (code.length() == 1) return SIC_BASE_URI + "section/" + code;
 		if (code.length() == 2) return SIC_BASE_URI + "division/" + code;
 		if (code.length() == 4) return SIC_BASE_URI + "group/" + code;
 		if (code.length() == 5) return SIC_BASE_URI + "class/" + code;
@@ -384,7 +433,11 @@ public class SICModelMaker {
 	 */
 	public static int getItemLevelDepth(String code) {
 
-		if ((code.length() == 2) || (code.contains("-"))) return 1;
-		return (code.length() - 1);
+		if (code.length() == 1) return 1;
+		if (code.length() == 2) return 2;
+		if (code.length() == 4) return 3;
+		if (code.length() == 5) return 4;
+		if (code.length() == 7) return 5;
+		return 0;
 	}
 }
