@@ -23,6 +23,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.DC;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.logging.log4j.LogManager;
@@ -79,11 +80,11 @@ public class SICModelMaker {
 
 		SICModelMaker modelMaker = new SICModelMaker();
 		// Creation of the classification with its levels and items
-//		modelMaker.initializeModel();
-//		modelMaker.createClassificationAndLevels();
-//		modelMaker.populateScheme();
+		modelMaker.initializeModel();
+		modelMaker.createClassificationAndLevels();
+		modelMaker.populateScheme();
 //		modelMaker.getNotes();
-//		modelMaker.writeModel(LOCAL_FOLDER + "sic2007.ttl");
+		modelMaker.writeModel(LOCAL_FOLDER + "sic2007.ttl");
 		// Creation of the NACE-SIC hierarchy
 		modelMaker.initializeModel();
 		modelMaker.createNACESICHierarchy();
@@ -318,7 +319,8 @@ public class SICModelMaker {
 		scheme.addProperty(SKOS.notation, "UK SIC 2007");
 		scheme.addProperty(SKOS.definition, model.createLiteral("The current Standard Industrial Classification (SIC) used in classifying business establishments and other statistical units by the type of economic activity in which they are engaged.", "en"));
 		scheme.addProperty(DC.publisher, model.createResource("http://www.ons.gov.uk"));
-		scheme.addProperty(DC.date, model.createTypedLiteral("2007-01-01", "http://www.w3.org/2001/XMLSchema#date"));
+		scheme.addProperty(DCTerms.issued, model.createTypedLiteral("2007-01-01", "http://www.w3.org/2001/XMLSchema#date"));
+		scheme.addProperty(DCTerms.modified, model.createTypedLiteral("2007-01-01", "http://www.w3.org/2001/XMLSchema#date"));
 		scheme.addProperty(FOAF.homepage, model.createResource("https://www.ons.gov.uk/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007"));
 		scheme.addProperty(XKOS.covers, model.createResource("http://eurovoc.europa.eu/5992"));
 		scheme.addProperty(XKOS.numberOfLevels, model.createTypedLiteral(5));
