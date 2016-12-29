@@ -12,17 +12,16 @@ Associated query:
 
 ```
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-PREFIX xkos:<http://rdf-vocabulary.ddialliance.org/xkos#>
 
-SELECT ?s ?label ?code {
+SELECT ?s {
   ?s rdf:type skos:ConceptScheme .
   MINUS {
-      SELECT ?s ?label ?code {
-        ?s rdf:type skos:ConceptScheme .
-        ?s skos:notation ?code .
-      }
+    SELECT ?s {
+      ?s rdf:type skos:ConceptScheme .
+      ?s skos:notation ?code .
     }
   }
+}
 ```
 
 * All classification schemes MUST have a `skos:prefLabel` property which value is the complete name of the classification scheme in English, with a language tag set at '@en'. Names in other languages MAY be provided with the same property. All names MUST have a language tag.
@@ -30,7 +29,18 @@ SELECT ?s ?label ?code {
 Associated query:
 
 ```
-TBD
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?s {
+  ?s rdf:type skos:ConceptScheme .
+  MINUS {
+    SELECT ?s {
+      ?s rdf:type skos:ConceptScheme .
+      ?s skos:prefLabel ?label .
+      FILTER (LANG(?label)="en")
+    }
+  }
+}
 ```
 * All classification schemes MAY have additional labels represented by values of the `skos:altLabel` property. The SKOS integrity rules MUST be applied. The [XKOS specification](http://rdf-vocabulary.ddialliance.org/xkos.html#add-labels) gives rules regarding the representation of fixed-length labels.
 
@@ -39,7 +49,19 @@ TBD
 Associated query:
 
 ```
-TBD
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX dc:<http://purl.org/dc/elements/1.1/>
+
+SELECT ?s {
+  ?s rdf:type skos:ConceptScheme .
+  MINUS {
+    SELECT ?s {
+      ?s rdf:type skos:ConceptScheme .
+      ?s dc:description ?description .
+      FILTER (LANG(?description)="en")
+    }
+  }
+}
 ```
 * All classification schemes SHOULD have a `skos:scopeNote` property which value is a resource of type `xkos:ExplanatoryNote`. The explanatory note MUST have a `xkos:plainText` property which value is a long descriptive text about the classification scheme in English, with a language tag set at '@en'. Long descriptives in other languages MAY be provided: for each language a dedicated `xkos:ExplanatoryNote` resource will be created, with a `xkos:plainText` string bearing the corresponding language tag.
 
