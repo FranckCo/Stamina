@@ -77,18 +77,17 @@ Associated query:
 
 ```
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-PREFIX xkos:<http://rdf-vocabulary.ddialliance.org/xkos#>
 PREFIX dcterms:<http://purl.org/dc/terms/>
 
-  SELECT ?s ?label ?issued {
-    ?s rdf:type skos:ConceptScheme .
-    MINUS {
-      SELECT ?s ?label ?issued {
-        ?s rdf:type skos:ConceptScheme .
-        ?s dcterms:issued ?issued . 
-      }
+SELECT ?s {
+  ?s rdf:type skos:ConceptScheme .
+  MINUS {
+    SELECT ?s {
+      ?s rdf:type skos:ConceptScheme .
+      ?s dcterms:issued ?issued . 
     }
   }
+}
 ```
 
 * All classification schemes SHOULD have a `dcterms:modified` property which value is the last modification date of the of the classification scheme with datatype xsd:date.
@@ -97,16 +96,15 @@ Associated query:
 
 ```
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-PREFIX xkos:<http://rdf-vocabulary.ddialliance.org/xkos#>
 PREFIX dcterms:<http://purl.org/dc/terms/>
 
-  SELECT ?s ?label ?modified {
-    ?s rdf:type skos:ConceptScheme .
-    MINUS {
-      SELECT ?s ?label ?modified {
-        ?s rdf:type skos:ConceptScheme .
-        ?s dcterms:modified ?modified . 
-      }
+SELECT ?s {
+  ?s rdf:type skos:ConceptScheme .
+  MINUS {
+    SELECT ?s {
+      ?s rdf:type skos:ConceptScheme .
+      ?s dcterms:modified ?modified . 
     }
   }
+}
 ```
