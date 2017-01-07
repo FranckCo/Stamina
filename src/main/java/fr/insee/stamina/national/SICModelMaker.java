@@ -3,7 +3,9 @@ package fr.insee.stamina.national;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -15,6 +17,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -35,8 +41,12 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
+import fr.insee.stamina.utils.ExplanatoryNote;
 import fr.insee.stamina.utils.Names;
+import fr.insee.stamina.utils.NoteType;
 import fr.insee.stamina.utils.XKOS;
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
  * The <code>SICModelMaker</code> class creates and saves the Jena model corresponding to the UK SIC 2007 classification.
@@ -54,6 +64,9 @@ public class SICModelMaker {
 
 	/** File name of the PDF file containing the explanatory notes */
 	public static String SIC_NOTES_FILE = "sic2007explanatorynote_tcm77-223502.pdf";
+
+	/** The explanatory notes are also in a JavaScript file on the Neighbourhood Statistics site */
+	public static String SIC_DB_URL = "http://www.neighbourhood.statistics.gov.uk/HTMLDocs/SIC/data/sicDB.js";
 
 	/** Base URI for the RDF resources belonging to NAICS */
 	public final static String SIC_BASE_URI = "http://stamina-project.org/codes/sic2007/";
@@ -83,7 +96,7 @@ public class SICModelMaker {
 		modelMaker.initializeModel();
 		modelMaker.createClassificationAndLevels();
 		modelMaker.populateScheme();
-//		modelMaker.getNotes();
+//		modelMaker.getNotesPDF();
 		modelMaker.writeModel(LOCAL_FOLDER + "sic2007.ttl");
 		// Creation of the NACE-SIC hierarchy
 		modelMaker.initializeModel();
@@ -209,7 +222,15 @@ public class SICModelMaker {
 		}
 	}
 
-	private void getNotes() throws IOException {
+	/**
+	 * Extracts the explanatory notes from the official PDF publication of the UK SIC classification.
+	 * 
+	 * <i>Note:</i> This method is unfinished.
+	 * 
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unused")
+	private void getNotesPDF() throws IOException {
 
 		PDDocument document = PDDocument.load(new File(LOCAL_FOLDER + SIC_NOTES_FILE));
 		PDFTextStripper stripper = new PDFTextStripper();
@@ -261,8 +282,59 @@ public class SICModelMaker {
 			} else {
 				if (currentNote != null) currentNote.add(noteLine); // We could avoid the null test since we jumped directly to the first title
 			}
-
 		}
+	}
+
+	/**
+	 * Extracts the explanatory notes from the JavaScript file on the Neighbourhood Statistics site and creates associated resources.
+	 * 
+	 * @throws Exception
+	 */
+	private void getNotesJS() throws Exception {
+
+		// Create a script engine manager
+		ScriptEngineManager factory = new ScriptEngineManager();
+		// Create a JavaScript engine
+		ScriptEngine engine = factory.getEngineByName("JavaScript");
+		// Evaluate the script, which produces a JavaScript object containing an array with the classification and notes
+		engine.eval(new FileReader("D:\\Temp\\sicDB.js"));
+
+		JSObject sic = (JSObject)engine.get("SICmeta");
+		// The SICmeta object is an array with one entry for each SIC item. The corresponding value is a JavaScript object containing
+		// a 'title' key (item label) and some or all of 'detail' (general note), 'includes' (inclusions) and 'excludes' (exclusions).
+		// 'includes' and 'excludes' are arrays of string listing the activities included or excluded respectively.
+
+		for (String sicCode : sic.keySet()) {
+			JSObject sicEntry = (JSObject)sic.getMember(sicCode);
+			logger.debug("Creating explanatory notes for item " + sicCode);
+
+			ExplanatoryNote currentNote = new ExplanatoryNote();
+
+			if (sicEntry.hasMember("detail")) {
+				currentNote.setNoteType(NoteType.GENERAL);
+				currentNote.addSourceLine(sicEntry.getMember("detail").toString());
+				System.out.println(" . detail : " + sicEntry.getMember("detail"));
+			}
+			
+			if (sicEntry.hasMember("includes")) {
+				currentNote.setNoteType(NoteType.CENTRAL_CONTENT);
+				JSObject includes = (JSObject)sicEntry.getMember("includes");
+				for (String includeItem : includes.keySet()) {
+					currentNote.addSourceLine(includeItem);
+					System.out.println(" . includes " + includes.getMember(includeItem));
+				}
+			}
+
+			if (sicEntry.hasMember("excludes")) {
+				currentNote.setNoteType(NoteType.EXCLUSIONS);
+				JSObject excludes = (JSObject)sicEntry.getMember("excludes");
+				for (String excludeItem : excludes.keySet()) {
+					currentNote.addSourceLine(excludeItem);
+					System.out.println(" . excludes " + excludes.getMember(excludeItem));
+				}
+			}
+		}
+
 	}
 
 	/**
