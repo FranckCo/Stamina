@@ -3,6 +3,7 @@ package fr.insee.stamina.utils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The <code>ExplanatoryNote</code> class represents an explanatory note in a classification or concept scheme.
@@ -24,6 +25,9 @@ public class ExplanatoryNote {
 	/** The raw text of the note as a list of strings. */
 	private List<String> sourceText;
 
+	/** The language of the explanatory note. */
+	private Locale language;
+
 	/** The start of the note validity period. */
 	private Date validFrom;
 
@@ -31,11 +35,19 @@ public class ExplanatoryNote {
 	private Date validUntil;
 
 	/**
-	 * Constructs a note with unknown type and null validity dates.
+	 * Constructs a note with unknown type, null validity dates, and English for default language.
 	 */
 	public ExplanatoryNote() {
-		setNoteType(NoteType.UNKNOWN);
+		this(NoteType.UNKNOWN);
+	}
+
+	/**
+	 * Constructs a note of a given type, with null validity dates, and English for default language.
+	 */
+	public ExplanatoryNote(NoteType noteType) {
+		setNoteType(noteType);
 		setSourceText(new ArrayList<String>());
+		setLanguage(Locale.ENGLISH);
 	}
 
 	/**
@@ -116,6 +128,24 @@ public class ExplanatoryNote {
 	 */
 	public void addSourceLine(String sourceLine) {
 		this.sourceText.add(sourceLine);
+	}
+
+	/**
+	 * Gets the note language.
+	 * 
+	 * @return The language as a <code>Locale</code> object.
+	 */
+	public Locale getLanguage() {
+		return language;
+	}
+
+	/**
+	 * Sets the note language to a new value.
+	 * 
+	 * @param language New value for the note language (<code>Locale</code> object).
+	 */
+	public void setLanguage(Locale language) {
+		this.language = language;
 	}
 
 	/**
