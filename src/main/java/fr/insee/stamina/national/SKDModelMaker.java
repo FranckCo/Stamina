@@ -1,11 +1,8 @@
 package fr.insee.stamina.national;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -22,9 +19,6 @@ import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import fr.insee.stamina.utils.Names;
 import fr.insee.stamina.utils.XKOS;
@@ -47,6 +41,9 @@ public class SKDModelMaker {
 
 	/** Base URI for the RDF resources belonging to the NACE-SKD correspondence */
 	public final static String NACE_SKD_BASE_URI = "http://stamina-project.org/codes/nacer2-skd2008/";
+
+	/** Indicates if the NACE correspondences at SKD class and above levels are produced */
+	public final boolean CORRESPONDENCE_AT_ALL_LEVELS = false;
 
 	/** Log4J2 logger */ // This must be before the configuration initialization
 	private static final Logger logger = LogManager.getLogger(SKDModelMaker.class);
@@ -84,26 +81,23 @@ public class SKDModelMaker {
 	private void populateScheme() throws Exception {
 
 		// Read the CSV file and create the classification items
-		logger.info("Preparing to read CSV file " + SKD_FILE);
-		// Counters
-		int noResults = 0, severalResults = 0, invalidResult = 0, okResult = 0;
+		logger.info("Preparing to read CSV file " + SKD_FILE + " to create the SKD classification");
 		CSVParser parser = null;
-		try {
-			parser = new CSVParser(new FileReader(LOCAL_FOLDER + SKD_FILE), CSVFormat.TDF.withQuote(null).withHeader().withIgnoreEmptyLines());
-			for (CSVRecord record : parser) {
+		parser = new CSVParser(new FileReader(LOCAL_FOLDER + SKD_FILE), CSVFormat.DEFAULT.withDelimiter(';').withQuote(null).withHeader().withIgnoreEmptyLines());
+		for (CSVRecord record : parser) {
 
-			// The code and label are in the first cell, separated by the first space
-			String line = row.getCell(0, Row.CREATE_NULL_AS_BLANK).toString();
+			int level = Integer.parseInt(record.get(0));
+			String itemCode = record.get(1).trim();
+			// In the CSV files, codes of divisions and below have the section code as first letter, but this is not the case in the official publication
+			// TODO Validate with SURS
+			if (itemCode.length() > 1) itemCode = itemCode.substring(1);
 
-			int firstSpace = line.indexOf(' ');
-			String itemCode = line.substring(0, firstSpace);
-			String itemLabel = line.substring(firstSpace + 1).trim();
-			int level = getItemLevelDepth(itemCode);
-
-			// Create the resource representing the classification item (skos:Concept), with its code and label
+			// Create the resource representing the classification item (skos:Concept), with its code and labels
 			Resource itemResource = model.createResource(getItemURI(itemCode), SKOS.Concept);
 			itemResource.addProperty(SKOS.notation, itemCode);
-			itemResource.addProperty(SKOS.prefLabel, itemLabel, "en");
+			// Create the resource representing the classification item (skos:Concept), with its code and label
+			itemResource.addProperty(SKOS.prefLabel, record.get(2).trim(), "si");
+			itemResource.addProperty(SKOS.prefLabel, record.get(3).trim(), "en");
 
 			// Attach the item to its level
 			Resource levelResource = (Resource) levelList.get(level - 1);
@@ -123,17 +117,15 @@ public class SKDModelMaker {
 				itemResource.addProperty(SKOS.broader, parentResource);
 			}
 		}
+		parser.close();
 	}
 
 	/**
-	 * Creates a model containing the resources representing the correspondence between NACE and SKD.
+	 * Creates a model containing the resources representing the hierarchy between NACE and SKD.
 	 */
 	private void createNACESKDHierarchy() throws Exception {
 
-		// Read the Excel file and create the classification items
-		InputStream sourceFile = new FileInputStream(new File(SKD_FILE));
-		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		logger.info("Preparing to read CSV file " + SKD_FILE + " to create the NACE-SKD hierarchy");
 
 		// Creation of the correspondence table resource
 		Resource table = model.createResource(NACE_SKD_BASE_URI + "correspondence", XKOS.Correspondence);
@@ -141,15 +133,20 @@ public class SKDModelMaker {
 		table.addProperty(XKOS.compares, model.createResource(Names.getCSURI("NACE", "2")));
 		table.addProperty(XKOS.compares, model.createResource(BASE_URI + "skd"));
 
-		Iterator<Row> rows = items.rowIterator ();
-		while (rows.hasNext() && rows.next().getRowNum() < 2); // Skip the header lines
-		while (rows.hasNext()) {
-			Row row = rows.next();
-			String line = row.getCell(0, Row.CREATE_NULL_AS_BLANK).toString();
+		CSVParser parser = null;
+		parser = new CSVParser(new FileReader(LOCAL_FOLDER + SKD_FILE), CSVFormat.DEFAULT.withDelimiter(';').withQuote(null).withHeader().withIgnoreEmptyLines());
+		for (CSVRecord record : parser) {
 
-			if (line == null) continue;
-			int firstSpace = line.indexOf(' ');
-			String skdCode = line.substring(0, firstSpace);
+			int level = Integer.parseInt(record.get(0));
+
+			if ((level < 5) && (!CORRESPONDENCE_AT_ALL_LEVELS)) continue;
+
+			String skdCode = record.get(1).trim();
+			// In the CSV files, codes of divisions and below have the section code as first letter, but this is not the case in the official publication
+			// TODO Validate with SURS
+			if (skdCode.length() > 1) skdCode = skdCode.substring(1);
+
+			System.out.println(skdCode);
 
 			String naceCode = skdToNACECode(skdCode);
 
@@ -159,11 +156,18 @@ public class SKDModelMaker {
 			Resource skdItemResource = model.createResource(getItemURI(skdCode));
 			association.addProperty(XKOS.sourceConcept, naceItemResource);	
 			association.addProperty(XKOS.targetConcept, skdItemResource);
-			// TODO When is it exact match?
-			naceItemResource.addProperty(SKOS.narrowMatch, skdItemResource);
-			skdItemResource.addProperty(SKOS.broadMatch, naceItemResource);
+			// Hypothesis: exact match for items down to classes, and on subclasses when code ends with '0'
+			// TODO Validate with SURS
+			if ((level  < 5) || (skdCode.endsWith("0"))) {
+				naceItemResource.addProperty(SKOS.exactMatch, skdItemResource);
+				skdItemResource.addProperty(SKOS.exactMatch, naceItemResource);
+			} else {
+				naceItemResource.addProperty(SKOS.narrowMatch, skdItemResource);
+				skdItemResource.addProperty(SKOS.broadMatch, naceItemResource);
+			}
 			table.addProperty(XKOS.madeOf, association);
 		}
+		parser.close();
 	}
 
 	/**
@@ -203,19 +207,19 @@ public class SKDModelMaker {
 		Resource level3 = model.createResource(BASE_URI + "/groups", XKOS.ClassificationLevel);
 		level3.addProperty(SKOS.prefLabel, model.createLiteral("SKD 2008 - level 3 - Groups", "en"));
 		level3.addProperty(XKOS.depth, model.createTypedLiteral(3));
-		level3.addProperty(XKOS.notationPattern, "[0-9]{2}\.[0-9]");
+		level3.addProperty(XKOS.notationPattern, "[0-9]{2}\\.[0-9]");
 		level3.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/skd2008/group"));
 
 		Resource level4 = model.createResource(BASE_URI + "/classes", XKOS.ClassificationLevel);
 		level4.addProperty(SKOS.prefLabel, model.createLiteral("SKD 2008 - level 4 - Classes", "en"));
 		level4.addProperty(XKOS.depth, model.createTypedLiteral(4));
-		level4.addProperty(XKOS.notationPattern, "[0-9]{2}\.[0-9]{2}");
+		level4.addProperty(XKOS.notationPattern, "[0-9]{2}\\.[0-9]{2}");
 		level4.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/skd2008/class"));
 
 		Resource level5 = model.createResource(BASE_URI + "/subclasses", XKOS.ClassificationLevel);
 		level5.addProperty(SKOS.prefLabel, model.createLiteral("SKD 2008 - level 5 - Subclasses", "en"));
 		level5.addProperty(XKOS.depth, model.createTypedLiteral(5));
-		level5.addProperty(XKOS.notationPattern, "[0-9]{2}\.[0-9]{3}");
+		level5.addProperty(XKOS.notationPattern, "[0-9]{2}\\.[0-9]{3}");
 		level5.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/skd2008/subclass"));
 
 		// Attach the level list to the classification
@@ -257,15 +261,22 @@ public class SKDModelMaker {
 	
 	/**
 	 * Computes the parent code for one given SKD code.
+	 * 
+	 * @param code A SKD code.
+	 * @return The parent code, or <code>null</code> if the code is invalid.
 	 */
 	private static String getParentCode(String code) {
 
-		if ((code.length() == 1) || (code.length() > 5)) return null;
+		if ((code.length() <= 1) || (code.length() > 6)) return null;
 
+		// For division, same parents as in the NACE
 		if (code.length() == 2) return Names.getNACESectionForDivision(code);
-
-		// For codes of length 3 to 5, parent code is the child code truncated on the right
-		return code.substring(0, code.length() - 1);
+		// For codes of length 5 or 6, parent code is the child code truncated on the right
+		if (code.length() > 4) return code.substring(0, code.length() - 1);
+		// For codes of length 4, parent code is the child code truncated by two positions on the right
+		if (code.length() == 4) return code.substring(0, code.length() - 1);
+		// Only length 3 is left, and should not exist
+		return null;
 	}
 
 	/**
@@ -276,7 +287,10 @@ public class SKDModelMaker {
 	 */
 	public static String skdToNACECode(String skdCode) {
 
-		// TODO
+		if ((skdCode == null) || (skdCode.length() == 0)) return null;
+		if ((skdCode.length() == 3) || (skdCode.length() > 6)) return null;
+
+		if (skdCode.length() == 6) return skdCode.substring(0, skdCode.length() - 1);
 		return skdCode;
 	}
 
@@ -302,11 +316,13 @@ public class SKDModelMaker {
 	/**
 	 * Returns the depth of the level to which an item belongs.
 	 * 
+	 * The method will return wrong results for invalid SDK codes.
+	 * 
 	 * @param code The item code.
 	 * @return The depth of the level.
 	 */
-	public static int getItemLevelDepth(String code) {
+	private static int getItemLevelDepth(String code) {
 
-		return code.length();
+		return code.length() - (code.length() > 3 ? 1 : 0);
 	}
 }
