@@ -28,9 +28,12 @@ public class CSPAOnto {
 	 * The namespace of the CSPA vocabulary
 	 */
 	public static final Resource NAMESPACE = model.createResource(uri);
-	/* ##########################################################
-	 * Defines CSPA Classes
-	   ########################################################## */
-	public static final Resource GAMSOActivity = model.createResource(uri + "GAMSOActivity");
+
+	/* #################### *
+	 * Defines CSPA Classes *
+	 * #################### */
+
+	public static final Resource StatisticalActivity = model.createResource(uri + "StatisticalActivity");
+	public static final Resource StatisticalActivityArea = model.createResource(uri + "StatisticalActivityArea");
 
 }

@@ -155,7 +155,7 @@ public class GAMSOModelMaker {
 		// Add the properties of the concept scheme (the description is now complete)
 		gamsoCS.addProperty(SKOS.notation, gamsoModel.createLiteral("GAMSO v1.0"));
 		gamsoCS.addProperty(SKOS.prefLabel, gamsoModel.createLiteral("Generic Activity Model for Statistical Organisations v 1.0", "en"));
-		gamsoCS.addProperty(SKOS.scopeNote, gamsoModel.createLiteral(gamsoDescription, "en"));
+		gamsoCS.addProperty(SKOS.definition, gamsoModel.createLiteral(gamsoDescription, "en"));
 
 	}
 
@@ -176,7 +176,8 @@ public class GAMSOModelMaker {
 		logger.debug("Adding activity " + code + " - " + activityLabel);
 
 		Resource gamsoConcept = gamsoModel.createResource(GAMSO_BASE_URI + code, SKOS.Concept);
-		gamsoConcept.addProperty(RDF.type, CSPAOnto.GAMSOActivity);
+		if (parentCode == null) gamsoConcept.addProperty(RDF.type, CSPAOnto.StatisticalActivityArea);
+		else gamsoConcept.addProperty(RDF.type, CSPAOnto.StatisticalActivity);
 		gamsoConcept.addProperty(SKOS.notation, code);
 		gamsoConcept.addProperty(SKOS.prefLabel, gamsoModel.createLiteral(activityLabel, "en"));
 		gamsoConcept.addProperty(SKOS.inScheme, gamsoCS);
@@ -189,8 +190,11 @@ public class GAMSOModelMaker {
 			parentConcept.addProperty(SKOS.narrower, gamsoConcept);
 			gamsoConcept.addProperty(SKOS.broader, parentConcept);
 		}
-	}
 
+		if (activityDescription != null) {
+			gamsoConcept.addProperty(SKOS.definition, gamsoModel.createLiteral(getNote(activityDescription), "en"));
+		}
+	}
 
 	/**
 	 * Returns the parent code for a GAMSO activity code.
@@ -200,7 +204,7 @@ public class GAMSOModelMaker {
 	 */
 	public static String getParentCode(String code) {
 
-		// TODO This is a very basic implementation, will work for actual GAMSO codes, otherwise impredictible
+		// TODO This is a very basic implementation, will work for actual GAMSO codes, otherwise unpredictable
 		if ((code == null) || (code.length() < 3)) return null;
 		return code.substring(0, code.lastIndexOf("."));
 	}
@@ -223,12 +227,11 @@ public class GAMSOModelMaker {
 		if (trimmedText.startsWith("3.")) return trimmedText.substring(trimmedText.indexOf(" ") + 1);
 
 		return trimmedText;
-		
 	}
 
 	/**
 	 * Normalizes a paragraph of an activity description.
-	 * This method will trim the text of the paragraph and add a trailing '- ' for bullet points. 
+	 * This method will trim the text of the paragraph and add a leading '- ' for bullet points. 
 	 * 
 	 * @param paragraph The paragraph from the activity description.
 	 * @param stylingNumber The styling number of the paragraph.
@@ -243,7 +246,11 @@ public class GAMSOModelMaker {
 		if (stylingNumber > 0) return "- " + trimmedText;
 
 		return trimmedText;
-		
 	}
 
+	public static String getNote(List<String> activityDescription) {
+
+		// For now we just concatenate the strings
+		return String.join(" ", activityDescription);
+	}
 }
