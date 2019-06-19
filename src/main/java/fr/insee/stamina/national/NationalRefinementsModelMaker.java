@@ -20,6 +20,7 @@ import org.apache.jena.vocabulary.SKOS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -43,28 +44,28 @@ public class NationalRefinementsModelMaker {
 	/** File name of the file containing the RDF representation of the Ateco 2007 classification */
 	public static String ATECO_TTL_FILE = LOCAL_FOLDER + "ateco2007.rdf";
 
-	/** File name of the spreadsheet containing the last level of NAF rév. 2 */
+	/** File name of the spreadsheet containing the last level of NAF rï¿½v. 2 */
 	public static String NAF_EXCEL_FILE = LOCAL_FOLDER + "naf2008_liste_n5.xls";
 
-	/** Name of the file containing the RDF representation of the NAF rév. 2 classification */
+	/** Name of the file containing the RDF representation of the NAF rï¿½v. 2 classification */
 	public static String NAF_RDF_FILE = LOCAL_FOLDER + "naf08.rdf";
 
-	/** File name of the spreadsheet containing the last level of CPF rév. 2.1 */
+	/** File name of the spreadsheet containing the last level of CPF rï¿½v. 2.1 */
 	public static String CPF_EXCEL_FILE = LOCAL_FOLDER + "cpf2015_liste_n6.xls";
 
-	/** Name of the file containing the RDF representation of the NAF rév. 2 classification */
+	/** Name of the file containing the RDF representation of the NAF rï¿½v. 2 classification */
 	public static String CPF_RDF_FILE = LOCAL_FOLDER + "cpf15.rdf";
 
-	/** Name of the file containing the RDF representation of the correspondence between NAF rév. 2 and CPF rév 2.1 */
+	/** Name of the file containing the RDF representation of the correspondence between NAF rï¿½v. 2 and CPF rï¿½v 2.1 */
 	public static String NAF_CPF_RDF_FILE = LOCAL_FOLDER + "correspondancesNafCpf.rdf";
 
 	/** Base URI for all resources in the Ateco 2007 classification model */
 	public static String ATECO_BASE_URI = "http://www.ims/concepts/ateco2007/Ateco2007/";
 
-	/** Base URI for all resources in the NAF rév. 2 classification model */
+	/** Base URI for all resources in the NAF rï¿½v. 2 classification model */
 	public static String NAF_BASE_URI = "http://stamina-project.org/codes/nafr2/";
 
-	/** Base URI for all resources in the CPF rév 2.1 classification model */
+	/** Base URI for all resources in the CPF rï¿½v 2.1 classification model */
 	public static String CPF_BASE_URI = "http://stamina-project.org/codes/cpfr21/";
 
 	/** Base URI for the RDF resources belonging to the NACE-Ateco correspondence */
@@ -159,9 +160,9 @@ public class NationalRefinementsModelMaker {
 		while (rows.hasNext() && rows.next().getRowNum() < 3); // Skip the header lines
 		while (rows.hasNext()) {
 			Row row = rows.next();
-			String atecoCode = getCodeInCell(row.getCell(0, Row.CREATE_NULL_AS_BLANK));
+			String atecoCode = getCodeInCell(row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 			// Items eliminated in 2009 have empty labels
-			boolean eliminato = (getCodeInCell(row.getCell(1, Row.CREATE_NULL_AS_BLANK)).trim().length() == 0);
+			boolean eliminato = (getCodeInCell(row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)).trim().length() == 0);
 			if (eliminato || (atecoCode.length() < 8)) continue;
 			String naceCode = atecoCode.substring(0, 5);
 
@@ -195,7 +196,7 @@ public class NationalRefinementsModelMaker {
 
 		// Creation of the correspondence table resource
 		Resource table = model.createResource(NACE_NAF_BASE_URI + "correspondence", XKOS.Correspondence);
-		table.addProperty(SKOS.definition, "Correspondence table between NACE Rev. 2 and NAF rév. 2");
+		table.addProperty(SKOS.definition, "Correspondence table between NACE Rev. 2 and NAF rï¿½v. 2");
 		table.addProperty(XKOS.compares, model.createResource(Names.getCSURI("NACE", "2")));
 		table.addProperty(XKOS.compares, model.createResource(NAF_BASE_URI + "naf"));
 
@@ -203,11 +204,11 @@ public class NationalRefinementsModelMaker {
 		while (rows.hasNext() && rows.next().getRowNum() < 2); // Skip the header lines
 		while (rows.hasNext()) {
 			Row row = rows.next();
-			String nafCode = getCodeInCell(row.getCell(0, Row.CREATE_NULL_AS_BLANK));
+			String nafCode = getCodeInCell(row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 			String naceCode = nafCode.substring(0, 5);
 
 			Resource association = model.createResource(NACE_NAF_BASE_URI + "association/" + naceCode + "-" + nafCode, XKOS.ConceptAssociation);
-			association.addProperty(RDFS.label, "NACE Rev.2 " + naceCode + " - NAF rév. 2 " + nafCode);
+			association.addProperty(RDFS.label, "NACE Rev.2 " + naceCode + " - NAF rï¿½v. 2 " + nafCode);
 			Resource naceItemResource = model.createResource(Names.getItemURI(naceCode, "NACE", "2"));
 			Resource nafItemResource = model.createResource(getNAFItemURI(nafCode));
 			association.addProperty(XKOS.sourceConcept, naceItemResource);	
@@ -237,7 +238,7 @@ public class NationalRefinementsModelMaker {
 
 		// Creation of the correspondence table resource
 		Resource table = model.createResource(NACE_CPF_BASE_URI + "correspondence", XKOS.Correspondence);
-		table.addProperty(SKOS.definition, "Correspondence table between CPA Ver. 2.1 and CPF rév. 2.1");
+		table.addProperty(SKOS.definition, "Correspondence table between CPA Ver. 2.1 and CPF rï¿½v. 2.1");
 		table.addProperty(XKOS.compares, model.createResource(Names.getCSURI("CPA", "2.1")));
 		table.addProperty(XKOS.compares, model.createResource(CPF_BASE_URI + "cpf"));
 
@@ -245,11 +246,11 @@ public class NationalRefinementsModelMaker {
 		while (rows.hasNext() && rows.next().getRowNum() < 1); // Skip the header lines
 		while (rows.hasNext()) {
 			Row row = rows.next();
-			String cpfCode = getCodeInCell(row.getCell(0, Row.CREATE_NULL_AS_BLANK));
+			String cpfCode = getCodeInCell(row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 			String cpaCode = cpfCode; // CPA and CPF codes are identical
 
 			Resource association = model.createResource(NACE_NAF_BASE_URI + "association/" + cpaCode + "-" + cpfCode, XKOS.ConceptAssociation);
-			association.addProperty(RDFS.label, "CPA Ver. 2.1 " + cpaCode + " - CPF rév. 2.1 " + cpfCode);
+			association.addProperty(RDFS.label, "CPA Ver. 2.1 " + cpaCode + " - CPF rï¿½v. 2.1 " + cpfCode);
 			Resource cpaItemResource = model.createResource(Names.getItemURI(cpaCode, "CPA", "2.1"));
 			Resource cpfItemResource = model.createResource(getCPFItemURI(cpfCode));
 			association.addProperty(XKOS.sourceConcept, cpaItemResource);	
@@ -270,7 +271,7 @@ public class NationalRefinementsModelMaker {
 	private String getCodeInCell(Cell cell) {
 
 		String code = null;
-		if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+		if (cell.getCellType() == CellType.STRING) {
 			code = cell.toString();
 		}
 		else {
@@ -335,7 +336,7 @@ public class NationalRefinementsModelMaker {
 	}
 
 	/**
-	 * Computes the URI of CPF "sous-catégorie".
+	 * Computes the URI of CPF "sous-catï¿½gorie".
 	 * 
 	 * @param code The item code.
 	 * @return The item URI.

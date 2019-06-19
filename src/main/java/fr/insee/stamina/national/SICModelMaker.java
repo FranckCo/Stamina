@@ -37,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -127,8 +128,8 @@ public class SICModelMaker {
 			if (codeIndex < 0) continue;
 			if (codeIndex == 3) continue; // HACK: unwanted comment in line 572 of the spreadsheet
 
-			String itemCode = getCodeInCell(row.getCell(codeIndex, Row.CREATE_NULL_AS_BLANK));
-			String itemLabel = row.getCell(codeIndex + 1, Row.CREATE_NULL_AS_BLANK).toString();
+			String itemCode = getCodeInCell(row.getCell(codeIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+			String itemLabel = row.getCell(codeIndex + 1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString();
 			int level = getItemLevelDepth(itemCode);
 			logger.debug("About to create resources for SIC item " + itemCode + " at level " + level);
 
@@ -183,7 +184,7 @@ public class SICModelMaker {
 			if (codeIndex < 0) continue;
 			if (codeIndex < 6) continue; // We only want classes and sub-classes
 
-			String sicCode = getCodeInCell(row.getCell(codeIndex, Row.CREATE_NULL_AS_BLANK));
+			String sicCode = getCodeInCell(row.getCell(codeIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 			String naceCode = sicCode.substring(0, 5);
 			mostDetailedCodes.add(sicCode);
 			if (sicCode.length() == 7) {
@@ -353,9 +354,9 @@ public class SICModelMaker {
 			Cell cell = row.getCell(index);
 			index++;
 			if (cell == null) continue;
-			if (cell.getCellType() == Cell.CELL_TYPE_BLANK) continue;
-			if ((cell.getCellType() == Cell.CELL_TYPE_NUMERIC) && (cell.getNumericCellValue() > 0)) return --index;
-			if ((cell.getCellType() == Cell.CELL_TYPE_STRING) && (cell.toString().trim().length() > 0)) return --index;
+			if (cell.getCellType() == CellType.BLANK) continue;
+			if ((cell.getCellType() == CellType.NUMERIC) && (cell.getNumericCellValue() > 0)) return --index;
+			if ((cell.getCellType() == CellType.STRING) && (cell.toString().trim().length() > 0)) return --index;
 		}
 		return -1;
 	}
@@ -370,7 +371,7 @@ public class SICModelMaker {
 
 		if (cell == null) return "";
 		String code = null;
-		if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+		if (cell.getCellType() == CellType.STRING) {
 			code = cell.toString();
 		}
 		else {

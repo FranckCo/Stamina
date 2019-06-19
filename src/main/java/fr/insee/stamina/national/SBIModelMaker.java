@@ -91,7 +91,7 @@ public class SBIModelMaker {
 			Row row = rows.next();
 
 			// The code and label are in the first cell, separated by the first space
-			String line = row.getCell(0, Row.CREATE_NULL_AS_BLANK).toString();
+			String line = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString();
 
 			// Skip empty lines
 			if (line == null) continue;
@@ -146,7 +146,7 @@ public class SBIModelMaker {
 		while (rows.hasNext() && rows.next().getRowNum() < 2); // Skip the header lines
 		while (rows.hasNext()) {
 			Row row = rows.next();
-			String line = row.getCell(0, Row.CREATE_NULL_AS_BLANK).toString();
+			String line = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString();
 
 			if (line == null) continue;
 			int firstSpace = line.indexOf(' ');

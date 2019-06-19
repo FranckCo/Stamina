@@ -23,6 +23,7 @@ import org.apache.jena.vocabulary.SKOS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -39,13 +40,13 @@ import fr.insee.stamina.utils.XKOS;
 public class NAICSModelMaker {
 
 	/** Base local folder for reading and writing files */
-	public static String LOCAL_FOLDER = "D:\\Temp\\NAICS\\";
+	public static String LOCAL_FOLDER = "src/main/resources/data/";
 
 	/** File name of the spreadsheet containing the NAICS structure */
 	public static String NAICS_FILE = "2-digit_2012_Codes.xls";
 
 	/** File name of the spreadsheet containing the NAICS to ISIC correspondence */
-	public static String NAICS_ISIC_FILE = "2012_NAICS_to_ISIC_4.xls";
+	public static String NAICS_ISIC_FILE = "2012 NAICS_to_ISIC_4.xlsx";
 
 	/** Base URI for the RDF resources belonging to NAICS */
 	public final static String BASE_URI = "http://stamina-project.org/codes/naics2012/";
@@ -110,14 +111,14 @@ public class NAICSModelMaker {
 
 			// The cell containing the code is generally numeric, except for composite sector codes
 			String itemCode = null;
-			if (row.getCell(1).getCellType() == Cell.CELL_TYPE_STRING) {
-				itemCode = row.getCell(1, Row.CREATE_NULL_AS_BLANK).toString();
+			if (row.getCell(1).getCellType() == CellType.STRING) {
+				itemCode = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString();
 			}
 			else {
-				int itemCodeValue = (int)row.getCell(1, Row.CREATE_NULL_AS_BLANK).getNumericCellValue();
+				int itemCodeValue = (int)row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getNumericCellValue();
 				itemCode = Integer.toString(itemCodeValue);				
 			}
-			String itemLabel = row.getCell(2, Row.CREATE_NULL_AS_BLANK).toString();
+			String itemLabel = row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString();
 			int level = getItemLevelDepth(itemCode);
 			logger.debug(itemCode);
 
@@ -153,7 +154,7 @@ public class NAICSModelMaker {
 
 		// Read the Excel file and create the classification items
 		InputStream sourceFile = new FileInputStream(new File(LOCAL_FOLDER + NAICS_ISIC_FILE));
-		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(1); // The correspondence is on the second sheet
+		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0); // The correspondence is on the second sheet
 		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
 
 		// Creation of the correspondence table resource
@@ -167,8 +168,8 @@ public class NAICSModelMaker {
 		while (rows.hasNext()) {
 			Row row = rows.next();
 			//012X (0121 to 0129), 014X (0141 to 0146, 0149), 331X (3311 to 3315, 3319)
-			String naicsCode = getCodeInCell(row.getCell(0, Row.CREATE_NULL_AS_BLANK));
-			String isicCode = getCodeInCell(row.getCell(2, Row.CREATE_NULL_AS_BLANK));
+			String naicsCode = getCodeInCell(row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+			String isicCode = getCodeInCell(row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
 			String comment = row.getCell(4).toString().trim();
 			// Leading zero is not read correctly
 			if (isicCode.length() == 3) isicCode = "0" + isicCode;
@@ -197,7 +198,7 @@ public class NAICSModelMaker {
 	private String getCodeInCell(Cell cell) {
 
 		String code = null;
-		if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+		if (cell.getCellType() == CellType.STRING) {
 			code = cell.toString();
 		}
 		else {
