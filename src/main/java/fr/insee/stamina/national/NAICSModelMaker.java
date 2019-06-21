@@ -16,6 +16,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDFS;
@@ -85,11 +87,11 @@ public class NAICSModelMaker {
 		modelMaker.initializeModel();
 		modelMaker.createClassificationAndLevels();
 		modelMaker.populateScheme();
-		modelMaker.writeModel(LOCAL_FOLDER + "naicsv2012.ttl");
+		modelMaker.writeModel(LOCAL_FOLDER + "naicsv2012.ttl", RDFFormat.TURTLE); // Use RDFFormat.RDFXML_PLAIN for flat (and quick) XML
 		// Creation of the ISIC-NAICS correspondence
 		modelMaker.initializeModel();
 		modelMaker.createISICCorrespondence();
-		modelMaker.writeModel(LOCAL_FOLDER + "isicr4-naicsv2012.ttl");
+		modelMaker.writeModel(LOCAL_FOLDER + "isicr4-naicsv2012.ttl", RDFFormat.TURTLE);
 	}
 
 	/**
@@ -282,9 +284,9 @@ public class NAICSModelMaker {
 	 * Writes the model to the output Turtle file.
 	 * 
 	 * @throws Exception In case of problem writing the file	 */
-	private void writeModel(String fileName) throws IOException {
+	private void writeModel(String fileName, RDFFormat format) throws IOException {
 
-		model.write(new FileOutputStream(fileName), "TTL");
+		RDFDataMgr.write(new FileOutputStream(fileName), model, format) ;
 		// Close the model
 		model.close();
 	}
