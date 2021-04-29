@@ -3,7 +3,9 @@ target/
 .checkstyle
 .classpath
 .project
-dist/
+**/*.iml
+**/.idea
 logs/
+dist/
 node_modules/
 npm-debug.log

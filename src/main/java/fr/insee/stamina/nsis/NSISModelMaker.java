@@ -35,7 +35,7 @@ import com.google.maps.model.Geometry;
  * 
  * This program uses the ORG ontology published by the W3C.
  * 
- * @see https://www.w3.org/TR/vocab-org/
+ * @see <a href="https://www.w3.org/TR/vocab-org/">https://www.w3.org/TR/vocab-org/</a>
  * @author Franck Cotton
  * @version 0.3, 11 Nov 2016
  */

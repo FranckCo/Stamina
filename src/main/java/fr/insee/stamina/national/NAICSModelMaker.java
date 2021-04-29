@@ -36,7 +36,7 @@ import fr.insee.stamina.utils.XKOS;
 /**
  * The <code>NAICSModelMaker</code> class creates and saves the Jena model corresponding to the NAICS 2012 classification.
  * 
- * @see http://www.census.gov/eos/www/naics/
+ * @see <a href="http://www.census.gov/eos/www/naics/">http://www.census.gov/eos/www/naics/</a>
  * @author Franck Cotton
  */
 public class NAICSModelMaker {
