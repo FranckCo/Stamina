@@ -14,7 +14,7 @@ public class GSBPMShredder {
 	static String GSBPM_TXT = "src/main/resources/data/GSBPM 5.0 - phases.txt";
 	static String SHRED_PATH = "src/main/resources/data/shreds/";
 
-	private static Logger logger = LogManager.getLogger(GSBPMShredder.class);
+	private static final Logger logger = LogManager.getLogger(GSBPMShredder.class);
 
 	public static void main(String[] args) throws IOException {
 

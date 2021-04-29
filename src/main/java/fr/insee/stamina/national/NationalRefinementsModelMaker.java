@@ -1,17 +1,7 @@
 package fr.insee.stamina.national;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
-
+import fr.insee.stamina.utils.Names;
+import fr.insee.stamina.utils.XKOS;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -19,14 +9,10 @@ import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 
-import fr.insee.stamina.utils.Names;
-import fr.insee.stamina.utils.XKOS;
+import java.io.*;
+import java.util.Iterator;
 
 /**
  * The <code>NationalRefinementsModelMaker</code> class creates and saves the Jena model corresponding to correspondences with national refinements of the NACE or CPA.
@@ -146,9 +132,9 @@ public class NationalRefinementsModelMaker {
 	private void createNACEAtecoHierarchy() throws Exception {
 
 		// Read the Excel file and create the classification items
-		InputStream sourceFile = new FileInputStream(new File(ATECO_EXCEL_FILE));
+		InputStream sourceFile = new FileInputStream(ATECO_EXCEL_FILE);
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		try {sourceFile.close();} catch(Exception ignored) {}
 
 		// Creation of the correspondence table resource
 		Resource table = model.createResource(NACE_ATECO_BASE_URI + "correspondence", XKOS.Correspondence);
@@ -190,9 +176,9 @@ public class NationalRefinementsModelMaker {
 	private void createNACENAFHierarchy() throws Exception {
 
 		// Read the Excel file and create the classification items
-		InputStream sourceFile = new FileInputStream(new File(NAF_EXCEL_FILE));
+		InputStream sourceFile = new FileInputStream(NAF_EXCEL_FILE);
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		try {sourceFile.close();} catch(Exception ignored) {}
 
 		// Creation of the correspondence table resource
 		Resource table = model.createResource(NACE_NAF_BASE_URI + "correspondence", XKOS.Correspondence);
@@ -232,9 +218,9 @@ public class NationalRefinementsModelMaker {
 	private void createCPACPFCorrespondence() throws Exception {
 
 		// Read the Excel file and create the classification items
-		InputStream sourceFile = new FileInputStream(new File(CPF_EXCEL_FILE));
+		InputStream sourceFile = new FileInputStream(CPF_EXCEL_FILE);
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		try {sourceFile.close();} catch(Exception ignored) {}
 
 		// Creation of the correspondence table resource
 		Resource table = model.createResource(NACE_CPF_BASE_URI + "correspondence", XKOS.Correspondence);
@@ -270,7 +256,7 @@ public class NationalRefinementsModelMaker {
 	 */
 	private String getCodeInCell(Cell cell) {
 
-		String code = null;
+		String code;
 		if (cell.getCellType() == CellType.STRING) {
 			code = cell.toString();
 		}
@@ -297,13 +283,12 @@ public class NationalRefinementsModelMaker {
 
 		logger.debug("Jena model initialized");
 
-		return;
 	}
 
 	/**
 	 * Writes the model to the output Turtle file.
 	 * 
-	 * @throws Exception In case of problem writing the file	 */
+	 * @throws IOException In case of problem writing the file	 */
 	private void writeModel(String fileName) throws IOException {
 
 		model.write(new FileOutputStream(fileName), "TTL");
@@ -364,7 +349,7 @@ public class NationalRefinementsModelMaker {
 		BufferedReader reader = new BufferedReader(new FileReader(fileName));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
 
-		String line = null;
+		String line;
 		while ((line = reader.readLine()) != null) {
 			writer.write(line.replaceAll(before, after) + System.lineSeparator());
 		}

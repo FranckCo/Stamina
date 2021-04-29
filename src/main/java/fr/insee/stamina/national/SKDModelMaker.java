@@ -1,16 +1,13 @@
 package fr.insee.stamina.national;
 
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-
+import fr.insee.stamina.utils.Names;
+import fr.insee.stamina.utils.XKOS;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFList;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.DC;
@@ -20,8 +17,9 @@ import org.apache.jena.vocabulary.SKOS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.stamina.utils.Names;
-import fr.insee.stamina.utils.XKOS;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * The <code>SKDModelMaker</code> class creates and saves the Jena model corresponding to the Slovenian SKD 2008 classification.
@@ -76,13 +74,13 @@ public class SKDModelMaker {
 	/**
 	 * Creates the statements corresponding to the classification items.
 	 * 
-	 * @throws Exception
+	 * @throws Exception In case of problems.
 	 */
 	private void populateScheme() throws Exception {
 
 		// Read the CSV file and create the classification items
 		logger.info("Preparing to read CSV file " + SKD_FILE + " to create the SKD classification");
-		CSVParser parser = null;
+		CSVParser parser;
 		parser = new CSVParser(new FileReader(LOCAL_FOLDER + SKD_FILE), CSVFormat.DEFAULT.withDelimiter(';').withQuote(null).withHeader().withIgnoreEmptyLines());
 		for (CSVRecord record : parser) {
 
@@ -133,7 +131,7 @@ public class SKDModelMaker {
 		table.addProperty(XKOS.compares, model.createResource(Names.getCSURI("NACE", "2")));
 		table.addProperty(XKOS.compares, model.createResource(BASE_URI + "skd"));
 
-		CSVParser parser = null;
+		CSVParser parser;
 		parser = new CSVParser(new FileReader(LOCAL_FOLDER + SKD_FILE), CSVFormat.DEFAULT.withDelimiter(';').withQuote(null).withHeader().withIgnoreEmptyLines());
 		for (CSVRecord record : parser) {
 
@@ -223,7 +221,7 @@ public class SKDModelMaker {
 		level5.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/skd2008/subclass"));
 
 		// Attach the level list to the classification
-		levelList = model.createList(new RDFNode[] {level1, level2, level3, level4, level5});
+		levelList = model.createList(level1, level2, level3, level4, level5);
 		scheme.addProperty(XKOS.levels, levelList);
 	}
 
@@ -243,13 +241,12 @@ public class SKDModelMaker {
 
 		logger.debug("Jena model initialized");
 
-		return;
 	}
 
 	/**
 	 * Writes the model to the output Turtle file.
 	 * 
-	 * @throws Exception In case of problem writing the file
+	 * @throws IOException In case of problem writing the file
 	 */
 	private void writeModel(String fileName) throws IOException {
 

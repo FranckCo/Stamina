@@ -52,7 +52,7 @@ public class GSBPMModelMaker {
 
 		// Iterate through GSBPM entries to create the associated resources
 		for (GSBPMEntry entry : gsbpmEntries) {
-			Resource activity = null;
+			Resource activity;
 			if (entry.isPhase()) activity = gsbpmModel.createResource(BASE_URI + entry.getCode(), phase);
 			else activity = gsbpmModel.createResource(BASE_URI + entry.getCode(), subProcess);
 			activity.addProperty(SKOS.notation, gsbpmModel.createLiteral(entry.getCode()));
@@ -62,7 +62,7 @@ public class GSBPMModelMaker {
 				activity.addProperty(SKOS.topConceptOf, gsbpmCS);
 				gsbpmCS.addProperty(SKOS.hasTopConcept, activity);
 			} else {
-				Resource parent = gsbpmModel.getResource(BASE_URI + entry.getCode().substring(0, 1));
+				Resource parent = gsbpmModel.getResource(BASE_URI + entry.getCode().charAt(0));
 				activity.addProperty(SKOS.broader, parent);
 				parent.addProperty(SKOS.narrower, activity);
 			}

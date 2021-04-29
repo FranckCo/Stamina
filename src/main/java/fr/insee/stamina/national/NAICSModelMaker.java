@@ -1,21 +1,8 @@
 package fr.insee.stamina.national;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFList;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
+import fr.insee.stamina.utils.Names;
+import fr.insee.stamina.utils.XKOS;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.vocabulary.FOAF;
@@ -24,14 +11,13 @@ import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 
-import fr.insee.stamina.utils.Names;
-import fr.insee.stamina.utils.XKOS;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * The <code>NAICSModelMaker</code> class creates and saves the Jena model corresponding to the NAICS 2012 classification.
@@ -57,7 +43,7 @@ public class NAICSModelMaker {
 	public final static String BASE_CORRESPONDENCE_URI = "http://stamina-project.org/codes/isicr4-naics2012/";
 
 	/** Cases where the ISIC-NAICS correspondence is at ISIC group level */
-	static Map<String, List<String>> GROUP_LINK_CASES = new HashMap<String, List<String>>();
+	static Map<String, List<String>> GROUP_LINK_CASES = new HashMap<>();
 	static {
 		// 012X (0121 to 0129), 014X (0141 to 0146, 0149), 331X (3311 to 3315, 3319)
 		GROUP_LINK_CASES.put("012X", Arrays.asList("0121", "0122", "0123", "0124", "0125", "0126", "0127", "0128", "0129"));
@@ -97,14 +83,14 @@ public class NAICSModelMaker {
 	/**
 	 * Creates the statements corresponding to the classification items.
 	 * 
-	 * @throws Exception
+	 * @throws Exception In case of problem.
 	 */
 	private void populateScheme() throws Exception {
 
 		// Read the Excel file and create the classification items
-		InputStream sourceFile = new FileInputStream(new File(LOCAL_FOLDER + NAICS_FILE));
+		InputStream sourceFile = new FileInputStream(LOCAL_FOLDER + NAICS_FILE);
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		try {sourceFile.close();} catch(Exception ignored) {}
 
 		Iterator<Row> rows = items.rowIterator ();
 		while (rows.hasNext() && rows.next().getRowNum() < 1); // Skip the two header lines
@@ -112,7 +98,7 @@ public class NAICSModelMaker {
 			Row row = rows.next();
 
 			// The cell containing the code is generally numeric, except for composite sector codes
-			String itemCode = null;
+			String itemCode;
 			if (row.getCell(1).getCellType() == CellType.STRING) {
 				itemCode = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).toString();
 			}
@@ -155,9 +141,9 @@ public class NAICSModelMaker {
 	private void createISICCorrespondence() throws Exception {
 
 		// Read the Excel file and create the classification items
-		InputStream sourceFile = new FileInputStream(new File(LOCAL_FOLDER + NAICS_ISIC_FILE));
+		InputStream sourceFile = new FileInputStream(LOCAL_FOLDER + NAICS_ISIC_FILE);
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0); // The correspondence is on the second sheet
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		try {sourceFile.close();} catch(Exception ignored) {}
 
 		// Creation of the correspondence table resource
 		Resource table = model.createResource(BASE_CORRESPONDENCE_URI + "correspondence", XKOS.Correspondence);
@@ -199,7 +185,7 @@ public class NAICSModelMaker {
 	 */
 	private String getCodeInCell(Cell cell) {
 
-		String code = null;
+		String code;
 		if (cell.getCellType() == CellType.STRING) {
 			code = cell.toString();
 		}
@@ -257,7 +243,7 @@ public class NAICSModelMaker {
 		level5.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/national-industry"));
 
 		// Attach the level list to the classification
-		levelList = model.createList(new RDFNode[] {level1, level2, level3, level4, level5});
+		levelList = model.createList(level1, level2, level3, level4, level5);
 		scheme.addProperty(XKOS.levels, levelList);
 	}
 
@@ -277,13 +263,13 @@ public class NAICSModelMaker {
 
 		logger.debug("Jena model initialized");
 
-		return;
 	}
 
 	/**
 	 * Writes the model to the output Turtle file.
 	 * 
-	 * @throws Exception In case of problem writing the file	 */
+	 * @throws IOException In case of problem writing the file
+	 */
 	private void writeModel(String fileName, RDFFormat format) throws IOException {
 
 		RDFDataMgr.write(new FileOutputStream(fileName), model, format) ;

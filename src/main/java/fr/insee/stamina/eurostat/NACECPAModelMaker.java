@@ -51,7 +51,7 @@ public class NACECPAModelMaker {
 	/** Base local folder for input files */
 	public static String LOCAL_FOLDER = "D:\\Temp\\NACE\\";
 	/** Expression for filtering files corresponding to a given classification scheme or correspondence */
-	private static Map<String, String> FILE_FILTER = new HashMap<String, String>();
+	private static final Map<String, String> FILE_FILTER = new HashMap<>();
 	static {
 		FILE_FILTER.put("NACE1.1", "NACE_1_1_*.xml");
 		FILE_FILTER.put("NACE2", "NACE_REV2_*.xml");
@@ -84,7 +84,7 @@ public class NACECPAModelMaker {
 	 * Main method: basic launcher that produces all the models.
 	 * 
 	 * @param args Not used.
-	 * @throws Exception 
+	 * @throws Exception In case of problem.
 	 */
 	public static void main(String[] args) throws Exception {
 
@@ -395,7 +395,7 @@ public class NACECPAModelMaker {
 	/**
 	 * Initializes the Jena model and adds standard prefixes.
 	 * 
-	 * @throws Exception
+	 * @throws Exception In case of problem.
 	 */
 	private void initializeModel() throws Exception {
 
@@ -411,8 +411,6 @@ public class NACECPAModelMaker {
 		model.setNsPrefix("xkos", XKOS.getURI());
 
 		logger.debug("Jena model initialized");
-
-		return;
 	}
 
 	/**
@@ -431,7 +429,7 @@ public class NACECPAModelMaker {
 		BufferedReader reader = new BufferedReader(new FileReader(fileName));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
 
-		String line = null;
+		String line;
 		int lineNumber = 0;
 		while ((line = reader.readLine()) != null) {
 			if (linesToRemove.contains(++lineNumber)) {
@@ -479,7 +477,7 @@ public class NACECPAModelMaker {
 	private static String getMatchingFileName(String filter) {
 
 		logger.debug("Matching files in " + LOCAL_FOLDER + " for filter " + filter);
-		List<String> fileList = new ArrayList<String>();
+		List<String> fileList = new ArrayList<>();
 		// Get all the files whose name matches the filter 
 		DirectoryStream<Path> stream;
 		try {
@@ -511,13 +509,13 @@ public class NACECPAModelMaker {
 
 		logger.debug("Initializing global configuration");
 
-		Map<String, Map<String, TransformationSpecification>> baseConfiguration = new HashMap<String, Map<String, TransformationSpecification>>();
+		Map<String, Map<String, TransformationSpecification>> baseConfiguration = new HashMap<>();
 
 		// We first initialize the input file to the file filter
-		Map<String, TransformationSpecification> cpaSpecification = new HashMap<String, TransformationSpecification>();
+		Map<String, TransformationSpecification> cpaSpecification = new HashMap<>();
 		cpaSpecification.put("2008", new TransformationSpecification(FILE_FILTER.get("CPA2008"), CPA_XSL_FILE, getTurtleFilePath("CPA", "2008")));
 		cpaSpecification.put("2.1", new TransformationSpecification(FILE_FILTER.get("CPA2.1"), CPA_XSL_FILE, getTurtleFilePath("CPA", "2.1")));
-		Map<String, TransformationSpecification> naceSpecification = new HashMap<String, TransformationSpecification>();
+		Map<String, TransformationSpecification> naceSpecification = new HashMap<>();
 		naceSpecification.put("1.1", new TransformationSpecification(FILE_FILTER.get("NACE1.1"), NACE_XSL_FILE, getTurtleFilePath("NACE", "1.1")));
 		naceSpecification.put("2", new TransformationSpecification(FILE_FILTER.get("NACE2"), NACE_XSL_FILE, getTurtleFilePath("NACE", "2")));
 
@@ -542,9 +540,9 @@ public class NACECPAModelMaker {
 	 */
 	private static class TransformationSpecification {
 
-		String inputFile = null;
-		String transformationFile = null;
-		String outputFile = null;
+		String inputFile;
+		String transformationFile;
+		String outputFile;
 		public TransformationSpecification(String inputFile, String transformationFile, String outputFile) {
 			super();
 			this.inputFile = inputFile;

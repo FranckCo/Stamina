@@ -75,7 +75,7 @@ public class NSISModelMaker {
 	public static void main(String[] args) {
 
 		// Read the Google Maps API key from the file and initialize the API context
-		String apiKey = null;
+		String apiKey;
 		try {
 			apiKey = new String(Files.readAllBytes(Paths.get(API_KEY_FILE)));
 		} catch (IOException e) {
@@ -101,8 +101,7 @@ public class NSISModelMaker {
 		ontologyModel.getNsPrefixURI("org");
 		System.out.println(ontologyModel.getNsPrefixMap());
 		Map<String, String> namespaces = ontologyModel.getNsPrefixMap();
-		Set<String> keepNs = new HashSet<String>();
-		keepNs.addAll(Arrays.asList("owl", "org", "skos"));
+		Set<String> keepNs = new HashSet<>(Arrays.asList("owl", "org", "skos"));
 		namespaces.keySet().retainAll(keepNs);
 		namespaces.put("vcard", VCARD_BASE_URI);
 

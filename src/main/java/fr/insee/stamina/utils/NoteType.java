@@ -68,7 +68,7 @@ public enum NoteType {
 		public String getTag() {return null;}
 	};
 
-	private String text;
+	private final String text;
 
 	NoteType(String text) {
 		this.text = text;

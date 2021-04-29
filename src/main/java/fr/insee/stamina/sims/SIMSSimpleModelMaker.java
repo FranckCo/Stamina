@@ -23,7 +23,7 @@ import org.apache.jena.vocabulary.SKOS;
  * The source used here is the version with only the SIMS structure (see ref. below).
  * A more complete version is produced by the SIMSModelMaker class.
  * 
- * @see http://ec.europa.eu/eurostat/documents/64157/4373903/SIMS-2-0-Revised-standards-November-2015-ESSC-final.pdf/47c0b80d-0e19-4777-8f9e-28f89f82ce18
+ * @see <a href="http://ec.europa.eu/eurostat/documents/64157/4373903/SIMS-2-0-Revised-standards-November-2015-ESSC-final.pdf/47c0b80d-0e19-4777-8f9e-28f89f82ce18">source</a>
  * @author Franck Cotton
  * @version 0.10, 12 May 2016
  */
@@ -36,15 +36,15 @@ public class SIMSSimpleModelMaker {
 	static int SIMS_SKIP = 7;
 
 	/** The list of concept codes and labels in SIMS */
-	private SortedMap<String, String> entryMap = null;
+	private SortedMap<String, String> entryMap;
 
 	/** The RDF model containing the SKOS concept scheme */
-	Model simsModel = null;
+	Model simsModel;
 
-	private static Logger logger = LogManager.getLogger(SIMSSimpleModelMaker.class);
+	private static final Logger logger = LogManager.getLogger(SIMSSimpleModelMaker.class);
 
 	public SIMSSimpleModelMaker() {
-		entryMap = new TreeMap<String, String>();
+		entryMap = new TreeMap<>();
 		simsModel = ModelFactory.createDefaultModel();
 	}
 
@@ -67,7 +67,7 @@ public class SIMSSimpleModelMaker {
 	public void extractFromPDF() throws IOException {
 
 		// Reinitialize the sorted map
-		entryMap = new TreeMap<String, String>();
+		entryMap = new TreeMap<>();
 
 		// Extract the SIMS contents into a list of strings
 		logger.debug("Starting PDF extraction from " + SIMS_PDF);

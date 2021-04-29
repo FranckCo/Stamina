@@ -1,32 +1,11 @@
 package fr.insee.stamina.national;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFList;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
+import fr.insee.stamina.utils.ExplanatoryNote;
+import fr.insee.stamina.utils.Names;
+import fr.insee.stamina.utils.NoteType;
+import fr.insee.stamina.utils.XKOS;
+import jdk.nashorn.api.scripting.JSObject;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.DCTerms;
@@ -36,23 +15,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 
-import fr.insee.stamina.utils.ExplanatoryNote;
-import fr.insee.stamina.utils.Names;
-import fr.insee.stamina.utils.NoteType;
-import fr.insee.stamina.utils.XKOS;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * The <code>SICModelMaker</code> class creates and saves the Jena model corresponding to the UK SIC 2007 classification.
  * 
- * @see https://www.ons.gov.uk/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007
+ * <a href="https://www.ons.gov.uk/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007>https://www.ons.gov.uk/methodology/classificationsandstandards/ukstandardindustrialclassificationofeconomicactivities/uksic2007</a></a>
  * @author Franck Cotton
  */
 public class SICModelMaker {
@@ -113,9 +88,9 @@ public class SICModelMaker {
 	private void populateScheme() throws Exception {
 
 		// Read the Excel file
-		InputStream sourceFile = new FileInputStream(new File(LOCAL_FOLDER + SIC_STRUCTURE_FILE));
+		InputStream sourceFile = new FileInputStream(LOCAL_FOLDER + SIC_STRUCTURE_FILE);
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		try {sourceFile.close();} catch(Exception ignored) {}
 
 		// Iterate over the rows and create the classification items
 		Iterator<Row> rows = items.rowIterator ();
@@ -169,11 +144,11 @@ public class SICModelMaker {
 		// Due to the design choices made, the process is not purely sequential, so we
 		// have to read the whole spreadsheet before starting creating the resources
 
-		List<String> mostDetailedCodes = new ArrayList<String>();
+		List<String> mostDetailedCodes = new ArrayList<>();
 
-		InputStream sourceFile = new FileInputStream(new File(LOCAL_FOLDER + SIC_STRUCTURE_FILE));
+		InputStream sourceFile = new FileInputStream(LOCAL_FOLDER + SIC_STRUCTURE_FILE);
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		try {sourceFile.close();} catch(Exception ignored) {}
 
 		Iterator<Row> rows = items.rowIterator ();
 		while (rows.hasNext() && rows.next().getRowNum() < 2); // Skip the two header lines
@@ -228,7 +203,7 @@ public class SICModelMaker {
 	 * 
 	 * <i>Note:</i> This method is unfinished.
 	 * 
-	 * @throws IOException
+	 * @throws IOException In case of problems.
 	 */
 	@SuppressWarnings("unused")
 	private void getNotesPDF() throws IOException {
@@ -244,7 +219,7 @@ public class SICModelMaker {
 		document.close();
 
 		// Read the string containing the raw text line by line and try to make sense of it
-		String noteLine = null;
+		String noteLine;
 		List<String> currentNote = null;
 		int lineNumber = 0;
 		boolean ignore = true; // Lines 1 and 2 must be ignored
@@ -278,7 +253,7 @@ public class SICModelMaker {
 				else if (noteLine.matches("^\\d{2}\\.\\d{2}/\\d .+$")) code = noteLine.substring(0, 7); // Checked: the test identifies exactly the subclasses lines
 			}
 			if (code != null) { // Start of a note for item identified by 'code'
-				currentNote = new ArrayList<String>();
+				currentNote = new ArrayList<>();
 				System.out.println(lineNumber + " - " + code + " - '" + noteLine.substring(code.length() + 1) + "'");
 			} else {
 				if (currentNote != null) currentNote.add(noteLine); // We could avoid the null test since we jumped directly to the first title
@@ -289,7 +264,7 @@ public class SICModelMaker {
 	/**
 	 * Extracts the explanatory notes from the JavaScript file on the Neighbourhood Statistics site and creates associated resources.
 	 * 
-	 * @throws Exception
+	 * @throws Exception In case of problems.
 	 */
 	private void getNotesJS() throws Exception {
 
@@ -341,7 +316,6 @@ public class SICModelMaker {
 	/**
 	 * Returns the index of the first non-empty cell in a row.
 	 * 
-	 * @param cell The <code>Row</code> to analyse.
 	 * @return The (zero-based) index of the first non-empty cell, or -1 if the row is empty.
 	 */
 	private short getFirstNonEmptyCellIndex(Row row) {
@@ -370,7 +344,7 @@ public class SICModelMaker {
 	private String getCodeInCell(Cell cell) {
 
 		if (cell == null) return "";
-		String code = null;
+		String code;
 		if (cell.getCellType() == CellType.STRING) {
 			code = cell.toString();
 		}
@@ -430,7 +404,7 @@ public class SICModelMaker {
 		level5.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sic2007/subclass"));
 
 		// Attach the level list to the classification
-		levelList = model.createList(new RDFNode[] {level1, level2, level3, level4, level5});
+		levelList = model.createList(level1, level2, level3, level4, level5);
 		scheme.addProperty(XKOS.levels, levelList);
 	}
 
@@ -450,13 +424,12 @@ public class SICModelMaker {
 
 		logger.debug("Jena model initialized");
 
-		return;
 	}
 
 	/**
 	 * Writes the model to the output Turtle file.
 	 * 
-	 * @throws Exception In case of problem writing the file.
+	 * @throws IOException In case of problem writing the file.
 	 */
 	private void writeModel(String fileName) throws IOException {
 

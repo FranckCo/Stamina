@@ -45,24 +45,24 @@ import fr.insee.stamina.utils.XKOS;
 public class ISICModelMaker {
 
 	/** Directory for input files */
-	private static String INPUT_FOLDER = "D:\\Temp\\unsd\\";
+	private static final String INPUT_FOLDER = "D:\\Temp\\unsd\\";
 	/** Directory for output files */
-	private static String OUTPUT_FOLDER = "src/main/resources/data/";
+	private static final String OUTPUT_FOLDER = "src/main/resources/data/";
 
 	/** Files containing the Access databases */
-	private static Map<String, String> ISIC_ACCESS_FILE = new HashMap<String, String>();
+	private static final Map<String, String> ISIC_ACCESS_FILE = new HashMap<>();
 	/** Name of the Access tables containing the data */
-	private static Map<String, String> ISIC_ACCESS_TABLE = new HashMap<String, String>();
+	private static final Map<String, String> ISIC_ACCESS_TABLE = new HashMap<>();
 	/** Name of the Access tables containing the names of the levels */
-	private static Map<String, String> ISIC_STRUCTURE_ACCESS_TABLE = new HashMap<String, String>();
+	private static final Map<String, String> ISIC_STRUCTURE_ACCESS_TABLE = new HashMap<>();
 	/** CSV files containing the additional French labels */
-	private static Map<String, String> ISIC_FRENCH_LABELS_FILE = new HashMap<String, String>();
+	private static final Map<String, String> ISIC_FRENCH_LABELS_FILE = new HashMap<>();
 	/** CSV files containing the additional Spanish labels */
-	private static Map<String, String> ISIC_SPANISH_LABELS_FILE = new HashMap<String, String>();
+	private static final Map<String, String> ISIC_SPANISH_LABELS_FILE = new HashMap<>();
 	/** CSV format of the files containing additional labels */
-	private static Map<String, CSVFormat> ISIC_LABELS_FILE_FORMAT = new HashMap<String, CSVFormat>();
+	private static final Map<String, CSVFormat> ISIC_LABELS_FILE_FORMAT = new HashMap<>();
 	/** CSV files containing the correspondence tables */
-	private static Map<String, String> CORRESPONDENCE_FILE = new HashMap<String, String>();
+	private static final Map<String, String> CORRESPONDENCE_FILE = new HashMap<>();
 	// Initialization of the static properties
 	static {
 		ISIC_ACCESS_FILE.put("3.1", "ISIC31_english.mdb");
@@ -88,7 +88,7 @@ public class ISICModelMaker {
 	private static final Logger logger = LogManager.getLogger(ISICModelMaker.class);
 
 	/** Mapping of the division codes to the section codes. */
-	private static Map<String, String> divisionsToSections = new HashMap<String, String>();
+	private static final Map<String, String> divisionsToSections = new HashMap<>();
 
 	/** Current Jena model */
 	private Model isicModel = null;
@@ -101,7 +101,7 @@ public class ISICModelMaker {
 	 * Main method: basic launcher that produces all the models.
 	 * 
 	 * @param args Not used.
-	 * @throws Exception 
+	 * @throws Exception In case of problem
 	 */
 	public static void main(String[] args) throws Exception {
 
@@ -204,14 +204,14 @@ public class ISICModelMaker {
 		int numberOfLevels = Names.LEVEL_NAMES.get("ISIC").size();
 		scheme.addProperty(XKOS.numberOfLevels, isicModel.createTypedLiteral(numberOfLevels));
 
-		levels = new ArrayList<Resource>();
+		levels = new ArrayList<>();
 		for (int levelIndex = 1; levelIndex <= numberOfLevels; levelIndex++) {
 			Resource level = isicModel.createResource(Names.getClassificationLevelURI("ISIC", version, levelIndex), XKOS.ClassificationLevel);
 			level.addProperty(SKOS.prefLabel, isicModel.createLiteral(Names.getClassificationLevelLabel("ISIC", version, levelIndex), "en"));
 			level.addProperty(XKOS.depth, isicModel.createTypedLiteral(levelIndex));
 			levels.add(level);
 		}
-		scheme.addProperty(XKOS.levels, isicModel.createList(levels.toArray(new Resource[levels.size()])));
+		scheme.addProperty(XKOS.levels, isicModel.createList(levels.toArray(new Resource[0])));
 	}
 
 	/**

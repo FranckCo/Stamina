@@ -13,18 +13,18 @@ import org.apache.logging.log4j.LogManager;
 
 public class GSBPMReader {
 
-	private static Logger logger = LogManager.getLogger(GSBPMReader.class);
+	private static final Logger logger = LogManager.getLogger(GSBPMReader.class);
 
 	public GSBPMReader() {}
 
 	public List<GSBPMEntry> read(File file) throws IOException {
 
 		BufferedReader gsbpmInput  = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-		String gsbpmLine = null;
+		String gsbpmLine;
 		StringBuilder currentNote = new StringBuilder();
 		GSBPMEntry currentEntry = null;
 
-		List<GSBPMEntry> GSBPMEntries = new ArrayList<GSBPMEntry>();
+		List<GSBPMEntry> GSBPMEntries = new ArrayList<>();
 
 		while ((gsbpmLine = gsbpmInput.readLine()) != null) {
 

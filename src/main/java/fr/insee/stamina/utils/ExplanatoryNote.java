@@ -46,7 +46,7 @@ public class ExplanatoryNote {
 	 */
 	public ExplanatoryNote(NoteType noteType) {
 		setNoteType(noteType);
-		setSourceText(new ArrayList<String>());
+		setSourceText(new ArrayList<>());
 		setLanguage(Locale.ENGLISH);
 	}
 
@@ -178,7 +178,7 @@ public class ExplanatoryNote {
 	/**
 	 * Sets the end date of the validity period of the note to a new value.
 	 * 
-	 * @param validFrom New value for the end date of the validity period of the note.
+	 * @param validUntil New value for the end date of the validity period of the note.
 	 */
 	public void setValidUntil(Date validUntil) {
 		this.validUntil = validUntil;

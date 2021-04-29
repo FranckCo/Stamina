@@ -19,9 +19,9 @@ public class Names {
 	public static String CLASSIFICATION_BASE_URI = "http://stamina-project.org/codes/";
 
 	/** Classifications for which major versions are named 'revisions' instead of 'versions' */
-	public static Set<String> REVISION_CLASSIFICATIONS = new HashSet<String>(Arrays.asList("ISIC", "NACE", "NAF", "CPF"));
+	public static Set<String> REVISION_CLASSIFICATIONS = new HashSet<>(Arrays.asList("ISIC", "NACE", "NAF", "CPF"));
 
-	public static Map<String, List<String>> LEVEL_NAMES = new HashMap<String, List<String>>();
+	public static Map<String, List<String>> LEVEL_NAMES = new HashMap<>();
 	static {
 		LEVEL_NAMES.put("ISIC", Arrays.asList("section", "division", "group", "class"));
 		LEVEL_NAMES.put("CPC", Arrays.asList("section", "division", "group", "class", "subclass"));
@@ -70,7 +70,7 @@ public class Names {
 	 */
 	public static String getCSContext(String classification, String version) {
 
-		String versionQualifier = null;
+		String versionQualifier;
 		if (REVISION_CLASSIFICATIONS.contains(classification.toUpperCase())) versionQualifier = "r";
 		else versionQualifier = "v";
 

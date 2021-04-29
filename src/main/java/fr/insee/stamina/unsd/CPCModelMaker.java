@@ -44,17 +44,17 @@ import fr.insee.stamina.utils.XKOS;
 public class CPCModelMaker {
 
 	/** Directory for input files */
-	private static String INPUT_FOLDER = "D:\\Temp\\unsd\\";
+	private static final String INPUT_FOLDER = "D:\\Temp\\unsd\\";
 	/** Directory for output files */
-	private static String OUTPUT_FOLDER = "src/main/resources/data/";
+	private static final String OUTPUT_FOLDER = "src/main/resources/data/";
 	
 	/** Files containing the Access databases */
-	private static Map<String, String> CPC_ACCESS_FILE = new HashMap<String, String>();
+	private static final Map<String, String> CPC_ACCESS_FILE = new HashMap<>();
 	/** Name of the Access tables containing the data */
-	private static Map<String, String> CPC_ACCESS_TABLE = new HashMap<String, String>();
+	private static final Map<String, String> CPC_ACCESS_TABLE = new HashMap<>();
 	// There are no French labels for the CPC on the UNSD web site
 	/** CSV files containing the additional Spanish labels */
-	private static Map<String, String> CPC_SPANISH_LABELS_FILE = new HashMap<String, String>();
+	private static final Map<String, String> CPC_SPANISH_LABELS_FILE = new HashMap<>();
 	// Initialization of the static properties
 	static {
 		CPC_ACCESS_FILE.put("1.1", "cpc_v11_english.mdb");
@@ -69,9 +69,9 @@ public class CPCModelMaker {
 	}
 
 	/** CSV file containing the correspondences between CPC Ver.2 and CPC Ver.2.1 */
-	private static String CPC2_TO_CPC21_FILE = "cpc2-cpc21.txt";
+	private static final String CPC2_TO_CPC21_FILE = "cpc2-cpc21.txt";
 	/** CSV file containing the correspondences between CPC Ver.1.1 and CPC Ver.2 */
-	private static String CPC11_TO_CPC2_FILE = "CPCv11_CPCv2.txt";
+	private static final String CPC11_TO_CPC2_FILE = "CPCv11_CPCv2.txt";
 
 	/** Log4J2 logger */
 	private static final Logger logger = LogManager.getLogger(CPCModelMaker.class);
@@ -87,7 +87,7 @@ public class CPCModelMaker {
 	 * Main method: basic launcher that produces all the models.
 	 * 
 	 * @param args Not used.
-	 * @throws Exception 
+	 * @throws Exception In case of problem
 	 */
 	public static void main(String[] args) throws Exception {
 
@@ -180,14 +180,14 @@ public class CPCModelMaker {
 		int numberOfLevels = Names.LEVEL_NAMES.get("CPC").size();
 		scheme.addProperty(XKOS.numberOfLevels, cpcModel.createTypedLiteral(numberOfLevels));
 
-		levels = new ArrayList<Resource>();
+		levels = new ArrayList<>();
 		for (int levelIndex = 1; levelIndex <= numberOfLevels; levelIndex++) {
 			Resource level = cpcModel.createResource(Names.getClassificationLevelURI("CPC", version, levelIndex), XKOS.ClassificationLevel);
 			level.addProperty(SKOS.prefLabel, cpcModel.createLiteral(Names.getClassificationLevelLabel("CPC", version, levelIndex), "en"));
 			level.addProperty(XKOS.depth, cpcModel.createTypedLiteral(levelIndex));
 			levels.add(level);
 		}
-		scheme.addProperty(XKOS.levels, cpcModel.createList(levels.toArray(new Resource[levels.size()])));
+		scheme.addProperty(XKOS.levels, cpcModel.createList(levels.toArray(new Resource[0])));
 	}
 
 	/**

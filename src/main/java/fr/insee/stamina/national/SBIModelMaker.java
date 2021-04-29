@@ -1,17 +1,8 @@
 package fr.insee.stamina.national;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFList;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
+import fr.insee.stamina.utils.Names;
+import fr.insee.stamina.utils.XKOS;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.DCTerms;
@@ -23,8 +14,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-import fr.insee.stamina.utils.Names;
-import fr.insee.stamina.utils.XKOS;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 
 /**
  * The <code>SBIModelMaker</code> class creates and saves the Jena model corresponding to the Dutch SBI 2008 classification.
@@ -76,14 +70,14 @@ public class SBIModelMaker {
 	/**
 	 * Creates the statements corresponding to the classification items.
 	 * 
-	 * @throws Exception
+	 * @throws Exception In case of problem.
 	 */
 	private void populateScheme() throws Exception {
 
 		// Read the Excel file and create the classification items
-		InputStream sourceFile = new FileInputStream(new File(LOCAL_FOLDER + SBI_FILE));
+		InputStream sourceFile = new FileInputStream(LOCAL_FOLDER + SBI_FILE);
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		try {sourceFile.close();} catch(Exception ignored) {}
 
 		Iterator<Row> rows = items.rowIterator ();
 		while (rows.hasNext() && rows.next().getRowNum() < 2); // Skip the header lines
@@ -132,9 +126,9 @@ public class SBIModelMaker {
 	private void createNACESBIHierarchy() throws Exception {
 
 		// Read the Excel file and create the classification items
-		InputStream sourceFile = new FileInputStream(new File(SBI_FILE));
+		InputStream sourceFile = new FileInputStream(SBI_FILE);
 		Sheet items = WorkbookFactory.create(sourceFile).getSheetAt(0);
-		if (sourceFile != null) try {sourceFile.close();} catch(Exception ignored) {}
+		try {sourceFile.close();} catch(Exception ignored) {}
 
 		// Creation of the correspondence table resource
 		Resource table = model.createResource(NACE_SBI_BASE_URI + "correspondence", XKOS.Correspondence);
@@ -216,7 +210,7 @@ public class SBIModelMaker {
 		level5.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/sbi2008/subclass"));
 
 		// Attach the level list to the classification
-		levelList = model.createList(new RDFNode[] {level1, level2, level3, level4, level5});
+		levelList = model.createList(level1, level2, level3, level4, level5);
 		scheme.addProperty(XKOS.levels, levelList);
 	}
 
@@ -236,13 +230,12 @@ public class SBIModelMaker {
 
 		logger.debug("Jena model initialized");
 
-		return;
 	}
 
 	/**
 	 * Writes the model to the output Turtle file.
 	 * 
-	 * @throws Exception In case of problem writing the file
+	 * @throws IOException In case of problem writing the file
 	 */
 	private void writeModel(String fileName) throws IOException {
 

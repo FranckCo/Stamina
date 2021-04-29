@@ -32,12 +32,12 @@ public class GAMSOModelMaker {
 	static String GAMSO_BASE_URI = "http://id.unece.org/codes/gamso/";
 
 	/** The numbers of the paragraphs that will build up the concept scheme description. */
-	static List<Integer> descriptionIndexes = Arrays.asList(new Integer[]{31, 34});
+	static List<Integer> descriptionIndexes = Arrays.asList(31, 34);
 	static String LEVEL1_STYLING = "Heading2";
 	static String LEVEL2_STYLING = "Heading3";
 
 	/** The RDF model containing the SKOS concept scheme. */
-	Model gamsoModel = null;
+	Model gamsoModel;
 
 	/** The SKOS ConceptScheme representing the GAMSO. */
 	Resource gamsoCS = null;
@@ -46,7 +46,7 @@ public class GAMSOModelMaker {
 	String gamsoDescription = null;
 
 	/** Log4J 2 logger. */
-	private static Logger logger = LogManager.getLogger(GAMSOModelMaker.class);
+	private static final Logger logger = LogManager.getLogger(GAMSOModelMaker.class);
 
 	/**
 	 * Constructor: initializes the Jena model.
@@ -87,7 +87,7 @@ public class GAMSOModelMaker {
 		List<XWPFParagraph> paragraphs = document.getParagraphs();
 
 		int paragraphNumber = 0;
-		int paragraphStylingNumber = 0;
+		int paragraphStylingNumber;
 		int[] currentNumber = {0,0,0};
 		List<String> currentDescription = null;
 		String currentLabel = null;
@@ -123,7 +123,7 @@ public class GAMSOModelMaker {
 				}
 				currentNumber[0]++;
 				currentNumber[1] = 0;
-				currentDescription = new ArrayList<String>();
+				currentDescription = new ArrayList<>();
 				currentLabel = normalizeActivityName(paragraph);
 			} else if (LEVEL2_STYLING.equals(paragraph.getStyle())) {
 				// Start of a new level 2 activity
@@ -131,7 +131,7 @@ public class GAMSOModelMaker {
 				// Record previous description (which exists since we are at level 2) in the model
 				this.addActivityToModel(currentNumber, currentLabel, currentDescription);
 				currentNumber[1]++;
-				currentDescription = new ArrayList<String>();
+				currentDescription = new ArrayList<>();
 				currentLabel = normalizeActivityName(paragraph); // Strip code for 3.x activities
 			} else {
 				if (currentNumber[0] == 0) continue; // Skip paragraphs that are before the first activity

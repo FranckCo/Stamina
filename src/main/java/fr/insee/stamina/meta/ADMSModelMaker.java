@@ -44,7 +44,7 @@ public class ADMSModelMaker {
 	 * Main method: basic launcher that produces all the models.
 	 * 
 	 * @param args Not used.
-	 * @throws Exception 
+	 * @throws Exception In case of problem.
 	 */
 	public static void main(String[] args) throws Exception {
 
