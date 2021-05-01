@@ -82,7 +82,7 @@ public class NSISModelMaker {
 			logger.fatal("An exception occurred while reading the Google Maps API key", e);
 			return;
 		}
-		GeoApiContext context = new GeoApiContext().setApiKey(apiKey);
+		GeoApiContext context = new GeoApiContext.Builder().apiKey(apiKey).build();
 		logger.info("Google Maps API key read from " + API_KEY_FILE);
 
 		// Initialize the ontology model, populate it with the ORG ontology, extract some useful ORG components, add useful components from other ontologies
