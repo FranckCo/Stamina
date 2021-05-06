@@ -24,7 +24,7 @@ import java.util.*;
  *  - JSON file giving the codes and English labels: https://comtrade.un.org/data/cache/classificationH5.json
  * 
  * @author Franck Cotton
- * @version 0.1, 1 May 2021
+ * @version 0.1.0, 1 May 2021
  */
 public class HSModelMaker {
 
@@ -53,12 +53,15 @@ public class HSModelMaker {
 		HSModelMaker modelMaker = new HSModelMaker();
 		logger.debug("New HSModelMaker instance created");
 		Model hsModel = modelMaker.createHSModel("2017", true);
-		if (hsModel != null) RDFDataMgr.write(new FileOutputStream(HS_2017_TURTLE), hsModel, RDFFormat.TURTLE) ;
+		if (hsModel != null) {
+			RDFDataMgr.write(new FileOutputStream(HS_2017_TURTLE), hsModel, RDFFormat.TURTLE);
+			hsModel.close();
+		}
 		logger.debug("Program terminated");
 	}
 
 	/**
-	 * Returns an Jena model corresponding to the Harmonized System classification.
+	 * Returns a Jena model corresponding to the Harmonized System classification.
 	 * 
 	 * @param version The version of the classification (for now "2017").
 	 */
@@ -136,6 +139,13 @@ public class HSModelMaker {
 		return scheme;
 	}
 
+	/**
+	 * Creates the resources corresponding to the classification levels and their properties.
+	 *
+	 * @param hsModel The model where the resource will be created.
+	 * @param version The version of the classification.
+	 * @return A map between the level depths and the resources corresponding to the levels.
+	 */
 	private Map<Integer, Resource> createLevels(Model hsModel, String version) {
 
 		Map<Integer, Resource> levels = new HashMap<>();
