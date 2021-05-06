@@ -1,6 +1,7 @@
 package fr.insee.stamina.codes;
 
 import com.healthmarketscience.jackcess.*;
+import fr.insee.stamina.utils.AccessSpecification;
 import fr.insee.stamina.utils.Names;
 import fr.insee.stamina.utils.XKOS;
 import org.apache.commons.csv.CSVFormat;
@@ -35,26 +36,6 @@ public class CPCModelMaker {
 	/** Directory for output files */
 	private static final String OUTPUT_FOLDER = "src/main/resources/data/out/";
 	
-	/** Files containing the Access databases */
-	private static final Map<String, String> CPC_ACCESS_FILE = new HashMap<>();
-	/** Name of the Access tables containing the data */
-	private static final Map<String, String> CPC_ACCESS_TABLE = new HashMap<>();
-	// There are no French labels for the CPC on the UNSD web site
-	/** CSV files containing the additional Spanish labels */
-	private static final Map<String, String> CPC_SPANISH_LABELS_FILE = new HashMap<>();
-	// Initialization of the static properties
-	static {
-		CPC_ACCESS_FILE.put("1.1", "cpc_v11_english.mdb");
-		CPC_ACCESS_FILE.put("2", "CPCv2_english.mdb");
-		CPC_ACCESS_FILE.put("2.1", "CPC21_english.mdb");
-		CPC_ACCESS_TABLE.put("1.1", "tblTitles_English_CPCV11");
-		CPC_ACCESS_TABLE.put("2", "CPC2-structure");
-		CPC_ACCESS_TABLE.put("2.1", "CPC21-structure");
-		CPC_SPANISH_LABELS_FILE.put("1.1", null); // No Spanish labels for CPC Ver.1.1
-		CPC_SPANISH_LABELS_FILE.put("2", "CPCv2_Spanish_structure.txt");
-		CPC_SPANISH_LABELS_FILE.put("2.1", null); // No Spanish labels for CPC Ver.2.1
-	}
-
 	/** CSV file containing the correspondences between CPC Ver.2 and CPC Ver.2.1 */
 	private static final String CPC2_TO_CPC21_FILE = "cpc2-cpc21.txt";
 	/** CSV file containing the correspondences between CPC Ver.1.1 and CPC Ver.2 */
@@ -62,7 +43,6 @@ public class CPCModelMaker {
 
 	/** Log4J2 logger */
 	private static final Logger logger = LogManager.getLogger(CPCModelMaker.class);
-
 
 	/**
 	 * Main method: basic launcher that produces all the models.
@@ -81,7 +61,7 @@ public class CPCModelMaker {
 		}
 		cpcModel = modelMaker.createCPCModel("2", true);
 		if (cpcModel != null) {
-			cpcModel.add(modelMaker.addLabels(INPUT_FOLDER + "CPCv2_Spanish_structure.txt", "2", "es"));
+			cpcModel.add(modelMaker.createLabelsModel(INPUT_FOLDER + "CPCv2_Spanish_structure.txt", "2", "es"));
 			RDFDataMgr.write(new FileOutputStream(OUTPUT_FOLDER + "cpc2.ttl"), cpcModel, RDFFormat.TURTLE);
 			cpcModel.close();
 		}
@@ -90,7 +70,7 @@ public class CPCModelMaker {
 	}
 
 	/**
-	 * Creates an Jena model corresponding to a version of CPC and saves it to a Turtle file.
+	 * Creates a Jena model corresponding to a version of CPC, optionally with explanatory notes.
 	 * 
 	 * @param version Version of the classification ("1.1", "2", "2.1").
 	 * @param withNotes Boolean indicating if the explanatory notes must be produced in the model.
@@ -108,20 +88,23 @@ public class CPCModelMaker {
 		Map<Integer, Resource> levels = createLevels(cpcModel, version);
 		scheme.addProperty(XKOS.levels, cpcModel.createList(levels.values().toArray(new Resource[0])));
 
-		// For CPC, the naming of the columns in the tables between different versions is not coherent
-		String codeColumnName = ("2.1".equals(version)) ? "CPC21code" : "Code";
-		String labelColumnName = ("2.1".equals(version)) ? "CPC21title" : "Description";
-		String noteColumnName = ("2.1".equals(version)) ? "CPC21ExplanatoryNote" : "ExplanatoryNote";
+		// Get the Access information for the specified version and English language
+		AccessSpecification accessSpecification = accessInfo.get(version + "en");
+		File accessFile = accessSpecification.getAccessFile();
+		String tableName = accessSpecification.getTableName();
+		String codeColumnName = accessSpecification.getColumns().get("code");
+		String labelColumnName = accessSpecification.getColumns().get("label");
+		String noteColumnName = accessSpecification.getColumns().get("note");
+		logger.debug("Reading data from table " + tableName + " in database " + accessFile);
 		logger.debug("Reading codes from column " + codeColumnName);
 		logger.debug("Reading labels from column " + labelColumnName);
 		if (withNotes) logger.debug("Reading explanatory notes from column " + noteColumnName);
 
 		try {
 			// Open a cursor on the main table and iterate through all the records
-			Table table = DatabaseBuilder.open(new File(INPUT_FOLDER + CPC_ACCESS_FILE.get(version))).getTable(CPC_ACCESS_TABLE.get(version));
+			Table table = DatabaseBuilder.open(accessFile).getTable(tableName);
 			Cursor cursor = CursorBuilder.createCursor(table);
-			logger.debug("Cursor defined on table " + CPC_ACCESS_TABLE.get(version));
-			logger.debug("Table has the following columns:\n" + table.getColumns().toString());
+			logger.debug("Cursor defined on table " + tableName);
 			Resource itemResource, parentResource;
 			for (Row row : cursor.newIterable()) {
 				final String itemCode = row.getString(codeColumnName);
@@ -130,7 +113,7 @@ public class CPCModelMaker {
 				itemResource.addProperty(SKOS.notation, cpcModel.createLiteral(itemCode));
 				itemResource.addProperty(SKOS.prefLabel, cpcModel.createLiteral(row.getString(labelColumnName), "en"));
 				// Add explanatory notes if requested
-				// TODO For CPC Ver.2 and CPC Ver.2.1, all notes together in one column. For now all is recorded as a skos:skosNote
+				// TODO For CPC Ver.2 and CPC Ver.2.1, all notes together in one column. For now all is recorded as a skos:scopeNote
 				if (withNotes) {
 					String note = row.getString(noteColumnName);
 					if ((note != null) && (note.length() > 0))
@@ -149,7 +132,7 @@ public class CPCModelMaker {
 				// Add the item as a member of its level
 				levels.get(itemCode.length()).addProperty(SKOS.member, itemResource);
 			}
-			logger.debug("Finished reading table " + CPC_ACCESS_TABLE.get(version));
+			logger.debug("Finished reading table " + tableName);
 		} catch (Exception e) {
 			logger.error("Exception raised while constructing the model", e);
 			return null;
@@ -194,14 +177,15 @@ public class CPCModelMaker {
 	}
 
 	/**
-	 * Adds labels read in a CSV file to the Jena model. Expected character set is CP-1252).
+	 * Reads labels in a CSV file and returns a Jena model for specified version and language.
+	 * Expected character set for the CSV file is CP-1252).
 	 *
 	 * @param filePath The path of the CSV file.
 	 * @param version The version of the CPC classification.
 	 * @param language The tag representing the language of the labels ("fr", "es", etc.).
 	 * @return A Jena model containing the labels linked to their classification items.
 	 */
- 	private Model addLabels(String filePath, String version, String language) {
+ 	private Model createLabelsModel(String filePath, String version, String language) {
 
 		logger.debug("Preparing to create additional labels for version " + version + " and language '" + language + "'");
 		Model labelModel = ModelFactory.createDefaultModel();
@@ -231,8 +215,6 @@ public class CPCModelMaker {
 		cpcModel.setNsPrefix("rdfs", RDFS.getURI());
 		cpcModel.setNsPrefix("skos", SKOS.getURI());
 		cpcModel.setNsPrefix("xkos", XKOS.getURI());
-		cpcModel.setNsPrefix("asso", Names.getCorrespondenceBaseURI("CPC", "1.1", "CPC", "2") + "association/");
-		// TODO Not sure it is a good idea to create a prefix associated with different namespaces: see what happens when you load data
 
 		// Creation of the correspondence table resource
 		Resource table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "1.1",  "CPC",  "2"), XKOS.Correspondence);
@@ -335,6 +317,27 @@ public class CPCModelMaker {
 	 */
 	private static int getItemLength(int levelDepth) {
 		return levelDepth;
+	}
+
+	static Map<String, AccessSpecification> accessInfo = new HashMap<>();
+	static {
+		// CPC version 2.0
+		Map<String, String> cpc2Columns = new HashMap<String, String>() {{
+			put("code", "Code");
+			put("label", "Description");
+			put("note", "ExplanatoryNote");
+		}};
+		AccessSpecification cpc2AccessInfo = new AccessSpecification(new File(INPUT_FOLDER + "CPCv2_english.mdb"), "CPC2-structure", cpc2Columns);
+		accessInfo.put("2en", cpc2AccessInfo);
+		// CPC version 2.1
+		Map<String, String> cpc21Columns = new HashMap<String, String>() {{
+			put("code", "CPC21code");
+			put("label", "CPC21title");
+			put("note", "CPC21ExplanatoryNote");
+		}};
+		AccessSpecification cpc21AccessInfo = new AccessSpecification(new File(INPUT_FOLDER + "CPC21_english.mdb"), "CPC21-structure", cpc21Columns);
+		accessInfo.put("2.1en", cpc21AccessInfo);
+		logger.debug("Initialized Access information:\n" + accessInfo);
 	}
 
 	/**
