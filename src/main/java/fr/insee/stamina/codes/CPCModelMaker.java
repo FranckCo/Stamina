@@ -18,6 +18,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -52,14 +54,20 @@ public class CPCModelMaker {
 	 */
 	public static void main(String[] args) throws Exception {
 
+		createCorrespondences();
+
+	}
+
+	public static void createClassifications() throws Exception {
+
 		CPCModelMaker modelMaker = new CPCModelMaker();
 		logger.debug("New CPCModelMaker instance created");
-		Model cpcModel = modelMaker.createCPCModel("2.1", true);
+		Model cpcModel = modelMaker.createClassificationModel("2.1", true);
 		if (cpcModel != null) {
 			RDFDataMgr.write(new FileOutputStream(OUTPUT_FOLDER + "cpc21.ttl"), cpcModel, RDFFormat.TURTLE);
 			cpcModel.close();
 		}
-		cpcModel = modelMaker.createCPCModel("2", true);
+		cpcModel = modelMaker.createClassificationModel("2", true);
 		if (cpcModel != null) {
 			cpcModel.add(modelMaker.createLabelsModel(INPUT_FOLDER + "CPCv2_Spanish_structure.txt", "2", "es"));
 			RDFDataMgr.write(new FileOutputStream(OUTPUT_FOLDER + "cpc2.ttl"), cpcModel, RDFFormat.TURTLE);
@@ -69,13 +77,26 @@ public class CPCModelMaker {
 		logger.debug("Program terminated");
 	}
 
+	public static void createCorrespondences() throws Exception {
+
+		CPCModelMaker modelMaker = new CPCModelMaker();
+		logger.debug("Creating correspondences: new CPCModelMaker instance initialized");
+		Model cpcModel = modelMaker.createCorrespondenceModel("1.1", "2");
+		if (cpcModel != null) {
+			RDFDataMgr.write(new FileOutputStream(OUTPUT_FOLDER + "cpc11-cpc2.ttl"), cpcModel, RDFFormat.TURTLE);
+			cpcModel.close();
+		}
+		logger.debug("Program terminated");
+	}
+
 	/**
 	 * Creates a Jena model corresponding to a version of CPC, optionally with explanatory notes.
 	 * 
 	 * @param version Version of the classification ("1.1", "2", "2.1").
 	 * @param withNotes Boolean indicating if the explanatory notes must be produced in the model.
+	 * @return A Jena model containing the RDF representation of the requested version of the CPC.
 	 */
-	private Model createCPCModel(String version, boolean withNotes) {
+	private Model createClassificationModel(String version, boolean withNotes) {
 
 		logger.debug("Construction of the Jena model for CPC version " + version);
 
@@ -89,7 +110,7 @@ public class CPCModelMaker {
 		scheme.addProperty(XKOS.levels, cpcModel.createList(levels.values().toArray(new Resource[0])));
 
 		// Get the Access information for the specified version and English language
-		AccessSpecification accessSpecification = accessInfo.get(version + "en");
+		AccessSpecification accessSpecification = ACCESS_INFO.get(version + "en");
 		File accessFile = accessSpecification.getAccessFile();
 		String tableName = accessSpecification.getTableName();
 		String codeColumnName = accessSpecification.getColumns().get("code");
@@ -207,6 +228,58 @@ public class CPCModelMaker {
 
 	/**
 	 * Creates the models for correspondences between CPC Ver.1.1, CPC Ver.2 and CPC Ver.2.1.
+	 * Requested versions should be adjacent, e.g. no correspondence is defined between CPC Ver.1.1 and CPC Ver.2.1.
+	 *
+	 * @param sourceVersion Version of the source classification ("1.1", "2", "2.1").
+	 * @param targetVersion Version of the target classification ("1.1", "2", "2.1").
+	 * @return A Jena model containing the RDF representation of the requested table.
+	 */
+	private Model createCorrespondenceModel(String sourceVersion, String targetVersion) {
+
+		final String tableURL = TABLE_URLS.get(sourceVersion + targetVersion);
+		if (tableURL == null) {
+			logger.error("Invalid version numbers: (" + sourceVersion + ", " + targetVersion + ")");
+			return null;
+		}
+		logger.debug("Preparing to create model for the correspondences between CPC Ver." + sourceVersion + " and CPC Ver." + targetVersion);
+		Model tableModel = ModelFactory.createDefaultModel();
+		tableModel.setNsPrefix("rdfs", RDFS.getURI());
+		tableModel.setNsPrefix("skos", SKOS.getURI());
+		tableModel.setNsPrefix("xkos", XKOS.getURI());
+		// Creation of the correspondence table resource
+		Resource table = tableModel.createResource(Names.getCorrespondenceURI("CPC", "1.1", "CPC", "2"), XKOS.Correspondence);
+		table.addProperty(SKOS.definition, "Correspondence between versions " + sourceVersion + " and " + targetVersion + " of the CPC");
+		table.addProperty(XKOS.compares, createScheme(tableModel, sourceVersion));
+		table.addProperty(XKOS.compares, createScheme(tableModel, targetVersion));
+
+		try {
+			logger.debug("Preparing to read correspondence data from " + tableURL);
+			CSVParser parser = CSVParser.parse(new URL(tableURL), StandardCharsets.UTF_8, CSVFormat.DEFAULT.withHeader());
+			for (CSVRecord record : parser) {
+				String sourceCode = record.get(0);
+				Boolean sourcePartial = Boolean.parseBoolean(record.get(1));
+				String targetCode = record.get(2);
+				Boolean targetPartial = Boolean.parseBoolean(record.get(3));
+				// Cases where one code is "n/a" (correspondences between versions 1.1 and 2): no association is created (TODO This should be reconsidered)
+				if (!(Character.isDigit(sourceCode.charAt(0)) && Character.isDigit(targetCode.charAt(0)))) continue;
+				Resource association = tableModel.createResource(Names.getAssociationURI(sourceCode, "CPC",  sourceVersion, targetCode, "CPC", targetVersion), XKOS.ConceptAssociation);
+				StringBuilder labelBuilder = new StringBuilder("CPC Ver.").append(sourceVersion).append(' ').append(sourceCode);
+				if (sourcePartial) labelBuilder.append("(p)");
+				labelBuilder.append(" to CPC Ver.").append(targetVersion).append(' ').append(targetCode);
+				if (targetPartial) labelBuilder.append("(p)");
+				association.addProperty(RDFS.label, tableModel.createLiteral(labelBuilder.toString(), "en"));
+				association.addProperty(XKOS.sourceConcept, tableModel.createResource(Names.getItemURI(sourceCode, "CPC", sourceVersion)));
+				association.addProperty(XKOS.targetConcept, tableModel.createResource(Names.getItemURI(targetCode, "CPC", targetVersion)));
+				table.addProperty(XKOS.madeOf, association);
+			}
+		} catch (Exception e) {
+			logger.error("Problem while creating the correspondence table: " + e.getMessage());
+		}
+		return tableModel;
+	}
+
+	/**
+	 * Creates the models for correspondences between CPC Ver.1.1, CPC Ver.2 and CPC Ver.2.1.
 	 */
 	private void createCorrespondenceModels(Model cpcModel) {
 
@@ -319,7 +392,7 @@ public class CPCModelMaker {
 		return levelDepth;
 	}
 
-	static Map<String, AccessSpecification> accessInfo = new HashMap<>();
+	static Map<String, AccessSpecification> ACCESS_INFO = new HashMap<>();
 	static {
 		// CPC version 2.0
 		Map<String, String> cpc2Columns = new HashMap<String, String>() {{
@@ -328,7 +401,7 @@ public class CPCModelMaker {
 			put("note", "ExplanatoryNote");
 		}};
 		AccessSpecification cpc2AccessInfo = new AccessSpecification(new File(INPUT_FOLDER + "CPCv2_english.mdb"), "CPC2-structure", cpc2Columns);
-		accessInfo.put("2en", cpc2AccessInfo);
+		ACCESS_INFO.put("2en", cpc2AccessInfo);
 		// CPC version 2.1
 		Map<String, String> cpc21Columns = new HashMap<String, String>() {{
 			put("code", "CPC21code");
@@ -336,9 +409,18 @@ public class CPCModelMaker {
 			put("note", "CPC21ExplanatoryNote");
 		}};
 		AccessSpecification cpc21AccessInfo = new AccessSpecification(new File(INPUT_FOLDER + "CPC21_english.mdb"), "CPC21-structure", cpc21Columns);
-		accessInfo.put("2.1en", cpc21AccessInfo);
-		logger.debug("Initialized Access information:\n" + accessInfo);
+		ACCESS_INFO.put("2.1en", cpc21AccessInfo);
+		logger.debug("Initialized Access information:\n" + ACCESS_INFO);
 	}
+
+	/** for some reason, the naming of the files containing the tables is not coherent */
+	static final String TABLE_URL_BASE = "https://unstats.un.org/unsd/classifications/Econ/tables/CPC/";
+	static final Map<String, String> TABLE_URLS = new HashMap<String, String>() {{
+		put("1.12", TABLE_URL_BASE + "CPCv11_CPCv2/CPCv11_CPCv2.txt");
+		put("21.1", TABLE_URL_BASE + "CPCv2_CPCv11/CPCv2_CPCv11.txt");
+		put("22.1", TABLE_URL_BASE + "CPCv2_CPCv21/cpc2-cpc21.txt");
+		put("2.12", TABLE_URL_BASE + "CPCv21_CPCv2/CPC21-CPC2.txt");
+	}};
 
 	/**
 	 * Constants and methods for the naming of HS resources.
