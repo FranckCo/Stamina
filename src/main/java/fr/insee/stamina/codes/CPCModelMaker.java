@@ -37,11 +37,6 @@ public class CPCModelMaker {
 	private static final String INPUT_FOLDER = "src/main/resources/data/in/";
 	/** Directory for output files */
 	private static final String OUTPUT_FOLDER = "src/main/resources/data/out/";
-	
-	/** CSV file containing the correspondences between CPC Ver.2 and CPC Ver.2.1 */
-	private static final String CPC2_TO_CPC21_FILE = "cpc2-cpc21.txt";
-	/** CSV file containing the correspondences between CPC Ver.1.1 and CPC Ver.2 */
-	private static final String CPC11_TO_CPC2_FILE = "CPCv11_CPCv2.txt";
 
 	/** Log4J2 logger */
 	private static final Logger logger = LogManager.getLogger(CPCModelMaker.class);
@@ -55,7 +50,6 @@ public class CPCModelMaker {
 	public static void main(String[] args) throws Exception {
 
 		createCorrespondences();
-
 	}
 
 	public static void createClassifications() throws Exception {
@@ -162,42 +156,6 @@ public class CPCModelMaker {
 	}
 
 	/**
-	 * Creates the resource corresponding to the concept scheme and its different properties.
-	 *
-	 * @param cpcModel The model where the resource will be created.
-	 * @param version The version of the classification.
-	 * @return The resource corresponding to the concept scheme.
-	 */
-	private Resource createScheme(Model cpcModel, String version) {
-
-		Resource scheme = cpcModel.createResource(Naming.getClassificationURI(version), SKOS.ConceptScheme);
-		scheme.addProperty(SKOS.prefLabel, cpcModel.createLiteral(Naming.getClassificationLabel(version), "en"));
-		scheme.addProperty(SKOS.notation, Naming.getClassificationNotation(version));
-
-		return scheme;
-	}
-
-	/**
-	 * Creates the resources corresponding to the classification levels and their properties.
-	 *
-	 * @param cpcModel The model where the resource will be created.
-	 * @param version The version of the classification.
-	 * @return A map between the level depths and the resources corresponding to the levels.
-	 */
-	private Map<Integer, Resource> createLevels(Model cpcModel, String version) {
-
-		Map<Integer, Resource> levels = new HashMap<>();
-		int numberOfLevels = Naming.LEVEL_NAMES.size();
-		for (int depth = 1; depth <= numberOfLevels; depth++) {
-			Resource level = cpcModel.createResource(Naming.getClassificationLevelURI(depth, version), XKOS.ClassificationLevel);
-			level.addProperty(SKOS.prefLabel, cpcModel.createLiteral(Naming.LEVEL_NAMES.get(depth - 1), "en"));
-			level.addProperty(XKOS.depth, cpcModel.createTypedLiteral(depth));
-			levels.put(getItemLength(depth), level);
-		}
-		return levels;
-	}
-
-	/**
 	 * Reads labels in a CSV file and returns a Jena model for specified version and language.
 	 * Expected character set for the CSV file is CP-1252).
 	 *
@@ -206,7 +164,7 @@ public class CPCModelMaker {
 	 * @param language The tag representing the language of the labels ("fr", "es", etc.).
 	 * @return A Jena model containing the labels linked to their classification items.
 	 */
- 	private Model createLabelsModel(String filePath, String version, String language) {
+	private Model createLabelsModel(String filePath, String version, String language) {
 
 		logger.debug("Preparing to create additional labels for version " + version + " and language '" + language + "'");
 		Model labelModel = ModelFactory.createDefaultModel();
@@ -257,9 +215,9 @@ public class CPCModelMaker {
 			CSVParser parser = CSVParser.parse(new URL(tableURL), StandardCharsets.UTF_8, CSVFormat.DEFAULT.withHeader());
 			for (CSVRecord record : parser) {
 				String sourceCode = record.get(0);
-				Boolean sourcePartial = Boolean.parseBoolean(record.get(1));
+				boolean sourcePartial = Boolean.parseBoolean(record.get(1));
 				String targetCode = record.get(2);
-				Boolean targetPartial = Boolean.parseBoolean(record.get(3));
+				boolean targetPartial = Boolean.parseBoolean(record.get(3));
 				// Cases where one code is "n/a" (correspondences between versions 1.1 and 2): no association is created (TODO This should be reconsidered)
 				if (!(Character.isDigit(sourceCode.charAt(0)) && Character.isDigit(targetCode.charAt(0)))) continue;
 				Resource association = tableModel.createResource(Names.getAssociationURI(sourceCode, "CPC",  sourceVersion, targetCode, "CPC", targetVersion), XKOS.ConceptAssociation);
@@ -279,94 +237,39 @@ public class CPCModelMaker {
 	}
 
 	/**
-	 * Creates the models for correspondences between CPC Ver.1.1, CPC Ver.2 and CPC Ver.2.1.
+	 * Creates the resource corresponding to the concept scheme and its different properties.
+	 *
+	 * @param cpcModel The model where the resource will be created.
+	 * @param version The version of the classification.
+	 * @return The resource corresponding to the concept scheme.
 	 */
-	private void createCorrespondenceModels(Model cpcModel) {
+	private Resource createScheme(Model cpcModel, String version) {
 
-		logger.debug("Preparing to create model for the correspondences between CPC Ver.1.1 and CPC Ver.2");
-		cpcModel = ModelFactory.createDefaultModel();
-		cpcModel.setNsPrefix("rdfs", RDFS.getURI());
-		cpcModel.setNsPrefix("skos", SKOS.getURI());
-		cpcModel.setNsPrefix("xkos", XKOS.getURI());
+		Resource scheme = cpcModel.createResource(Naming.getClassificationURI(version), SKOS.ConceptScheme);
+		scheme.addProperty(SKOS.prefLabel, cpcModel.createLiteral(Naming.getClassificationLabel(version), "en"));
+		scheme.addProperty(SKOS.notation, Naming.getClassificationNotation(version));
 
-		// Creation of the correspondence table resource
-		Resource table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "1.1",  "CPC",  "2"), XKOS.Correspondence);
-		table.addProperty(SKOS.definition, "Correspondence table between CPC Ver.1.1 - CPC Ver.2");
-		table.addProperty(XKOS.compares, cpcModel.createResource(Names.getCSURI("CPC", "1.1")));
-		table.addProperty(XKOS.compares, cpcModel.createResource(Names.getCSURI("CPC", "2")));
-		try {
-			logger.debug("Preparing to read correspondence data from " + CPC11_TO_CPC2_FILE);
-			Reader reader = new FileReader(INPUT_FOLDER + CPC11_TO_CPC2_FILE);
-			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
-			for (CSVRecord record : parser) {
-				String cpc11Code = record.get("CPC11Code");
-				String cpc2Code = record.get("CPC2Code");
-				Resource association = cpcModel.createResource(Names.getAssociationURI(cpc11Code, "CPC",  "1.1", cpc2Code, "CPC", "2"), XKOS.ConceptAssociation);
-				association.addProperty(RDFS.label, "CPC Ver.1.1 " + cpc11Code + " - CPC Ver.2 " + cpc2Code);
-				association.addProperty(XKOS.sourceConcept, cpcModel.createResource(Names.getItemURI(cpc11Code, "CPC", "1.1")));
-				association.addProperty(XKOS.targetConcept, cpcModel.createResource(Names.getItemURI(cpc2Code, "CPC", "2")));
-				// There are no descriptions of the correspondences for CPC11-CPC2
-				table.addProperty(XKOS.madeOf, association);
-				// TODO Add 'partial' information
-			}
-			parser.close();
-			reader.close();
-		} catch (Exception e) {
-			logger.error("Error reading correspondences from " + CPC11_TO_CPC2_FILE, e);
-		}
-		// Write the Turtle file and clear the model
-		String turtleFileName = Names.getCorrespondenceContext("CPC", "1.1", "CPC", "2") + ".ttl";
-		try {
-			cpcModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
-			logger.info("The Jena model for the correspondence between CPC Ver.1.1 and CPC Ver.2 has been written to " + OUTPUT_FOLDER + turtleFileName);
-		} catch (FileNotFoundException e) {
-			logger.error("Error saving the CPC11-CPC2 correspondences to " + turtleFileName, e);
-		}
-		cpcModel.close();
+		return scheme;
+	}
 
-		logger.debug("Preparing to create model for the correspondences between CPC Ver.2 and CPC Ver.2.1");
-		cpcModel = ModelFactory.createDefaultModel();
-		cpcModel.setNsPrefix("rdfs", RDFS.getURI());
-		cpcModel.setNsPrefix("skos", SKOS.getURI());
-		cpcModel.setNsPrefix("xkos", XKOS.getURI());
-		cpcModel.setNsPrefix("asso", Names.getCorrespondenceBaseURI("CPC", "2", "CPC", "2.1") + "association/");
+	/**
+	 * Creates the resources corresponding to the classification levels and their properties.
+	 *
+	 * @param cpcModel The model where the resource will be created.
+	 * @param version The version of the classification.
+	 * @return A map between the level depths and the resources corresponding to the levels.
+	 */
+	private Map<Integer, Resource> createLevels(Model cpcModel, String version) {
 
-		// Creation of the correspondence table resource
-		table = cpcModel.createResource(Names.getCorrespondenceURI("CPC",  "2",  "CPC",  "2.1"), XKOS.Correspondence);
-		table.addProperty(SKOS.definition, "CPC Ver.2 - CPC Ver.2.1 correspondence table");
-		table.addProperty(XKOS.compares, cpcModel.createResource(Names.getCSURI("CPC", "2")));
-		table.addProperty(XKOS.compares, cpcModel.createResource(Names.getCSURI("CPC", "2.1")));
-		// Comment extracted from the 'readme.txt' file (could be better in a skos:historyNote)
-		table.addProperty(RDFS.comment, cpcModel.createLiteral("The correspondence does not yet include divisions 61 and 62 of the CPC", "en"));
-		try {
-			logger.debug("Preparing to read correspondence data from " + CPC2_TO_CPC21_FILE);
-			Reader reader = new FileReader(INPUT_FOLDER + CPC2_TO_CPC21_FILE);
-			CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
-			for (CSVRecord record : parser) {
-				String cpc2Code = record.get("CPC2code");
-				String cpc21Code = record.get("CPC21code");
-				Resource association = cpcModel.createResource(Names.getAssociationURI(cpc2Code, "CPC",  "2", cpc21Code, "CPC", "2.1"), XKOS.ConceptAssociation);
-				association.addProperty(RDFS.label, "CPC Ver.2 " + cpc2Code + " - CPC Ver.2.1 " + cpc21Code);
-				association.addProperty(XKOS.sourceConcept, cpcModel.createResource(Names.getItemURI(cpc2Code, "CPC", "2")));
-				association.addProperty(XKOS.targetConcept, cpcModel.createResource(Names.getItemURI(cpc21Code, "CPC", "2.1")));
-				// There are no descriptions of the correspondences for CPC2-CPC2.1
-				table.addProperty(XKOS.madeOf, association);
-				// TODO Add 'partial' information
-			}
-			parser.close();
-			reader.close();
-		} catch (Exception e) {
-			logger.error("Error reading correspondences from " + CPC2_TO_CPC21_FILE, e);
+		Map<Integer, Resource> levels = new HashMap<>();
+		int numberOfLevels = Naming.LEVEL_NAMES.size();
+		for (int depth = 1; depth <= numberOfLevels; depth++) {
+			Resource level = cpcModel.createResource(Naming.getClassificationLevelURI(depth, version), XKOS.ClassificationLevel);
+			level.addProperty(SKOS.prefLabel, cpcModel.createLiteral(Naming.LEVEL_NAMES.get(depth - 1), "en"));
+			level.addProperty(XKOS.depth, cpcModel.createTypedLiteral(depth));
+			levels.put(getItemLength(depth), level);
 		}
-		// Write the Turtle file and clear the model
-		turtleFileName = Names.getCorrespondenceContext("CPC", "2", "CPC", "2.1") + ".ttl";
-		try {
-			cpcModel.write(new FileOutputStream(OUTPUT_FOLDER + turtleFileName), "TTL");
-			logger.info("The Jena model for the correspondence between CPC Ver.2 and CPC Ver.2.1 has been written to " + OUTPUT_FOLDER + turtleFileName);
-		} catch (FileNotFoundException e) {
-			logger.error("Error saving the CPC2-CPC21 correspondence to " + turtleFileName, e);
-		}
-		cpcModel.close();
+		return levels;
 	}
 
 	/**
@@ -427,7 +330,6 @@ public class CPCModelMaker {
 	 */
 	private static class Naming {
 
-		final static List<String> LEVEL_NOTATIONS = Arrays.asList("AG2", "AG4", "AG6");
 		final static List<String> LEVEL_NAMES = Arrays.asList("Sections", "Divisions", "Groups", "Classes", "Subclasses");
 
 		static String getNamingContext(String version) {
