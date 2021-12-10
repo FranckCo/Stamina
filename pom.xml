@@ -7,7 +7,7 @@
 	<version>0.1</version>
     <name>Linked Open Statistical Metadata</name>
 	<properties>
-		<log4j.version>2.14.1</log4j.version>
+		<log4j.version>2.15.0</log4j.version>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
 	</properties>
