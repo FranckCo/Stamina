@@ -212,31 +212,31 @@ public class NAICSModelMaker {
 		scheme.addProperty(XKOS.numberOfLevels, model.createTypedLiteral(5));
 
 		// Create the resources representing the levels (xkos:ClassificationLevel)
-		Resource level1 = model.createResource(BASE_URI + "/sectors", XKOS.ClassificationLevel);
+		Resource level1 = model.createResource(BASE_URI + "sectors", XKOS.ClassificationLevel);
 		level1.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 1 - Sectors", "en"));
 		level1.addProperty(XKOS.depth, model.createTypedLiteral(1));
 		level1.addProperty(XKOS.notationPattern, "[1-9]{2}");
 		level1.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/sector"));
 
-		Resource level2 = model.createResource(BASE_URI + "/subsectors", XKOS.ClassificationLevel);
+		Resource level2 = model.createResource(BASE_URI + "subsectors", XKOS.ClassificationLevel);
 		level2.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 2 - Subsectors", "en"));
 		level2.addProperty(XKOS.depth, model.createTypedLiteral(2));
 		level2.addProperty(XKOS.notationPattern, "[1-9]{3}");
 		level2.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/subsector"));
 
-		Resource level3 = model.createResource(BASE_URI + "/groups", XKOS.ClassificationLevel);
+		Resource level3 = model.createResource(BASE_URI + "groups", XKOS.ClassificationLevel);
 		level3.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 3 - Groups", "en"));
 		level3.addProperty(XKOS.depth, model.createTypedLiteral(3));
 		level3.addProperty(XKOS.notationPattern, "[1-9]{4}");
 		level3.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/group"));
 
-		Resource level4 = model.createResource(BASE_URI + "/naics-industries", XKOS.ClassificationLevel);
+		Resource level4 = model.createResource(BASE_URI + "naics-industries", XKOS.ClassificationLevel);
 		level4.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 4 - NAICS Industries", "en"));
 		level4.addProperty(XKOS.depth, model.createTypedLiteral(4));
 		level4.addProperty(XKOS.notationPattern, "[1-9]{5}");
 		level4.addProperty(XKOS.organizedBy, model.createResource("http://stamina-project.org/concepts/naics2012/naics-industry"));
 
-		Resource level5 = model.createResource(BASE_URI + "/national-industries", XKOS.ClassificationLevel);
+		Resource level5 = model.createResource(BASE_URI + "national-industries", XKOS.ClassificationLevel);
 		level5.addProperty(SKOS.prefLabel, model.createLiteral("NAICS 2012 - level 5 - National Industries", "en"));
 		level5.addProperty(XKOS.depth, model.createTypedLiteral(5));
 		level5.addProperty(XKOS.notationPattern, "[1-9]{5}[0-9]");
